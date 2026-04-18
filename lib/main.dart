@@ -8,12 +8,10 @@ import 'routing/app_router.dart';
 void main() {
   // Đảm bảo các dịch vụ hệ thống được khởi tạo
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   runApp(
     // ProviderScope bao bọc toàn bộ ứng dụng để sử dụng Riverpod
-    const ProviderScope(
-      child: VitaminCApp(),
-    ),
+    const ProviderScope(child: VitaminCApp()),
   );
 }
 
@@ -25,23 +23,23 @@ class VitaminCApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'VitaminC',
       debugShowCheckedModeBanner: false,
-      
+
       // Cấu hình giao diện (Theme)
       theme: ThemeData(
         useMaterial3: true,
         primaryColor: AppColors.primary,
         scaffoldBackgroundColor: AppColors.backgroundLight,
-        
+
         // Cách cài đặt Font Lexend cho toàn app chuẩn nhất
         textTheme: GoogleFonts.lexendTextTheme(),
-        
+
         // Cấu hình màu sắc hệ thống
         colorScheme: ColorScheme.fromSeed(
           seedColor: AppColors.primary,
           primary: AppColors.primary,
           surface: AppColors.backgroundLight,
         ),
-        
+
         // Định nghĩa style mặc định cho AppBar để đồng nhất các màn hình
         appBarTheme: AppBarTheme(
           backgroundColor: AppColors.backgroundLight,
@@ -55,7 +53,7 @@ class VitaminCApp extends StatelessWidget {
           iconTheme: const IconThemeData(color: AppColors.textLight),
         ),
       ),
-      
+
       // Kết nối với GoRouter
       routerConfig: goRouter,
     );
