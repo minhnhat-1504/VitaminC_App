@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-// Tạm thời comment các file chưa tồn tại để hết lỗi đỏ
-// import '../features/dashboard/presentation/screens/home_screen.dart';
-// import '../features/library/presentation/screens/deck_list_screen.dart';
-// import '../features/social/presentation/screens/leaderboard_screen.dart';
+import '../features/social/presentation/screens/leaderboard_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../core/shared_widgets/bottom_nav_bar.dart';
 
@@ -37,13 +34,13 @@ final goRouter = GoRouter(
         ),
         GoRoute(
           path: '/library',
-          builder: (context, state) => const DeckListScreen(),
+          builder: (context, state) =>
+              const DeckListScreen(), // Giữ màn hình thật từ nhánh HEAD
         ),
         GoRoute(
           path: '/social',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text("Social Screen Placeholder")),
-          ),
+          builder: (context, state) =>
+              const LeaderboardScreen(), // Giữ màn hình thật từ nhánh merge
         ),
         GoRoute(
           path: '/settings',
