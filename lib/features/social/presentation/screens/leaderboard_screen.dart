@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/dummy_data.dart';
 import 'badges_screen.dart';
+import '../widgets/streak_popup.dart';
 
 // ─── Bảng màu phụ trợ từ Figma (Slate palette) ───
 class LeaderboardColors {
@@ -31,6 +32,32 @@ class LeaderboardScreen extends StatefulWidget {
 
 class _LeaderboardScreenState extends State<LeaderboardScreen> {
   int _selectedTab = 0;
+
+  void _openStreakPopup() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Streak popup',
+      barrierColor: Colors.black.withOpacity(0.35),
+      transitionDuration: const Duration(milliseconds: 250),
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return const StreakPopup();
+      },
+      transitionBuilder: (context, animation, secondaryAnimation, child) {
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+        return FadeTransition(
+          opacity: curved,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.98, end: 1).animate(curved),
+            child: child,
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -425,117 +452,120 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 6,
-                offset: const Offset(0, 4),
-              ),
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  left: BorderSide(color: AppColors.primary, width: 4),
+        GestureDetector(
+          onTap: _openStreakPopup,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 6,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: Container(
-                      color: AppColors.primary.withOpacity(0.05),
-                    ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    left: BorderSide(color: AppColors.primary, width: 4),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 24,
-                          child: Text(
-                            '${DummyData.currentUserRank}',
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.lexend(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: LeaderboardColors.slate900,
+                ),
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Container(
+                        color: AppColors.primary.withOpacity(0.05),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 16, 16),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 24,
+                            child: Text(
+                              '${DummyData.currentUserRank}',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.lexend(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: LeaderboardColors.slate900,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: LeaderboardColors.slate200,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: const CircleAvatar(
-                            radius: 18,
-                            backgroundColor: Color(0xFFE2E8F0),
-                            child: Icon(
-                              Icons.person_rounded,
-                              size: 20,
-                              color: Color(0xFF94A3B8),
+                          const SizedBox(width: 16),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: LeaderboardColors.slate200,
+                              border: Border.all(color: Colors.white, width: 2),
+                            ),
+                            child: const CircleAvatar(
+                              radius: 18,
+                              backgroundColor: Color(0xFFE2E8F0),
+                              child: Icon(
+                                Icons.person_rounded,
+                                size: 20,
+                                color: Color(0xFF94A3B8),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'You',
-                                style: GoogleFonts.lexend(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: LeaderboardColors.slate900,
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'You',
+                                  style: GoogleFonts.lexend(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: LeaderboardColors.slate900,
+                                  ),
                                 ),
-                              ),
-                              Row(
-                                children: [
-                                  const Text(
-                                    '\u{1F525} ',
-                                    style: TextStyle(fontSize: 10),
-                                  ),
-                                  Text(
-                                    '${DummyData.currentUserStreak} day streak',
-                                    style: GoogleFonts.lexend(
-                                      fontSize: 12,
-                                      color: LeaderboardColors.slate500,
+                                Row(
+                                  children: [
+                                    const Text(
+                                      '\u{1F525} ',
+                                      style: TextStyle(fontSize: 10),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                    Text(
+                                      '${DummyData.currentUserStreak} day streak',
+                                      style: GoogleFonts.lexend(
+                                        fontSize: 12,
+                                        color: LeaderboardColors.slate500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${_formatXp(DummyData.currentUserXp)} XP',
-                          style: GoogleFonts.lexend(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                          Text(
+                            '${_formatXp(DummyData.currentUserXp)} XP',
+                            style: GoogleFonts.lexend(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
