@@ -1,4 +1,12 @@
+import '../constants/app_colors.dart';
+
 class DummyData {
+  static final List<Map<String, dynamic>> decks = [
+    {'title': 'IELTS Vocabulary', 'count': 120, 'color': AppColors.primary},
+    {'title': 'Giao tiếp cơ bản', 'count': 50, 'color': AppColors.success},
+    {'title': 'IT Tiếng Anh', 'count': 85, 'color': AppColors.warning},
+  ];
+
   static const List<Map<String, dynamic>> vocabularies = [
     {
       'id': '1',
