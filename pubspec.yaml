@@ -66,5 +66,5 @@ flutter:
   # Khai báo thư mục chứa tài nguyên nội bộ (Local assets)
   # Nhóm bạn nhớ tạo 2 thư mục này ở ngang hàng với thư mục lib/ nhé
   assets:
-    - assets/images/
+    - assets/images/logo.png
     - assets/icons/
