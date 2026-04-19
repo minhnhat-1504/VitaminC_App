@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -13,7 +14,12 @@ class SettingsScreen extends StatelessWidget {
         children: [
           const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
           const SizedBox(height: 16),
-          const Center(child: Text("Người dùng VitaminC", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))),
+          const Center(
+            child: Text(
+              "Người dùng VitaminC",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
           const SizedBox(height: 32),
           ListTile(
             leading: const Icon(Icons.dark_mode),
@@ -24,6 +30,12 @@ class SettingsScreen extends StatelessWidget {
             leading: Icon(Icons.notifications),
             title: Text("Thông báo nhắc học"),
             trailing: Icon(Icons.arrow_forward_ios, size: 16),
+          ),
+          ListTile(
+            leading: const Icon(Icons.mic_rounded),
+            title: const Text('Kiểm thử phát âm'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => context.push('/pronunciation'),
           ),
           const ListTile(
             leading: Icon(Icons.logout, color: Colors.red),

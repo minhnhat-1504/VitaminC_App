@@ -9,6 +9,7 @@ import '../features/library/presentation/screens/deck_list_screen.dart';
 import '../features/library/presentation/screens/add_vocab_screen.dart';
 import '../features/study/presentation/screens/flashcard_screen.dart';
 import '../features/study/presentation/screens/study_summary_screen.dart';
+import '../features/tools/presentation/screens/pronunciation_screen.dart';
 
 // Tạo key để quản lý trạng thái của Bottom Navigation Bar
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -59,6 +60,10 @@ final goRouter = GoRouter(
     GoRoute(
       path: '/study-summary',
       builder: (context, state) => const StudySummaryScreen(),
+    ),
+    GoRoute(
+      path: '/pronunciation',
+      builder: (context, state) => const PronunciationScreen(),
     ),
   ],
 );
