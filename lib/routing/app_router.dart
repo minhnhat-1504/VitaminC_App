@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vitaminc/features/auth/presentation/screens/login_screen.dart';
+import 'package:vitaminc/features/auth/presentation/screens/onboarding_screen.dart';
+import 'package:vitaminc/features/auth/presentation/screens/splash_screen.dart';
+import 'package:vitaminc/features/dashboard/presentation/screens/home_screen.dart';
 import '../features/social/presentation/screens/leaderboard_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../core/shared_widgets/bottom_nav_bar.dart';
@@ -14,8 +18,16 @@ import '../features/study/presentation/screens/study_summary_screen.dart';
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 final goRouter = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+
+    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {
@@ -26,12 +38,7 @@ final goRouter = GoRouter(
       },
       routes: [
         // Sử dụng Scaffold tạm thời để app chạy được
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text("Home Screen Placeholder")),
-          ),
-        ),
+        GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
         GoRoute(
           path: '/library',
           builder: (context, state) =>
