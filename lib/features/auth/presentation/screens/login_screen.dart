@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             _buildSocialBtn("Google", Icons.g_mobiledata),
             const SizedBox(width: 16),
-            _buildSocialBtn("Apple", Icons.apple),
+            _buildSocialBtn("Facebook", Icons.facebook),
           ],
         ),
       ],
