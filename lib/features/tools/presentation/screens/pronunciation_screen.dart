@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/shared_widgets/custom_app_bar.dart';
 
 class PronunciationScreen extends StatefulWidget {
   const PronunciationScreen({super.key});
@@ -69,7 +70,7 @@ class _PronunciationScreenState extends State<PronunciationScreen>
   }
 
   Color get _scoreColor {
-    if (_isRecording || _score == 0) return const Color(0xFF94A3B8);
+    if (_isRecording || _score == 0) return AppColors.slate400;
     return (!_hasMistake && _score >= 80) ? AppColors.success : AppColors.error;
   }
 
@@ -87,18 +88,16 @@ class _PronunciationScreenState extends State<PronunciationScreen>
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FB),
+      appBar: CustomAppBar(
+        title: _unitTitle,
+        actions: [
+          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert)),
+        ],
+      ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                _s(16, uiScale),
-                _s(12, uiScale),
-                _s(16, uiScale),
-                _s(6, uiScale),
-              ),
-              child: _buildHeader(context, uiScale),
-            ),
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(
@@ -110,6 +109,8 @@ class _PronunciationScreenState extends State<PronunciationScreen>
                 child: Column(
                   children: [
                     SizedBox(height: _s(8, uiScale)),
+                    _buildProgressBar(uiScale),
+                    SizedBox(height: _s(16, uiScale)),
                     _buildPhraseSection(uiScale),
                     SizedBox(height: _s(12, uiScale)),
                     Text(
@@ -138,50 +139,18 @@ class _PronunciationScreenState extends State<PronunciationScreen>
     );
   }
 
-  Widget _buildHeader(BuildContext context, double uiScale) {
-    return Row(
-      children: [
-        IconButton(
-          onPressed: () => Navigator.of(context).maybePop(),
-          icon: Icon(Icons.arrow_back_ios_new, size: _s(22, uiScale)),
-          color: const Color(0xFF64748B),
+  Widget _buildProgressBar(double uiScale) {
+    return SizedBox(
+      width: _s(160, uiScale),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(999),
+        child: LinearProgressIndicator(
+          value: 0.55,
+          minHeight: _s(6, uiScale),
+          backgroundColor: AppColors.slate200,
+          valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
         ),
-        Expanded(
-          child: Column(
-            children: [
-              Text(
-                _unitTitle,
-                style: GoogleFonts.lexend(
-                  fontSize: _s(14, uiScale),
-                  letterSpacing: _s(1.2, uiScale),
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF6B7280),
-                ),
-              ),
-              SizedBox(height: _s(8, uiScale)),
-              SizedBox(
-                width: _s(160, uiScale),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(999),
-                  child: LinearProgressIndicator(
-                    value: 0.55,
-                    minHeight: _s(6, uiScale),
-                    backgroundColor: const Color(0xFFE5E7EB),
-                    valueColor: const AlwaysStoppedAnimation<Color>(
-                      AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        IconButton(
-          onPressed: () {},
-          icon: Icon(Icons.more_vert, size: _s(22, uiScale)),
-          color: const Color(0xFF64748B),
-        ),
-      ],
+      ),
     );
   }
 

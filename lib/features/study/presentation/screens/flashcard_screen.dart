@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/utils/dummy_data.dart';
 import '../../../../../core/shared_widgets/custom_app_bar.dart';
+import '../../../../../core/shared_widgets/srs_button.dart';
 
 class FlashcardScreen extends StatefulWidget {
   const FlashcardScreen({super.key});
@@ -107,9 +108,21 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildSRSButton('Khó', AppColors.warning, _nextCard),
-                        _buildSRSButton('Tốt', AppColors.primary, _nextCard),
-                        _buildSRSButton('Dễ', AppColors.success, _nextCard),
+                        SrsButton(
+                          label: 'Khó',
+                          color: AppColors.warning,
+                          onPressed: _nextCard,
+                        ),
+                        SrsButton(
+                          label: 'Tốt',
+                          color: AppColors.primary,
+                          onPressed: _nextCard,
+                        ),
+                        SrsButton(
+                          label: 'Dễ',
+                          color: AppColors.success,
+                          onPressed: _nextCard,
+                        ),
                       ],
                     ),
                   )
@@ -171,25 +184,6 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
               style: const TextStyle(fontSize: 16, color: AppColors.textLight),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSRSButton(String label, Color color, VoidCallback onTap) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      onPressed: onTap,
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.white,
         ),
       ),
     );

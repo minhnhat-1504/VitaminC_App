@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
+import '../../../../core/shared_widgets/custom_label.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 
@@ -26,16 +27,25 @@ class _AddVocabScreenState extends State<AddVocabScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const CustomLabel(
+              english: 'Vocabulary',
+              vietnamese: 'Từ vựng (Tiếng Anh)',
+            ),
             const CustomTextField(
               hintText: 'Từ vựng (Tiếng Anh)...',
               prefixIcon: Icons.abc,
             ),
             const SizedBox(height: 16),
+            const CustomLabel(
+              english: 'Meaning',
+              vietnamese: 'Nghĩa (Tiếng Việt)',
+            ),
             const CustomTextField(
               hintText: 'Nghĩa (Tiếng Việt)...',
               prefixIcon: Icons.g_translate,
             ),
             const SizedBox(height: 16),
+            const CustomLabel(english: 'Example', vietnamese: 'Câu ví dụ'),
             const CustomTextField(
               hintText: 'Câu ví dụ...',
               prefixIcon: Icons.notes,

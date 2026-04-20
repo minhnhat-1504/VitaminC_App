@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/dummy_data.dart';
 
 class StreakPopup extends StatefulWidget {
@@ -65,7 +66,7 @@ class _StreakPopupState extends State<StreakPopup>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [_StreakColors.background, _StreakColors.background],
+            colors: [AppColors.backgroundLight, AppColors.backgroundLight],
           ),
         ),
         child: SafeArea(
@@ -82,8 +83,8 @@ class _StreakPopupState extends State<StreakPopup>
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        _StreakColors.orange.withOpacity(0.1),
-                        _StreakColors.orange.withOpacity(0.0),
+                        AppColors.streakOrange.withOpacity(0.1),
+                        AppColors.streakOrange.withOpacity(0.0),
                       ],
                     ),
                   ),
@@ -145,7 +146,7 @@ class _StreakPopupState extends State<StreakPopup>
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: _StreakColors.orange,
+              color: AppColors.streakOrange,
               letterSpacing: 0.7,
             ),
           ),
@@ -165,7 +166,7 @@ class _StreakPopupState extends State<StreakPopup>
           color: Colors.white.withOpacity(0.6),
           borderRadius: BorderRadius.circular(999),
         ),
-        child: Icon(icon, size: 16, color: _StreakColors.title),
+        child: Icon(icon, size: 16, color: AppColors.slate900),
       ),
     );
   }
@@ -188,7 +189,7 @@ class _StreakPopupState extends State<StreakPopup>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: _StreakColors.orange.withOpacity(_glow.value),
+                        color: AppColors.streakOrange.withOpacity(_glow.value),
                         blurRadius: 32,
                         spreadRadius: 6,
                       ),
@@ -198,10 +199,13 @@ class _StreakPopupState extends State<StreakPopup>
                 ShaderMask(
                   blendMode: BlendMode.srcIn,
                   shaderCallback: (rect) {
-                    return const LinearGradient(
+                    return LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [_StreakColors.orangeLight, _StreakColors.orange],
+                      colors: [
+                        AppColors.streakOrange.withOpacity(0.7),
+                        AppColors.streakOrange,
+                      ],
                     ).createShader(rect);
                   },
                   child: Transform.scale(
@@ -259,7 +263,7 @@ class _StreakPopupState extends State<StreakPopup>
           style: GoogleFonts.lexend(
             fontSize: 30,
             fontWeight: FontWeight.w800,
-            color: _StreakColors.title,
+            color: AppColors.slate900,
           ),
           textAlign: TextAlign.center,
         ),
@@ -269,7 +273,7 @@ class _StreakPopupState extends State<StreakPopup>
           style: GoogleFonts.lexend(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: _StreakColors.subtitle,
+            color: AppColors.slate500,
           ),
           textAlign: TextAlign.center,
         ),
@@ -277,16 +281,16 @@ class _StreakPopupState extends State<StreakPopup>
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 17, vertical: 9),
           decoration: BoxDecoration(
-            color: _StreakColors.orange.withOpacity(0.1),
+            color: AppColors.streakOrange.withOpacity(0.1),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _StreakColors.orange.withOpacity(0.2)),
+            border: Border.all(color: AppColors.streakOrange.withOpacity(0.2)),
           ),
           child: Text(
             'Don\'t give up! / Đừng bỏ cuộc!',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: _StreakColors.orange,
+              color: AppColors.streakOrange,
             ),
           ),
         ),
@@ -300,7 +304,7 @@ class _StreakPopupState extends State<StreakPopup>
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _StreakColors.borderLight),
+        border: Border.all(color: AppColors.slate100),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -319,7 +323,7 @@ class _StreakPopupState extends State<StreakPopup>
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: _StreakColors.title,
+                    color: AppColors.slate900,
                   ),
                   children: [
                     const TextSpan(text: 'This Week '),
@@ -328,7 +332,7 @@ class _StreakPopupState extends State<StreakPopup>
                       style: GoogleFonts.lexend(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: _StreakColors.muted,
+                        color: AppColors.slate400,
                       ),
                     ),
                   ],
@@ -337,7 +341,7 @@ class _StreakPopupState extends State<StreakPopup>
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _StreakColors.orange.withOpacity(0.1),
+                  color: AppColors.streakOrange.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
@@ -345,7 +349,7 @@ class _StreakPopupState extends State<StreakPopup>
                   style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: _StreakColors.orange,
+                    color: AppColors.streakOrange,
                   ),
                 ),
               ),
@@ -370,8 +374,8 @@ class _StreakPopupState extends State<StreakPopup>
           ? FontWeight.bold
           : FontWeight.w500,
       color: day.state == _DayState.today
-          ? _StreakColors.orange
-          : _StreakColors.muted,
+          ? AppColors.streakOrange
+          : AppColors.slate400,
     );
 
     Widget indicator;
@@ -381,7 +385,7 @@ class _StreakPopupState extends State<StreakPopup>
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: _StreakColors.blue,
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(999),
             boxShadow: [
               BoxShadow(
@@ -402,18 +406,18 @@ class _StreakPopupState extends State<StreakPopup>
               height: 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: _StreakColors.orange, width: 2),
+                border: Border.all(color: AppColors.streakOrange, width: 2),
               ),
             ),
             Container(
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: _StreakColors.orange,
+                color: AppColors.streakOrange,
                 borderRadius: BorderRadius.circular(999),
                 boxShadow: [
                   BoxShadow(
-                    color: _StreakColors.orange.withOpacity(0.4),
+                    color: AppColors.streakOrange.withOpacity(0.4),
                     blurRadius: 12,
                     spreadRadius: 1,
                   ),
@@ -429,7 +433,7 @@ class _StreakPopupState extends State<StreakPopup>
         );
       case _DayState.future:
         indicator = CustomPaint(
-          painter: _DashedCirclePainter(color: _StreakColors.borderStrong),
+          painter: _DashedCirclePainter(color: AppColors.slate200),
           child: const SizedBox(width: 32, height: 32),
         );
     }
@@ -452,9 +456,9 @@ class _StreakPopupState extends State<StreakPopup>
             title: 'Total XP',
             value: '1,240 XP',
             icon: Icons.auto_awesome_rounded,
-            background: _StreakColors.orange.withOpacity(0.05),
-            border: _StreakColors.orange.withOpacity(0.1),
-            iconColor: _StreakColors.orange,
+            background: AppColors.streakOrange.withOpacity(0.05),
+            border: AppColors.streakOrange.withOpacity(0.1),
+            iconColor: AppColors.streakOrange,
           ),
         ),
         const SizedBox(width: 16),
@@ -463,9 +467,9 @@ class _StreakPopupState extends State<StreakPopup>
             title: 'Time',
             value: '25m today',
             icon: Icons.schedule_rounded,
-            background: _StreakColors.blueSoft,
-            border: _StreakColors.blueBorder,
-            iconColor: _StreakColors.blue,
+            background: AppColors.primary.withOpacity(0.08),
+            border: AppColors.primary.withOpacity(0.18),
+            iconColor: AppColors.primary,
           ),
         ),
       ],
@@ -496,7 +500,7 @@ class _StreakPopupState extends State<StreakPopup>
             style: GoogleFonts.lexend(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: _StreakColors.title,
+              color: AppColors.slate900,
             ),
           ),
           const SizedBox(height: 4),
@@ -505,7 +509,7 @@ class _StreakPopupState extends State<StreakPopup>
             style: GoogleFonts.lexend(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: _StreakColors.subtitle,
+              color: AppColors.slate500,
             ),
           ),
         ],
@@ -517,10 +521,8 @@ class _StreakPopupState extends State<StreakPopup>
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       decoration: BoxDecoration(
-        color: _StreakColors.background.withOpacity(0.95),
-        border: const Border(
-          top: BorderSide(color: _StreakColors.borderStrong),
-        ),
+        color: AppColors.backgroundLight.withOpacity(0.95),
+        border: const Border(top: BorderSide(color: AppColors.slate200)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -535,11 +537,11 @@ class _StreakPopupState extends State<StreakPopup>
           Container(
             width: double.infinity,
             decoration: BoxDecoration(
-              color: _StreakColors.orange,
+              color: AppColors.streakOrange,
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: _StreakColors.orange.withOpacity(0.3),
+                  color: AppColors.streakOrange.withOpacity(0.3),
                   blurRadius: 14,
                   offset: const Offset(0, 8),
                 ),
@@ -596,7 +598,7 @@ class _StreakPopupState extends State<StreakPopup>
               style: GoogleFonts.lexend(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: _StreakColors.subtitle,
+                color: AppColors.slate500,
               ),
             ),
           ),
@@ -604,20 +606,6 @@ class _StreakPopupState extends State<StreakPopup>
       ),
     );
   }
-}
-
-class _StreakColors {
-  static const Color background = Color(0xFFF8F7F5);
-  static const Color orange = Color(0xFFF27F0D);
-  static const Color orangeLight = Color(0xFFF9A33B);
-  static const Color title = Color(0xFF111827);
-  static const Color subtitle = Color(0xFF6B7280);
-  static const Color muted = Color(0xFF9CA3AF);
-  static const Color borderLight = Color(0xFFF3F4F6);
-  static const Color borderStrong = Color(0xFFE5E7EB);
-  static const Color blue = Color(0xFF0EA5E9);
-  static const Color blueSoft = Color(0xFFEFF6FF);
-  static const Color blueBorder = Color(0xFFDBEAFE);
 }
 
 enum _DayState { completed, today, future }
