@@ -13,10 +13,7 @@ class DeckListScreen extends StatelessWidget {
     final decks = DummyData.decks;
 
     return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Thư viện của tôi',
-        showBackButton: false,
-      ),
+      appBar: const CustomAppBar(title: 'My Library', showBackButton: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GridView.builder(
@@ -58,7 +55,7 @@ class DeckListScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      '${deck['count']} từ vựng',
+                      '${deck['count']} vocabulary words',
                       style: const TextStyle(color: AppColors.textLight),
                     ),
                   ],

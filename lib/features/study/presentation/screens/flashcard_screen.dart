@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/utils/dummy_data.dart';
 import '../../../../../core/shared_widgets/custom_app_bar.dart';
-import '../../../../../core/shared_widgets/srs_button.dart';
 
 class FlashcardScreen extends StatefulWidget {
   const FlashcardScreen({super.key});
@@ -36,7 +35,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
 
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Đang học: IELTS Vocab',
+        title: 'Now Learning: IELTS Vocab',
         showBackButton: true,
       ),
       body: Column(
@@ -87,13 +86,14 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                     ? _buildCardContent(
                         key: const ValueKey(true),
                         text: currentWord['meaning'],
-                        subtext: 'Chạm để lật lại',
+                        subtext: 'Tap to flip back',
                         isBack: true,
                       )
                     : _buildCardContent(
                         key: const ValueKey(false),
                         text: currentWord['word'],
-                        subtext: '(${currentWord['type']}) - Chạm để xem nghĩa',
+                        subtext:
+                            '(${currentWord['type']}) - Tap to view meaning',
                       ),
               ),
             ),
@@ -108,27 +108,15 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        SrsButton(
-                          label: 'Khó',
-                          color: AppColors.warning,
-                          onPressed: _nextCard,
-                        ),
-                        SrsButton(
-                          label: 'Tốt',
-                          color: AppColors.primary,
-                          onPressed: _nextCard,
-                        ),
-                        SrsButton(
-                          label: 'Dễ',
-                          color: AppColors.success,
-                          onPressed: _nextCard,
-                        ),
+                        _buildSRSButton('Hard', AppColors.warning, _nextCard),
+                        _buildSRSButton('Good', AppColors.primary, _nextCard),
+                        _buildSRSButton('Easy', AppColors.success, _nextCard),
                       ],
                     ),
                   )
                 : const Center(
                     child: Text(
-                      'Hãy suy nghĩ kỹ trước khi lật thẻ!',
+                      'Think carefully before flipping the card!',
                       style: TextStyle(color: AppColors.textLight),
                     ),
                   ),
@@ -184,6 +172,25 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
               style: const TextStyle(fontSize: 16, color: AppColors.textLight),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSRSButton(String label, Color color, VoidCallback onTap) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      onPressed: onTap,
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
       ),
     );

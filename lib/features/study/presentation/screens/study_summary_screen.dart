@@ -18,12 +18,12 @@ class StudySummaryScreen extends StatelessWidget {
               const Icon(Icons.stars, size: 100, color: AppColors.secondary),
               const SizedBox(height: 24),
               const Text(
-                'Hoàn thành xuất sắc!',
+                'Amazing job!',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Bạn vừa hoàn thành phiên ôn tập.',
+                'You have completed your study session.',
                 style: TextStyle(fontSize: 16, color: AppColors.textLight),
               ),
               const SizedBox(height: 40),
@@ -44,8 +44,8 @@ class StudySummaryScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatItem('Từ đã ôn', '20', AppColors.primary),
-                    _buildStatItem('Điểm XP', '+50', AppColors.success),
+                    _buildStatItem('Words Reviewed', '20', AppColors.primary),
+                    _buildStatItem('XP Earned', '+50', AppColors.success),
                   ],
                 ),
               ),
@@ -53,7 +53,7 @@ class StudySummaryScreen extends StatelessWidget {
               const SizedBox(height: 60),
 
               CustomPrimaryButton(
-                text: 'VỀ TRANG CHỦ',
+                text: 'BACK TO HOME',
                 onPressed: () {
                   // Chuyển hướng về tab Home
                   context.go('/home');
