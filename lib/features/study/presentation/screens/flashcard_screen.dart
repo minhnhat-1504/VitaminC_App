@@ -35,7 +35,7 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
 
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Đang học: IELTS Vocab',
+        title: 'Now Learning: IELTS Vocab',
         showBackButton: true,
       ),
       body: Column(
@@ -86,13 +86,14 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                     ? _buildCardContent(
                         key: const ValueKey(true),
                         text: currentWord['meaning'],
-                        subtext: 'Chạm để lật lại',
+                        subtext: 'Tap to flip back',
                         isBack: true,
                       )
                     : _buildCardContent(
                         key: const ValueKey(false),
                         text: currentWord['word'],
-                        subtext: '(${currentWord['type']}) - Chạm để xem nghĩa',
+                        subtext:
+                            '(${currentWord['type']}) - Tap to view meaning',
                       ),
               ),
             ),
@@ -107,15 +108,15 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildSRSButton('Khó', AppColors.warning, _nextCard),
-                        _buildSRSButton('Tốt', AppColors.primary, _nextCard),
-                        _buildSRSButton('Dễ', AppColors.success, _nextCard),
+                        _buildSRSButton('Hard', AppColors.warning, _nextCard),
+                        _buildSRSButton('Good', AppColors.primary, _nextCard),
+                        _buildSRSButton('Easy', AppColors.success, _nextCard),
                       ],
                     ),
                   )
                 : const Center(
                     child: Text(
-                      'Hãy suy nghĩ kỹ trước khi lật thẻ!',
+                      'Think carefully before flipping the card!',
                       style: TextStyle(color: AppColors.textLight),
                     ),
                   ),
