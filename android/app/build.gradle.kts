@@ -1,8 +1,10 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // Flutter Gradle Plugin phải nằm sau Android và Kotlin
     id("dev.flutter.flutter-gradle-plugin")
+    // Áp dụng plugin Google Services (Không ghi version ở đây nữa)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -20,11 +22,11 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.vitaminc"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        
+        // Firebase yêu cầu minSdkVersion tối thiểu là 21
+        minSdk = flutter.minSdkVersion 
+        
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -32,11 +34,16 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Sử dụng debug keys để có thể chạy thử bản release tạm thời
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    // Nhập Firebase BoM để quản lý phiên bản tự động các thư viện Firebase
+    implementation(platform("com.google.firebase:firebase-bom:34.12.0"))
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 flutter {
