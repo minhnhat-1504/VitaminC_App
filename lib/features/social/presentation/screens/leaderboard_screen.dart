@@ -1,27 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/shared_widgets/custom_app_bar.dart';
 import '../../../../core/utils/dummy_data.dart';
 import 'badges_screen.dart';
 import '../widgets/streak_popup.dart';
-
-// ─── Bảng màu phụ trợ từ Figma (Slate palette) ───
-class LeaderboardColors {
-  static const Color slate900 = Color(0xFF0F172A);
-  static const Color slate800 = Color(0xFF1E293B);
-  static const Color slate600 = Color(0xFF475569);
-  static const Color slate500 = Color(0xFF64748B);
-  static const Color slate400 = Color(0xFF94A3B8);
-  static const Color slate300 = Color(0xFFCBD5E1);
-  static const Color slate200 = Color(0xFFE2E8F0);
-  static const Color slate100 = Color(0xFFF1F5F9);
-  static const Color gold = Color(0xFFFACC15);
-  static const Color goldDark = Color(0xFF713F12);
-  static const Color goldLight = Color(0xFFFEF9C3);
-  static const Color bronze = Color(0xFFFDBA74);
-  static const Color bronzeDark = Color(0xFF7C2D12);
-  static const Color bronzeLight = Color(0xFFFFEDD5);
-}
 
 class LeaderboardScreen extends StatefulWidget {
   const LeaderboardScreen({super.key});
@@ -63,11 +46,12 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
+      appBar: const CustomAppBar(title: 'Leaderboard', showBackButton: false),
       body: SafeArea(
+        top: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -75,6 +59,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
+                    _buildLeagueInfo(),
+                    const SizedBox(height: 16),
                     _buildTabSwitcher(),
                     const SizedBox(height: 32),
                     if (_selectedTab == 0) ..._buildRankingContent(),
@@ -90,63 +76,47 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  // ─── HEADER ───
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  // ─── LEAGUE INFO ───
+  Widget _buildLeagueInfo() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          DummyData.leagueName,
+          style: GoogleFonts.lexend(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: AppColors.slate500,
+            letterSpacing: 0.6,
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: AppColors.slate100,
+            borderRadius: BorderRadius.circular(999),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              const Icon(
+                Icons.access_time_rounded,
+                size: 12,
+                color: AppColors.slate600,
+              ),
+              const SizedBox(width: 4),
               Text(
-                DummyData.leagueName,
+                DummyData.leagueTimeLeft,
                 style: GoogleFonts.lexend(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: LeaderboardColors.slate500,
-                  letterSpacing: 0.6,
-                ),
-              ),
-              Text(
-                'Leaderboard \u{1F3C6}',
-                style: GoogleFonts.lexend(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: LeaderboardColors.slate900,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.slate600,
                 ),
               ),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: LeaderboardColors.slate100,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.access_time_rounded,
-                  size: 12,
-                  color: LeaderboardColors.slate600,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  DummyData.leagueTimeLeft,
-                  style: GoogleFonts.lexend(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: LeaderboardColors.slate600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -155,7 +125,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: LeaderboardColors.slate200,
+        color: AppColors.slate200,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(children: [_tabItem('Ranking', 0), _tabItem('Badges', 1)]),
@@ -189,9 +159,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive
-                  ? LeaderboardColors.slate900
-                  : LeaderboardColors.slate500,
+              color: isActive ? AppColors.slate900 : AppColors.slate500,
             ),
           ),
         ),
@@ -247,13 +215,10 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   xp: '2,450 XP',
                   rank: 2,
                   avatarSize: 64,
-                  ringColor: LeaderboardColors.slate300,
-                  badgeColor: LeaderboardColors.slate300,
-                  badgeTextColor: LeaderboardColors.slate800,
-                  pedestalColors: [
-                    LeaderboardColors.slate100,
-                    LeaderboardColors.slate200,
-                  ],
+                  ringColor: AppColors.slate300,
+                  badgeColor: AppColors.slate300,
+                  badgeTextColor: AppColors.slate800,
+                  pedestalColors: [AppColors.slate100, AppColors.slate200],
                   pedestalHeight: 96,
                   avatarBgColor: const Color(0xFF8B5CF6),
                 ),
@@ -265,10 +230,13 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   xp: '3,100 XP',
                   rank: 1,
                   avatarSize: 80,
-                  ringColor: LeaderboardColors.gold,
-                  badgeColor: LeaderboardColors.gold,
-                  badgeTextColor: LeaderboardColors.goldDark,
-                  pedestalColors: [Colors.white, LeaderboardColors.goldLight],
+                  ringColor: AppColors.gold,
+                  badgeColor: AppColors.gold,
+                  badgeTextColor: AppColors.slate900,
+                  pedestalColors: [
+                    Colors.white,
+                    AppColors.gold.withOpacity(0.25),
+                  ],
                   pedestalHeight: 128,
                   avatarBgColor: AppColors.primary,
                   showCrown: true,
@@ -282,15 +250,15 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   xp: '2,120 XP',
                   rank: 3,
                   avatarSize: 64,
-                  ringColor: LeaderboardColors.bronze,
-                  badgeColor: LeaderboardColors.bronze,
-                  badgeTextColor: LeaderboardColors.bronzeDark,
+                  ringColor: AppColors.bronze,
+                  badgeColor: AppColors.bronze,
+                  badgeTextColor: AppColors.slate900,
                   pedestalColors: [
                     AppColors.backgroundLight,
-                    LeaderboardColors.bronzeLight,
+                    AppColors.bronze.withOpacity(0.25),
                   ],
                   pedestalHeight: 80,
-                  avatarBgColor: const Color(0xFFF97316),
+                  avatarBgColor: AppColors.streakOrange,
                 ),
               ),
             ],
@@ -388,7 +356,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           style: GoogleFonts.lexend(
             fontSize: isFirst ? 16 : 14,
             fontWeight: FontWeight.bold,
-            color: isFirst ? LeaderboardColors.slate900 : AppColors.textLight,
+            color: isFirst ? AppColors.slate900 : AppColors.textLight,
           ),
         ),
         Text(
@@ -415,9 +383,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
             border: isFirst
                 ? Border(
-                    top: BorderSide(
-                      color: const Color(0xFFFEF08A).withOpacity(0.5),
-                    ),
+                    top: BorderSide(color: AppColors.gold.withOpacity(0.4)),
                   )
                 : null,
             boxShadow: isFirst
@@ -447,7 +413,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: LeaderboardColors.slate500,
+              color: AppColors.slate500,
               letterSpacing: 0.35,
             ),
           ),
@@ -498,7 +464,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               style: GoogleFonts.lexend(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: LeaderboardColors.slate900,
+                                color: AppColors.slate900,
                               ),
                             ),
                           ),
@@ -508,16 +474,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             height: 40,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: LeaderboardColors.slate200,
+                              color: AppColors.slate200,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
                             child: const CircleAvatar(
                               radius: 18,
-                              backgroundColor: Color(0xFFE2E8F0),
+                              backgroundColor: AppColors.slate200,
                               child: Icon(
                                 Icons.person_rounded,
                                 size: 20,
-                                color: Color(0xFF94A3B8),
+                                color: AppColors.slate400,
                               ),
                             ),
                           ),
@@ -532,7 +498,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                   style: GoogleFonts.lexend(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: LeaderboardColors.slate900,
+                                    color: AppColors.slate900,
                                   ),
                                 ),
                                 Row(
@@ -545,7 +511,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                       '${DummyData.currentUserStreak} day streak',
                                       style: GoogleFonts.lexend(
                                         fontSize: 12,
-                                        color: LeaderboardColors.slate500,
+                                        color: AppColors.slate500,
                                       ),
                                     ),
                                   ],
@@ -586,7 +552,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: LeaderboardColors.slate500,
+              color: AppColors.slate500,
               letterSpacing: 0.35,
             ),
           ),
@@ -604,7 +570,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: LeaderboardColors.slate100),
+          border: Border.all(color: AppColors.slate100),
         ),
         child: Row(
           children: [
@@ -616,7 +582,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: LeaderboardColors.slate400,
+                  color: AppColors.slate400,
                 ),
               ),
             ),
@@ -640,7 +606,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: LeaderboardColors.slate900,
+                  color: AppColors.slate900,
                 ),
               ),
             ),
@@ -649,7 +615,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               style: GoogleFonts.lexend(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: LeaderboardColors.slate500,
+                color: AppColors.slate500,
               ),
             ),
           ],
@@ -674,7 +640,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                 style: GoogleFonts.lexend(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: LeaderboardColors.slate900,
+                  color: AppColors.slate900,
                 ),
               ),
               Container(
@@ -777,20 +743,20 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         children: [
           CustomPaint(
             painter: _DashedBorderPainter(
-              color: LeaderboardColors.slate300,
+              color: AppColors.slate300,
               radius: 16,
             ),
             child: Container(
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: LeaderboardColors.slate200,
+                color: AppColors.slate200,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(
                 IconData(badge['icon'] as int, fontFamily: 'MaterialIcons'),
                 size: 28,
-                color: LeaderboardColors.slate400,
+                color: AppColors.slate400,
               ),
             ),
           ),
@@ -800,7 +766,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             style: GoogleFonts.lexend(
               fontSize: 12,
               fontWeight: FontWeight.w500,
-              color: LeaderboardColors.slate500,
+              color: AppColors.slate500,
             ),
             textAlign: TextAlign.center,
           ),

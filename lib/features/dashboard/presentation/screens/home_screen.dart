@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,7 +9,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FD),
+      backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -96,7 +97,7 @@ class HomeScreen extends StatelessWidget {
               children: [
                 const Icon(
                   Icons.local_fire_department_rounded,
-                  color: Colors.orange,
+                  color: AppColors.warning,
                   size: 30,
                 ),
                 const SizedBox(height: 10),
@@ -129,8 +130,8 @@ class HomeScreen extends StatelessWidget {
                     "95%",
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   ),
-                  progressColor: Colors.lightBlue,
-                  backgroundColor: Colors.blue.withOpacity(0.1),
+                  progressColor: AppColors.primary,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
                   circularStrokeCap: CircularStrokeCap.round,
                 ),
                 const SizedBox(height: 10),
@@ -169,12 +170,12 @@ class HomeScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: AppColors.primary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.flag_rounded,
-                  color: Colors.blue,
+                  color: AppColors.primary,
                   size: 20,
                 ),
               ),
@@ -202,7 +203,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 "66%",
                 style: TextStyle(
-                  color: Colors.blue,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -213,8 +214,8 @@ class HomeScreen extends StatelessWidget {
             lineHeight: 12.0,
             percent: 0.66,
             padding: EdgeInsets.zero,
-            backgroundColor: Colors.blue.withOpacity(0.1),
-            progressColor: Colors.blue,
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            progressColor: AppColors.primary,
             barRadius: const Radius.circular(10),
           ),
         ],
@@ -234,7 +235,10 @@ class HomeScreen extends StatelessWidget {
             ),
             Text(
               "See all",
-              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -287,7 +291,7 @@ class HomeScreen extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
+                        backgroundColor: AppColors.primary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

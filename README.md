@@ -240,3 +240,118 @@ Một tính năng chỉ được coi là "Đã xong" và cho phép tạo PR khi 
 | **2. Streak Celebration** | `lib/features/social/presentation/widgets/` | `streak_popup.dart` | Mockup 8. Một Custom Dialog hiện lên rực rỡ (màu cam/vàng) chúc mừng người dùng duy trì chuỗi học. |
 | **3. Luyện phát âm** | `lib/features/tools/presentation/screens/` | `pronunciation_screen.dart` | Mockup 7. Giao diện nút thu âm. Cần vẽ UI giả lập sóng âm (`wave_animation`) khi đang thu âm. Hiển thị kết quả text xanh/đỏ. |
 | **4. Camera OCR & Chatbot** | `lib/features/tools/presentation/screens/` | `ocr_scanner_screen.dart`<br>`chatbot_screen.dart` | OCR: Khung ngắm camera giả lập có viền quét góc. <br>Chatbot: Giao diện phòng chat (Tin nhắn user bong bóng xanh bên phải, Bot bong bóng xám bên trái). |
+
+### Hướng dẫn thiết lập Firebase (Chỉ dành cho Android)
+
+#### Bước 1: Dọn dẹp thư mục dư thừa
+Vì nhóm chỉ phát triển trên nền tảng Android, hãy xóa các thư mục sau để tối ưu hóa dung lượng dự án:
+* `ios/`
+* `linux/`
+* `macos/`
+* `windows/`
+* `web/`
+
+#### Bước 2: Tạo dự án trên Firebase Console
+1.  Truy cập [Firebase Console](https://console.firebase.google.com/).
+2.  Nhấn **Add Project**, đặt tên dự án là `VitaminC`.
+3.  Bật **Google Analytics** (khuyên dùng để theo dõi người dùng).
+
+#### Bước 3: Đăng ký ứng dụng Android
+1.  Tại giao diện dự án, chọn biểu tượng **Android**.
+2.  **Android package name:** Mở file `android/app/build.gradle`, tìm dòng `applicationId` (thường là `com.example.vitaminc`). Copy và dán vào Firebase.
+3.  **App nickname:** `VitaminC_Android`.
+4.  **SHA-1 certificate:** Mở Terminal trong thư mục dự án, chạy lệnh:
+    ```bash
+    cd android
+    ./gradlew signingReport
+    ```
+    Copy mã SHA-1 (trong phần `debug`) dán vào Firebase để hỗ trợ Google Sign-In.
+5.  Tải file **`google-services.json`** và chép vào thư mục: `android/app/`.
+
+#### Bước 4: Cấu hình Gradle (Android)
+1.  **File `android/build.gradle` (Project level):**
+    Thêm dòng sau vào khối `dependencies`:
+    ```gradle
+    dependencies {
+        classpath 'com.google.gms:google-services:4.4.0'
+    }
+    ```
+2.  **File `android/app/build.gradle` (App level):**
+    Thêm dòng này vào cuối file:
+    ```gradle
+    apply plugin: 'com.google.gms.google-services'
+    ```
+    Đồng thời, đảm bảo `minSdkVersion` tối thiểu là **21** (hoặc 23 nếu dùng các tính năng AI phức tạp).
+
+#### Bước 5: Cấu hình Flutter & .gitignore
+1.  Thêm thư viện vào `pubspec.yaml`:
+    ```yaml
+    dependencies:
+      firebase_core: ^3.1.0
+      firebase_auth: ^5.1.0
+      cloud_firestore: ^5.0.1
+      firebase_storage: ^12.0.1
+    ```
+2.  **Bảo mật:** Mở file `.gitignore`, thêm dòng sau để không push file cấu hình lên GitHub:
+    ```text
+    android/app/google-services.json
+    ```
+
+---
+
+### Sprint 2: Kết nối Backend & Logic nghiệp vụ (Firebase & SRS)
+
+**Quy tắc chung cho toàn SPRINT 2:**
+* **Dữ liệu:** Chuyển dần từ `dummy_data.dart` sang gọi dữ liệu thời gian thực từ `FirebaseFirestore`.
+* **Trạng thái:** Sử dụng Riverpod `AsyncNotifier` hoặc `StreamProvider` để quản lý luồng dữ liệu từ Firebase.
+* **Bảo mật:** Thiết lập Rules trên Firestore để đảm bảo người dùng chỉ xem được dữ liệu cá nhân (trừ Leaderboard).
+
+---
+
+### 👨‍💻 Thành viên 1: Core & Authentication Logic
+
+**Mục tiêu:** Quản lý toàn bộ vòng đời người dùng và trạng thái đăng nhập hệ thống.
+
+| Task (Việc cần làm) | Vị trí file cần viết / tạo | Tên file | Outcome chi tiết |
+| :--- | :--- | :--- | :--- |
+| **1. Khởi tạo Firebase** | `lib/` | `main.dart` | Cấu hình `Firebase.initializeApp()` và xử lý lỗi khởi tạo ban đầu. |
+| **2. Auth Repository** | `lib/features/auth/data/repositories/` | `auth_repository.dart` | Code logic Đăng nhập/Đăng ký/Đăng xuất và Reset mật khẩu qua Firebase Auth. |
+| **3. Auth Provider** | `lib/features/auth/presentation/providers/` | `auth_provider.dart` | Tạo `StreamProvider` lắng nghe trạng thái `authStateChanges()` để tự động điều hướng người dùng. |
+| **4. Middleware bảo mật** | `lib/routing/` | `app_router.dart` | Thêm logic `redirect` vào GoRouter: Nếu chưa login thì ép về màn `/login`. |
+
+---
+
+### 👨‍💻 Thành viên 2: User Profile & Streak Logic
+
+**Mục tiêu:** Lưu trữ thông tin cá nhân và xử lý logic tính toán chuỗi ngày học (Streak) tự động.
+
+| Task (Việc cần làm) | Vị trí file cần viết / tạo | Tên file | Outcome chi tiết |
+| :--- | :--- | :--- | :--- |
+| **1. User Service** | `lib/features/auth/data/services/` | `user_service.dart` | Tạo document người dùng trên Firestore khi đăng ký thành công (Lưu: email, tên, avatar, XP, streak). |
+| **2. Streak Logic** | `lib/features/dashboard/data/` | `streak_logic.dart` | Kiểm tra thời gian login cuối cùng. Nếu là ngày tiếp theo thì `streak++`, nếu quá 48h thì reset về `0`. |
+| **3. Home Data Fetch** | `lib/features/dashboard/presentation/providers/` | `home_provider.dart` | Gọi dữ liệu XP, Level, Streak thực tế từ Firestore để hiển thị lên Dashboard thay cho data giả. |
+
+---
+
+### 👨‍💻 Thành viên 3: Library & SRS Algorithm Logic
+
+**Mục tiêu:** Triển khai thuật toán lặp lại ngắt quãng (SM-2) và quản lý kho dữ liệu từ vựng.
+
+| Task (Việc cần làm) | Vị trí file cần viết / tạo | Tên file | Outcome chi tiết |
+| :--- | :--- | :--- | :--- |
+| **1. Firestore CRUD** | `lib/features/library/data/` | `library_service.dart` | Logic Thêm/Xóa/Sửa Bộ thẻ (Decks) và Từ vựng (Vocab) lên Firestore theo `userId`. |
+| **2. Thuật toán SRS** | `lib/features/study/data/` | `srs_engine.dart` | Cài đặt công thức SM-2: Tính toán `nextReviewDate` dựa trên đánh giá Hard/Good/Easy. |
+| **3. Học tập Logic** | `lib/features/study/presentation/providers/` | `study_provider.dart` | Lọc ra danh sách từ vựng có `nextReviewDate` <= ngày hiện tại để đưa vào phiên học. |
+| **4. Lưu kết quả học** | `lib/features/study/data/` | `study_record.dart` | Cập nhật `lastPracticed` và XP cho người dùng sau khi kết thúc 1 phiên học Flashcard. |
+
+---
+
+### 👨‍💻 Thành viên 4: Social Integration & Tool Backend
+
+**Mục tiêu:** Kết nối bảng xếp hạng toàn cầu và xử lý logic ban đầu cho các công cụ thông minh.
+| Task (Việc cần làm) | Vị trí file cần viết / tạo | Tên file | Outcome chi tiết |
+| :--- | :--- | :--- | :--- |
+| **1. Leaderboard Service** | `lib/features/social/data/` | `leaderboard_service.dart` | Truy vấn Top 10 người dùng có XP cao nhất từ Firestore toàn cục (`query.orderBy('xp')`). |
+| **2. Badge Unlock Logic** | `lib/features/social/data/` | `badge_service.dart` | Kiểm tra điều kiện (ví dụ: streak > 7) để cập nhật mảng `badges` trong document người dùng trên Firestore. |
+| **3. Pronunciation Logic** | `lib/features/tools/data/` | `speech_service.dart` | Tích hợp `speech_to_text` để so khớp âm thanh người dùng với từ vựng mục tiêu (trả về điểm số % thực). |
+| **4. Chatbot API Integration** | `lib/features/tools/data/` | `chatbot_service.dart` | Kết nối API (Gemini/OpenAI) để xử lý hội thoại dựa trên nội dung chat từ UI. |

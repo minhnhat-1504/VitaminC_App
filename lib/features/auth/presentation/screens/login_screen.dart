@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/shared_widgets/custom_label.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../widgets/auth_tab_switcher.dart';
 import 'register_screen.dart';
@@ -101,14 +102,17 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildLabel("Email Address", "Địa chỉ Email"),
+        const CustomLabel(
+          english: 'Email Address',
+          vietnamese: 'Địa chỉ Email',
+        ),
         CustomTextField(
           controller: _emailController,
           hintText: 'name@example.com',
           prefixIcon: Icons.email_outlined,
         ),
         const SizedBox(height: 24),
-        _buildLabel("Password", "Mật khẩu"),
+        const CustomLabel(english: 'Password', vietnamese: 'Mật khẩu'),
         CustomTextField(
           controller: _passwordController,
           hintText: '••••••••',
@@ -199,29 +203,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? 'Chào mừng bạn quay trở lại'
                 : 'Bắt đầu hành trình của bạn',
             style: const TextStyle(color: Color(0xFF64748B), fontSize: 15),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLabel(String en, String vi) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
-      child: Row(
-        children: [
-          Text(
-            en,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: AppColors.textLight,
-              fontSize: 15,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            "- $vi",
-            style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
           ),
         ],
       ),
