@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vitaminc/features/auth/presentation/screens/login_screen.dart';
 import 'package:vitaminc/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:vitaminc/features/auth/presentation/screens/splash_screen.dart';
@@ -16,56 +18,68 @@ import '../features/tools/presentation/screens/pronunciation_screen.dart';
 
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-final goRouter = GoRouter(
-  initialLocation: '/splash',
-  routes: [
-    GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+// Khai báo GoRouter dưới dạng một Provider để có thể lắng nghe Auth State
+final routerProvider = Provider<GoRouter>((ref) {
+  final authState = ref.watch(authStateProvider);
+  final userModel = ref.watch(currentUserProvider);
 
-    GoRoute(
-      path: '/onboarding',
-      builder: (context, state) => const OnboardingScreen(),
-    ),
+  return GoRouter(
+    initialLocation: '/splash',
+    // Logic điều hướng tự động dựa trên trạng thái đăng nhập
+    redirect: (context, state) {
+      // Chờ cho đến khi Firebase tải xong dữ liệu khởi tạo
+      if (authState.isLoading || userModel.isLoading) return null;
 
-    GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-    ShellRoute(
-      navigatorKey: _shellNavigatorKey,
-      builder: (context, state, child) {
-        return Scaffold(
-          body: child,
-          bottomNavigationBar: const MainBottomNavBar(),
-        );
-      },
-      routes: [
-        GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
-        GoRoute(
-          path: '/library',
-          builder: (context, state) => const DeckListScreen(),
-        ),
-        GoRoute(
-          path: '/social',
-          builder: (context, state) => const LeaderboardScreen(),
-        ),
-        GoRoute(
-          path: '/settings',
-          builder: (context, state) => const SettingsScreen(),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/add-vocab',
-      builder: (context, state) => const AddVocabScreen(),
-    ),
-    GoRoute(
-      path: '/study',
-      builder: (context, state) => const FlashcardScreen(),
-    ),
-    GoRoute(
-      path: '/study-summary',
-      builder: (context, state) => const StudySummaryScreen(),
-    ),
-    GoRoute(
-      path: '/pronunciation',
-      builder: (context, state) => const PronunciationScreen(),
-    ),
-  ],
-);
+      final bool loggedIn = authState.value != null;
+      final String location = state.matchedLocation;
+      
+      // Các đường dẫn thuộc nhóm xác thực
+      final bool isAuthPath = location == '/login' || 
+                              location == '/splash' || 
+                              location == '/onboarding';
+
+      // 1. Nếu chưa đăng nhập: Buộc quay về màn Login (trừ khi đang ở Splash/Onboarding)
+      if (!loggedIn) {
+        return isAuthPath ? null : '/login';
+      }
+
+      // 2. Nếu đã đăng nhập thành công:
+      if (isAuthPath) {
+        // Có thể thêm kiểm tra Admin ở đây để chuyển vào dashboard riêng
+        // if (userModel.value?.role == 'admin') return '/admin-home';
+        return '/home';
+      }
+
+      return null;
+    },
+    routes: [
+      // Các màn hình độc lập
+      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      
+      // Cấu hình ShellRoute cho các màn hình có BottomNavigationBar
+      ShellRoute(
+        navigatorKey: _shellNavigatorKey,
+        builder: (context, state, child) {
+          return Scaffold(
+            body: child,
+            bottomNavigationBar: const MainBottomNavBar(),
+          );
+        },
+        routes: [
+          GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+          GoRoute(path: '/library', builder: (context, state) => const DeckListScreen()),
+          GoRoute(path: '/social', builder: (context, state) => const LeaderboardScreen()),
+          GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+        ],
+      ),
+
+      // Các màn hình chức năng sâu (Full screen)
+      GoRoute(path: '/add-vocab', builder: (context, state) => const AddVocabScreen()),
+      GoRoute(path: '/study', builder: (context, state) => const FlashcardScreen()),
+      GoRoute(path: '/study-summary', builder: (context, state) => const StudySummaryScreen()),
+      GoRoute(path: '/pronunciation', builder: (context, state) => const PronunciationScreen()),
+    ],
+  );
+});
