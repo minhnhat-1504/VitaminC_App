@@ -15,6 +15,7 @@ import '../features/library/presentation/screens/add_vocab_screen.dart';
 import '../features/study/presentation/screens/flashcard_screen.dart';
 import '../features/study/presentation/screens/study_summary_screen.dart';
 import '../features/tools/presentation/screens/pronunciation_screen.dart';
+import '../features/tools/presentation/screens/chatbot_screen.dart';
 
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -80,6 +81,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/study', builder: (context, state) => const FlashcardScreen()),
       GoRoute(path: '/study-summary', builder: (context, state) => const StudySummaryScreen()),
       GoRoute(path: '/pronunciation', builder: (context, state) => const PronunciationScreen()),
+      GoRoute(path: '/chatbot', builder: (context, state) => const ChatbotScreen()),
     ],
   );
 });

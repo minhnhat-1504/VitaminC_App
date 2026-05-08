@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/constants/app_colors.dart';
 import 'routing/app_router.dart';
@@ -10,6 +11,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    await dotenv.load(fileName: ".env");
     await Firebase.initializeApp();
     debugPrint("====================================================");
     debugPrint(">>> FIREBASE CONNECTED SUCCESSFULLY! <<<");

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               _buildTopBar(),
               const SizedBox(height: 25),
-              _buildHeaderTitle(),
+              _buildSearchBar(context),
               const SizedBox(height: 20),
               _buildStatsCards(),
               const SizedBox(height: 25),
@@ -49,8 +50,8 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text(
-                  "Welcome back,",
-                  style: TextStyle(color: Colors.grey, fontSize: 13),
+                  "Chào mừng trở lại,",
+                  style: TextStyle(color: AppColors.slate500, fontSize: 13),
                 ),
                 Text(
                   "Alex 👋",
@@ -68,21 +69,58 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderTitle() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
-        Text(
-          "Learning Dashboard",
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF1E293B),
+  Widget _buildSearchBar(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.black.withOpacity(0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Tra cứu từ vựng...',
+                hintStyle: const TextStyle(color: AppColors.slate400),
+                prefixIcon: const Icon(Icons.search, color: AppColors.slate400),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
           ),
         ),
-        Text(
-          "Bảng điều khiển",
-          style: TextStyle(fontSize: 14, color: Colors.grey),
+        const SizedBox(width: 12),
+        GestureDetector(
+          onTap: () => context.push('/chatbot'),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.auto_awesome, // Biểu tượng tia sáng đặc trưng của AI/Gemini
+              color: AppColors.white,
+              size: 26,
+            ),
+          ),
         ),
       ],
     );
@@ -106,12 +144,8 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const Text(
-                  "Day Streak",
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                const Text(
                   "Chuỗi ngày",
-                  style: TextStyle(fontSize: 12, color: Colors.black26),
+                  style: TextStyle(fontSize: 14, color: AppColors.slate500),
                 ),
               ],
             ),
@@ -140,10 +174,10 @@ class HomeScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const Text(
-                  "WORDS / TỪ",
+                  "TỪ VỰNG",
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: AppColors.slate500,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -164,7 +198,7 @@ class HomeScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Daily Goal / Mục tiêu ngày",
+                "Mục tiêu ngày",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               Container(
@@ -182,8 +216,8 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const Text(
-            "You're crushing it! / Bạn làm tốt lắm!",
-            style: TextStyle(color: Colors.grey, fontSize: 13),
+            "Bạn đang làm rất tốt!",
+            style: TextStyle(color: AppColors.slate500, fontSize: 13),
           ),
           const SizedBox(height: 15),
           Row(
@@ -195,7 +229,7 @@ class HomeScreen extends StatelessWidget {
               Text(
                 " / 30 XP",
                 style: TextStyle(
-                  color: Colors.grey,
+                  color: AppColors.slate500,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -230,11 +264,11 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: const [
             Text(
-              "Continue Learning",
+              "Tiếp tục học",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Text(
-              "See all",
+              "Xem tất cả",
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.bold,
@@ -267,21 +301,17 @@ class HomeScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            "Oxford 3000 Words",
+                            "3000 từ vựng Oxford",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
-                          Text(
-                            "3000 từ vựng Oxford",
-                            style: TextStyle(color: Colors.grey, fontSize: 13),
-                          ),
                           SizedBox(height: 10),
                           Text(
-                            "🎴 25 Cards remaining",
+                            "🎴 Còn 25 thẻ",
                             style: TextStyle(
-                              color: Colors.black54,
+                              color: AppColors.slate500,
                               fontSize: 12,
                             ),
                           ),
@@ -297,8 +327,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        "Study ▶",
-                        style: TextStyle(color: Colors.white),
+                        "Học ▶",
+                        style: TextStyle(color: AppColors.white),
                       ),
                     ),
                   ],
@@ -329,17 +359,17 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
                 Text(
-                  "Common Phrases / Mẫu câu",
+                  "Mẫu câu thông dụng",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  "120 words • 15 min",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                  "120 từ • 15 phút",
+                  style: TextStyle(color: AppColors.slate500, fontSize: 12),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.lock_outline, color: Colors.grey),
+          const Icon(Icons.lock_outline, color: AppColors.slate400),
         ],
       ),
     );
@@ -353,11 +383,11 @@ class HomeScreen extends StatelessWidget {
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: AppColors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),

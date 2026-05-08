@@ -37,6 +37,12 @@ class SettingsScreen extends StatelessWidget {
             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
             onTap: () => context.push('/pronunciation'),
           ),
+          ListTile(
+            leading: const Icon(Icons.chat_bubble_outline),
+            title: const Text('Trợ lý AI (Chatbot)'),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => context.push('/chatbot'),
+          ),
           const ListTile(
             leading: Icon(Icons.logout, color: Colors.red),
             title: Text("Đăng xuất", style: TextStyle(color: Colors.red)),

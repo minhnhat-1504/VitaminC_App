@@ -27,6 +27,10 @@ class AppColors {
   static const Color backgroundLight = Color(0xFFF8FAFC);
   static const Color backgroundDark = Color(0xFF101C22);
 
+  // Generic colors
+  static const Color white = Color(0xFFFFFFFF);
+  static const Color black = Color(0xFF000000);
+
   // Màu trạng thái (Success, Error, Warning)
   static const Color success = Color(0xFF22C55E); // Nút Easy
   static const Color warning = Color(0xFFF59E0B); // Nút Hard
