@@ -4,15 +4,80 @@ import '../../../../core/shared_widgets/custom_app_bar.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 
-class AddVocabScreen extends StatefulWidget {
-  const AddVocabScreen({super.key});
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:vitaminc/features/library/data/models/vocab_model.dart';
+import 'package:vitaminc/features/library/presentation/library_providers.dart';
+
+class AddVocabScreen extends ConsumerStatefulWidget {
+  final String deckId;
+  const AddVocabScreen({super.key, required this.deckId});
 
   @override
-  State<AddVocabScreen> createState() => _AddVocabScreenState();
+  ConsumerState<AddVocabScreen> createState() => _AddVocabScreenState();
 }
 
-class _AddVocabScreenState extends State<AddVocabScreen> {
+class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
+  final _wordController = TextEditingController();
+  final _meaningController = TextEditingController();
+  final _exampleController = TextEditingController();
   bool isPublic = false;
+  bool _isLoading = false;
+
+  Future<void> _saveVocab() async {
+    final word = _wordController.text.trim();
+    final meaning = _meaningController.text.trim();
+    final example = _exampleController.text.trim();
+
+    if (word.isEmpty || meaning.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập từ vựng và nghĩa!')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final libraryService = ref.read(libraryServiceProvider);
+      final newVocab = VocabModel(
+        id: '', // Service sẽ tự tạo ID
+        deckId: widget.deckId,
+        word: word,
+        meaning: meaning,
+        example: example.isEmpty ? null : example,
+        nextReview: Timestamp.now(),
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      );
+
+      await libraryService.addVocab(newVocab);
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã thêm từ vựng thành công!')),
+        );
+        context.pop(); // Trở về màn hình trước
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _wordController.dispose();
+    _meaningController.dispose();
+    _exampleController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +91,20 @@ class _AddVocabScreenState extends State<AddVocabScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CustomTextField(
+            CustomTextField(
+              controller: _wordController,
               hintText: 'Vocabulary (English)...',
               prefixIcon: Icons.abc,
             ),
             const SizedBox(height: 16),
-            const CustomTextField(
+            CustomTextField(
+              controller: _meaningController,
               hintText: 'Meaning (Vietnamese)...',
               prefixIcon: Icons.g_translate,
             ),
             const SizedBox(height: 16),
-            const CustomTextField(
+            CustomTextField(
+              controller: _exampleController,
               hintText: 'Example sentence...',
               prefixIcon: Icons.notes,
             ),
@@ -83,13 +151,12 @@ class _AddVocabScreenState extends State<AddVocabScreen> {
             const SizedBox(height: 32),
 
             // Nút Lưu chuẩn của Team
-            CustomPrimaryButton(
-              text: 'SAVE VOCABULARY',
-              onPressed: () {
-                // Xử lý lưu và quay lại
-                // context.pop();
-              },
-            ),
+            _isLoading 
+                ? const Center(child: CircularProgressIndicator())
+                : CustomPrimaryButton(
+                    text: 'SAVE VOCABULARY',
+                    onPressed: _saveVocab,
+                  ),
           ],
         ),
       ),

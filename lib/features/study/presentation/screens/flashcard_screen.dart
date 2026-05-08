@@ -1,37 +1,110 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/utils/dummy_data.dart';
 import '../../../../../core/shared_widgets/custom_app_bar.dart';
+import '../controllers/study_controller.dart';
+import '../../data/srs_engine.dart';
 
-class FlashcardScreen extends StatefulWidget {
-  const FlashcardScreen({super.key});
+class FlashcardScreen extends ConsumerStatefulWidget {
+  final String? deckId;
+  const FlashcardScreen({super.key, this.deckId});
 
   @override
-  State<FlashcardScreen> createState() => _FlashcardScreenState();
+  ConsumerState<FlashcardScreen> createState() => _FlashcardScreenState();
 }
 
-class _FlashcardScreenState extends State<FlashcardScreen> {
+class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   bool isFlipped = false;
-  int currentIndex = 0;
 
-  void _nextCard() {
-    if (currentIndex < DummyData.vocabularies.length - 1) {
-      setState(() {
-        isFlipped = false;
-        currentIndex++;
-      });
-    } else {
-      // Đã hết thẻ, chuyển sang màn hình tổng kết
-      context.push('/study-summary');
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Tải thẻ ôn tập của bộ hiện tại
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(studyControllerProvider.notifier).loadDueCards(deckId: widget.deckId);
+    });
+  }
+
+  void _reviewCard(ReviewQuality quality) {
+    ref.read(studyControllerProvider.notifier).processReview(quality);
+    setState(() {
+      isFlipped = false; // Reset lật thẻ
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final currentWord = DummyData.vocabularies[currentIndex];
-    final progress = (currentIndex + 1) / DummyData.vocabularies.length;
+    final state = ref.watch(studyControllerProvider);
+
+    if (state.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    if (state.errorMessage != null) {
+      return Scaffold(body: Center(child: Text('Lỗi: ${state.errorMessage}')));
+    }
+
+    if (state.dueCards.isEmpty) {
+      return Scaffold(
+        appBar: const CustomAppBar(title: 'Review Complete', showBackButton: true),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle_outline, size: 80, color: AppColors.success),
+              const SizedBox(height: 24),
+              const Text('🎉 Bộ từ này hôm nay không có từ nào cần ôn!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  ref.read(studyControllerProvider.notifier).loadDueCards(deckId: widget.deckId, forceStudy: true);
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                child: const Text('Học lại toàn bộ (Cram mode)', style: TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text('Trở về thư viện', style: TextStyle(color: AppColors.textLight)),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (state.isFinished) {
+      return Scaffold(
+        appBar: const CustomAppBar(title: 'Review Complete', showBackButton: true),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.stars, size: 100, color: AppColors.secondary),
+              const SizedBox(height: 24),
+              const Text('Tuyệt vời! Bạn đã hoàn thành phiên học.', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  context.pushReplacement('/study-summary');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text('Xem tổng kết bài học', style: TextStyle(fontSize: 16, color: Colors.white)),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+
+    final currentWord = state.dueCards[state.currentIndex];
+    final progress = (state.currentIndex + 1) / state.dueCards.length;
 
     return Scaffold(
       appBar: const CustomAppBar(
@@ -85,15 +158,14 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                 child: isFlipped
                     ? _buildCardContent(
                         key: const ValueKey(true),
-                        text: currentWord['meaning'],
-                        subtext: 'Tap to flip back',
+                        text: currentWord.meaning,
+                        subtext: 'Tap to flip back\n${currentWord.example ?? ''}',
                         isBack: true,
                       )
                     : _buildCardContent(
                         key: const ValueKey(false),
-                        text: currentWord['word'],
-                        subtext:
-                            '(${currentWord['type']}) - Tap to view meaning',
+                        text: currentWord.word,
+                        subtext: 'Tap to view meaning',
                       ),
               ),
             ),
@@ -108,9 +180,9 @@ class _FlashcardScreenState extends State<FlashcardScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildSRSButton('Hard', AppColors.warning, _nextCard),
-                        _buildSRSButton('Good', AppColors.primary, _nextCard),
-                        _buildSRSButton('Easy', AppColors.success, _nextCard),
+                        _buildSRSButton('Hard', AppColors.warning, () => _reviewCard(ReviewQuality.hard)),
+                        _buildSRSButton('Good', AppColors.primary, () => _reviewCard(ReviewQuality.good)),
+                        _buildSRSButton('Easy', AppColors.success, () => _reviewCard(ReviewQuality.easy)),
                       ],
                     ),
                   )

@@ -11,6 +11,7 @@ import '../features/settings/presentation/screens/settings_screen.dart';
 import '../core/shared_widgets/bottom_nav_bar.dart';
 
 import '../features/library/presentation/screens/deck_list_screen.dart';
+import '../features/library/presentation/screens/deck_detail_screen.dart';
 import '../features/library/presentation/screens/add_vocab_screen.dart';
 import '../features/study/presentation/screens/flashcard_screen.dart';
 import '../features/study/presentation/screens/study_summary_screen.dart';
@@ -77,8 +78,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
 
       // Các màn hình chức năng sâu (Full screen)
-      GoRoute(path: '/add-vocab', builder: (context, state) => const AddVocabScreen()),
-      GoRoute(path: '/study', builder: (context, state) => const FlashcardScreen()),
+      GoRoute(
+        path: '/deck-detail', 
+        builder: (context, state) {
+          final deckId = state.extra as String;
+          return DeckDetailScreen(deckId: deckId);
+        }
+      ),
+      GoRoute(
+        path: '/add-vocab', 
+        builder: (context, state) {
+          final deckId = state.extra as String;
+          return AddVocabScreen(deckId: deckId);
+        }
+      ),
+      GoRoute(
+        path: '/study',
+        builder: (context, state) {
+          // Ép kiểu extra thành String để lấy deckId
+          final deckId = state.extra as String?; 
+          return FlashcardScreen(deckId: deckId);
+        },
+      ),
       GoRoute(path: '/study-summary', builder: (context, state) => const StudySummaryScreen()),
       GoRoute(path: '/pronunciation', builder: (context, state) => const PronunciationScreen()),
       GoRoute(path: '/chatbot', builder: (context, state) => const ChatbotScreen()),
