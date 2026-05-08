@@ -1,29 +1,53 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
+import '../../data/speech_service.dart';
 
-class PronunciationScreen extends StatefulWidget {
+class PronunciationScreen extends ConsumerStatefulWidget {
   const PronunciationScreen({super.key});
 
   @override
-  State<PronunciationScreen> createState() => _PronunciationScreenState();
+  ConsumerState<PronunciationScreen> createState() =>
+      _PronunciationScreenState();
 }
 
-class _PronunciationScreenState extends State<PronunciationScreen>
+class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
     with SingleTickerProviderStateMixin {
-  static const String _unitTitle = 'UNIT 3 - DINING';
-  static const String _translation = '"The check, please"';
-  static const String _tipText = "Emphasize the 'v' sound";
+  // ─── Dữ liệu mẫu cho các bài luyện tập ───
+  static const List<Map<String, String>> _exercises = [
+    {
+      'phrase': 'Hello, how are you?',
+      'translation': '"Xin chào, bạn có khỏe không?"',
+      'tip': "Emphasize the 'h' sound",
+      'unit': 'UNIT 1 - GREETINGS',
+    },
+    {
+      'phrase': 'The check, please',
+      'translation': '"Cho tôi hóa đơn"',
+      'tip': "Emphasize the 'ch' sound",
+      'unit': 'UNIT 3 - DINING',
+    },
+    {
+      'phrase': 'Where is the nearest station?',
+      'translation': '"Ga gần nhất ở đâu?"',
+      'tip': "Focus on 'nearest' pronunciation",
+      'unit': 'UNIT 5 - TRAVEL',
+    },
+  ];
+
+  int _currentExercise = 0;
 
   late final AnimationController _waveController;
 
   bool _isRecording = false;
   double _score = 0;
-  bool _hasMistake = false;
+  String _recognizedText = '';
+  PronunciationResult? _result;
 
   @override
   void initState() {
@@ -42,43 +66,146 @@ class _PronunciationScreenState extends State<PronunciationScreen>
 
   double _s(double value, double scale) => value * scale;
 
-  void _toggleRecording() {
+  // ─── Lấy thông tin bài tập hiện tại ───
+  Map<String, String> get _currentData => _exercises[_currentExercise];
+  String get _unitTitle => _currentData['unit']!;
+  String get _phrase => _currentData['phrase']!;
+  String get _translation => _currentData['translation']!;
+  String get _tipText => _currentData['tip']!;
+  double get _progress => (_currentExercise + 1) / _exercises.length;
+
+  // ──────────────────────────────────────────────
+  // LOGIC GHI ÂM & CHẤM ĐIỂM
+  // ──────────────────────────────────────────────
+
+  Future<void> _toggleRecording() async {
+    final speechService = ref.read(speechServiceProvider);
+
     if (_isRecording) {
-      final computed = 60 + (DateTime.now().millisecond % 40);
+      // === DỪNG GHI ÂM ===
+      final text = await speechService.stopListening();
+      _waveController.stop();
+
+      // Chấm điểm phát âm bằng thuật toán Levenshtein
+      final result = speechService.assessPronunciation(
+        referenceText: _phrase,
+        recognizedText: text,
+      );
+
       setState(() {
         _isRecording = false;
-        _score = computed.toDouble();
-        _hasMistake = _score < 90;
+        _recognizedText = text;
+        _score = result.accuracyScore;
+        _result = result;
       });
-      _waveController.stop();
+
+      debugPrint('>>> Reference : $_phrase');
+      debugPrint('>>> Recognized: $text');
+      debugPrint('>>> Score     : ${result.accuracyScore}%');
       return;
     }
 
-    setState(() {
-      _isRecording = true;
-    });
-    _waveController.repeat();
+    // === BẮT ĐẦU GHI ÂM ===
+    try {
+      final ready = await speechService.initialize();
+      if (!ready) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Không thể truy cập Microphone hoặc thiết bị không hỗ trợ nhận diện giọng nói.'),
+              backgroundColor: Colors.redAccent,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+
+      setState(() {
+        _isRecording = true;
+        _score = 0;
+        _recognizedText = '';
+        _result = null;
+      });
+      _waveController.repeat();
+
+      await speechService.startListening(
+        onResult: (text, isFinal) {
+          if (mounted) {
+            setState(() {
+              _recognizedText = text;
+            });
+
+            // Khi nhận được kết quả cuối cùng → tự động dừng và chấm điểm
+            if (isFinal) {
+              _waveController.stop();
+              final result = speechService.assessPronunciation(
+                referenceText: _phrase,
+                recognizedText: text,
+              );
+              setState(() {
+                _isRecording = false;
+                _score = result.accuracyScore;
+                _result = result;
+              });
+            }
+          }
+        },
+        localeId: 'en_US',
+      );
+    } catch (e) {
+      debugPrint('>>> Lỗi khi bật mic: $e');
+      setState(() {
+        _isRecording = false;
+      });
+      _waveController.stop();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Lỗi khởi tạo. Vui lòng thử lại.'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   void _reset() {
+    final speechService = ref.read(speechServiceProvider);
+    speechService.cancelListening();
+
     setState(() {
       _isRecording = false;
       _score = 0;
-      _hasMistake = false;
+      _recognizedText = '';
+      _result = null;
     });
     _waveController.stop();
   }
 
+  void _nextExercise() {
+    _reset();
+    setState(() {
+      _currentExercise = (_currentExercise + 1) % _exercises.length;
+    });
+  }
+
   Color get _scoreColor {
     if (_isRecording || _score == 0) return AppColors.slate400;
-    return (!_hasMistake && _score >= 80) ? AppColors.success : AppColors.error;
+    return _score >= 80 ? AppColors.success : AppColors.error;
   }
 
   String get _scoreLabel {
     if (_isRecording) return 'RECORDING';
-    if (_score == 0) return 'READY';
-    return (!_hasMistake && _score >= 80) ? 'GOOD JOB!' : 'TRY AGAIN';
+    if (_score == 0 && _recognizedText.isEmpty) return 'READY';
+    if (_score == 0 && _recognizedText.isNotEmpty) return 'NO MATCH';
+    return _score >= 80 ? 'GOOD JOB!' : 'TRY AGAIN';
   }
+
+  // ──────────────────────────────────────────────
+  // BUILD UI
+  // ──────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +252,11 @@ class _PronunciationScreenState extends State<PronunciationScreen>
                     _buildTipPill(uiScale),
                     SizedBox(height: _s(24, uiScale)),
                     _buildScoreRing(ringSize, uiScale),
-                    SizedBox(height: _s(18, uiScale)),
+                    SizedBox(height: _s(10, uiScale)),
+                    // Hiển thị câu user đã đọc (recognized text)
+                    if (_recognizedText.isNotEmpty && !_isRecording)
+                      _buildRecognizedTextBox(uiScale),
+                    SizedBox(height: _s(12, uiScale)),
                     _buildWaveform(uiScale),
                     SizedBox(height: _s(18, uiScale)),
                     _buildBottomCard(uiScale),
@@ -145,7 +276,7 @@ class _PronunciationScreenState extends State<PronunciationScreen>
       child: ClipRRect(
         borderRadius: BorderRadius.circular(999),
         child: LinearProgressIndicator(
-          value: 0.55,
+          value: _progress,
           minHeight: _s(6, uiScale),
           backgroundColor: AppColors.slate200,
           valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
@@ -154,28 +285,75 @@ class _PronunciationScreenState extends State<PronunciationScreen>
     );
   }
 
+  // ─── HIỂN THỊ CÂU MẪU VỚI MÀU SẮC ĐÚNG/SAI ───
   Widget _buildPhraseSection(double uiScale) {
+    // Nếu chưa có kết quả → hiển thị toàn bộ câu mẫu màu mặc định
+    if (_result == null) {
+      final words = _phrase.split(RegExp(r'\s+'));
+      return Wrap(
+        spacing: _s(8, uiScale),
+        runSpacing: _s(10, uiScale),
+        alignment: WrapAlignment.center,
+        children: words.map((word) {
+          return _wordChip(
+            text: word,
+            uiScale: uiScale,
+            background: const Color(0xFFE0F2FE),
+            border: const Color(0xFF93C5FD),
+            textColor: const Color(0xFF1D4ED8),
+          );
+        }).toList(),
+      );
+    }
+
+    // Có kết quả → tô màu xanh/đỏ từng từ
     return Wrap(
       spacing: _s(8, uiScale),
       runSpacing: _s(10, uiScale),
       alignment: WrapAlignment.center,
-      children: [
-        _wordChip(
-          text: 'Hello,',
-          uiScale: uiScale,
-          background: const Color(0xFFE7F7EE),
-          border: const Color(0xFFB7E3C9),
-          textColor: const Color(0xFF16A34A),
-        ),
-        _wordChip(
-          text: 'You',
-          uiScale: uiScale,
-          background: const Color(0xFFE7F7EE),
-          border: const Color(0xFFB7E3C9),
-          textColor: const Color(0xFF16A34A),
-        ),
-        _errorWordChip(uiScale),
-      ],
+      children: _result!.wordResults.map((wordResult) {
+        final isCorrect = wordResult.isCorrect;
+        final bg = isCorrect
+            ? const Color(0xFFE7F7EE)
+            : const Color(0xFFFFE4E6);
+        final textColor = isCorrect
+            ? const Color(0xFF16A34A)
+            : const Color(0xFFEF4444);
+
+        Widget content = Text(
+          wordResult.word,
+          style: GoogleFonts.lexend(
+            fontSize: _s(26, uiScale),
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        );
+
+        // Gạch chân lượn sóng cho từ sai
+        if (!isCorrect) {
+          content = CustomPaint(
+            foregroundPainter: _WavyUnderlinePainter(
+              color: const Color(0xFFEF4444),
+              strokeWidth: _s(2.0, uiScale),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(bottom: _s(2, uiScale)),
+              child: content,
+            ),
+          );
+        }
+
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: _s(4, uiScale),
+          ),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(_s(6, uiScale)),
+          ),
+          child: content,
+        );
+      }).toList(),
     );
   }
 
@@ -203,51 +381,6 @@ class _PronunciationScreenState extends State<PronunciationScreen>
           color: textColor,
         ),
       ),
-    );
-  }
-
-  Widget _errorWordChip(double uiScale) {
-    final isError = _hasMistake;
-    final bg = isError ? const Color(0xFFFFE4E6) : const Color(0xFFE7F7EE);
-    final border = isError ? const Color(0xFFFECACA) : const Color(0xFFB7E3C9);
-    final textColor = isError
-        ? const Color(0xFFEF4444)
-        : const Color(0xFF16A34A);
-
-    Widget content = Text(
-      'noob',
-      style: GoogleFonts.lexend(
-        fontSize: _s(26, uiScale),
-        fontWeight: FontWeight.w600,
-        color: textColor,
-      ),
-    );
-
-    if (isError) {
-      content = CustomPaint(
-        foregroundPainter: _WavyUnderlinePainter(
-          color: const Color(0xFFEF4444),
-          strokeWidth: _s(2.0, uiScale),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(bottom: _s(2, uiScale)),
-          child: content,
-        ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        _s(4, uiScale),
-        _s(0, uiScale),
-        _s(4, uiScale),
-        isError ? _s(0, uiScale) : _s(0, uiScale),
-      ),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(_s(6, uiScale)),
-      ),
-      child: content,
     );
   }
 
@@ -397,6 +530,50 @@ class _PronunciationScreenState extends State<PronunciationScreen>
     );
   }
 
+  // ─── Ô hiển thị câu user đã đọc ───
+  Widget _buildRecognizedTextBox(double uiScale) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: _s(16, uiScale),
+        vertical: _s(12, uiScale),
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(_s(12, uiScale)),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'You said:',
+            style: GoogleFonts.lexend(
+              fontSize: _s(11, uiScale),
+              fontWeight: FontWeight.w600,
+              color: AppColors.slate400,
+              letterSpacing: 0.5,
+            ),
+          ),
+          SizedBox(height: _s(4, uiScale)),
+          Text(
+            _recognizedText.isEmpty ? '(không nhận diện được)' : _recognizedText,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.lexend(
+              fontSize: _s(15, uiScale),
+              fontWeight: FontWeight.w600,
+              color: _recognizedText.isEmpty
+                  ? AppColors.slate400
+                  : AppColors.slate700,
+              fontStyle: _recognizedText.isEmpty
+                  ? FontStyle.italic
+                  : FontStyle.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildWaveform(double uiScale) {
     return GestureDetector(
       onTap: _toggleRecording,
@@ -490,7 +667,7 @@ class _PronunciationScreenState extends State<PronunciationScreen>
               SizedBox(width: _s(12, uiScale)),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: _nextExercise,
                   icon: Icon(
                     Icons.arrow_forward_rounded,
                     size: _s(20, uiScale),
@@ -517,6 +694,10 @@ class _PronunciationScreenState extends State<PronunciationScreen>
     );
   }
 }
+
+// ──────────────────────────────────────────────
+// CUSTOM PAINTERS
+// ──────────────────────────────────────────────
 
 class _WaveformPainter extends CustomPainter {
   final double progress;
@@ -548,7 +729,7 @@ class _WaveformPainter extends CustomPainter {
       final isRight = i > (barCount / 2);
       final color = isRight ? const Color(0xFFEF4444) : const Color(0xFF60A5FA);
       final paint = Paint()
-        ..color = color.withOpacity(isRecording ? 0.9 : 0.45);
+        ..color = color.withValues(alpha: isRecording ? 0.9 : 0.45);
 
       final rect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, top, barWidth, barHeight),
