@@ -240,3 +240,149 @@ Một tính năng chỉ được coi là "Đã xong" và cho phép tạo PR khi 
 | **2. Streak Celebration** | `lib/features/social/presentation/widgets/` | `streak_popup.dart` | Mockup 8. Một Custom Dialog hiện lên rực rỡ (màu cam/vàng) chúc mừng người dùng duy trì chuỗi học. |
 | **3. Luyện phát âm** | `lib/features/tools/presentation/screens/` | `pronunciation_screen.dart` | Mockup 7. Giao diện nút thu âm. Cần vẽ UI giả lập sóng âm (`wave_animation`) khi đang thu âm. Hiển thị kết quả text xanh/đỏ. |
 | **4. Camera OCR & Chatbot** | `lib/features/tools/presentation/screens/` | `ocr_scanner_screen.dart`<br>`chatbot_screen.dart` | OCR: Khung ngắm camera giả lập có viền quét góc. <br>Chatbot: Giao diện phòng chat (Tin nhắn user bong bóng xanh bên phải, Bot bong bóng xám bên trái). |
+
+### Hướng dẫn thiết lập Firebase (Chỉ dành cho Android)
+
+#### Bước 1: Dọn dẹp thư mục dư thừa
+Vì nhóm chỉ phát triển trên nền tảng Android, hãy xóa các thư mục sau để tối ưu hóa dung lượng dự án:
+* `ios/`
+* `linux/`
+* `macos/`
+* `windows/`
+* `web/`
+
+#### Bước 2: Tạo dự án trên Firebase Console
+1.  Truy cập [Firebase Console](https://console.firebase.google.com/).
+2.  Nhấn **Add Project**, đặt tên dự án là `VitaminC`.
+3.  Bật **Google Analytics** (khuyên dùng để theo dõi người dùng).
+
+#### Bước 3: Đăng ký ứng dụng Android
+1.  Tại giao diện dự án, chọn biểu tượng **Android**.
+2.  **Android package name:** Mở file `android/app/build.gradle`, tìm dòng `applicationId` (thường là `com.example.vitaminc`). Copy và dán vào Firebase.
+3.  **App nickname:** `VitaminC_Android`.
+4.  **SHA-1 certificate:** Mở Terminal trong thư mục dự án, chạy lệnh:
+    ```bash
+    cd android
+    ./gradlew signingReport
+    ```
+    Copy mã SHA-1 (trong phần `debug`) dán vào Firebase để hỗ trợ Google Sign-In.
+5.  Tải file **`google-services.json`** và chép vào thư mục: `android/app/`.
+
+#### Bước 4: Cấu hình Gradle (Android)
+1.  **File `android/build.gradle` (Project level):**
+    Thêm dòng sau vào khối `dependencies`:
+    ```gradle
+    dependencies {
+        classpath 'com.google.gms:google-services:4.4.0'
+    }
+    ```
+2.  **File `android/app/build.gradle` (App level):**
+    Thêm dòng này vào cuối file:
+    ```gradle
+    apply plugin: 'com.google.gms.google-services'
+    ```
+    Đồng thời, đảm bảo `minSdkVersion` tối thiểu là **21** (hoặc 23 nếu dùng các tính năng AI phức tạp).
+
+#### Bước 5: Cấu hình Flutter & .gitignore
+1.  Thêm thư viện vào `pubspec.yaml`:
+    ```yaml
+    dependencies:
+      firebase_core: ^3.1.0
+      firebase_auth: ^5.1.0
+      cloud_firestore: ^5.0.1
+      firebase_storage: ^12.0.1
+    ```
+2.  **Bảo mật:** Mở file `.gitignore`, thêm dòng sau để không push file cấu hình lên GitHub:
+    ```text
+    android/app/google-services.json
+    ```
+
+---
+
+### Sprint 2: Kết nối Backend & Logic nghiệp vụ (Firebase & SRS)
+
+**Quy tắc chung cho toàn SPRINT 2:**
+* **Dữ liệu:** Chuyển từ `dummy_data.dart` sang `FirebaseFirestore`.
+* **Phân quyền:** Sử dụng trường `role` (admin/user) trong Document người dùng trên Firestore để điều hướng UI và phân quyền API.
+* **Bảo mật:** Thiết lập **Firebase Security Rules** để Admin có quyền ghi mọi nơi, User chỉ có quyền ghi vào data cá nhân.
+
+---
+
+### 👨‍💻 Thành viên 1: Authentication & Role-Based Routing
+
+**Mục tiêu:** Quản lý đăng nhập và điều hướng người dùng dựa trên chức vụ (Role).
+
+| Task (Việc cần làm) | Vị trí file cần viết / tạo | Tên file | Outcome chi tiết |
+| :--- | :--- | :--- | :--- |
+| **1. Auth Repository** | `lib/features/auth/data/` | `auth_repository.dart` | Hàm đăng nhập trả về thông tin User kèm theo `role` từ Firestore. |
+| **2. Auth Provider** | `lib/features/auth/presentation/` | `auth_provider.dart` | Quản lý trạng thái `currentUser` để các màn hình biết đang là Admin hay User. |
+| **3. Role-Based Redirect** | `lib/routing/` | `app_router.dart` | Nếu `role == 'admin'` -> vào màn hình Quản trị. Nếu `role == 'user'` -> vào Dashboard học tập. |
+
+---
+
+#### 👨‍💻 Thành viên 2: User Profile & Dashboard Logic (Dữ liệu cá nhân)
+**Mục tiêu:** Chuyển toàn bộ màn hình Home và Profile từ dữ liệu giả sang dữ liệu thật từ Firestore, đồng thời xây dựng logic tính toán tiến độ học tập (Streak).
+
+| Task (Việc cần làm) | Vị trí file | Outcome chi tiết |
+| :--- | :--- | :--- |
+| **1. User Stats Logic (Thống kê)** | `lib/features/dashboard/data/dashboard_service.dart` | Viết hàm gọi lệnh `count()` trực tiếp trên collection `users/{uid}/vocabs` từ Firestore để đếm tổng số thẻ mà không cần tải toàn bộ dữ liệu về máy. Trả về kết quả để hiển thị "Số từ đã học". |
+| **2. Xây dựng logic tính Streak** | `lib/features/dashboard/data/streak_service.dart` | Tạo hàm `updateStreak()`. Lưu trường `last_study_date` (dạng Timestamp) và `streak_count` (int) trong Document của User. Thuật toán: Lấy ngày hiện tại so sánh với `last_study_date`. Nếu chênh lệch 1 ngày -> `streak_count++`. Nếu > 1 ngày -> `streak_count = 0`. |
+| **3. Cập nhật Profile (Đồng bộ)** | `lib/features/auth/data/user_service.dart` | Viết hàm `updateUserProfile()`. Sử dụng `FirebaseAuth.instance.currentUser?.updateDisplayName()` để đổi tên trên hệ thống Auth, sau đó gọi lệnh `update()` để sửa lại trường `displayName` và `photoUrl` tương ứng trong document của User trên Firestore. |
+| **4. Home Data Binding** | `lib/features/dashboard/presentation/screens/home_screen.dart` | Kết nối giao diện Home với các Service trên thông qua Riverpod (`FutureProvider`). Nếu số lượng thẻ trả về = 0, hiển thị Empty State với nút kêu gọi hành động: "Bắt đầu thêm từ vựng ngay!". |
+
+---
+
+#### 👨‍💻 Thành viên 3: Library & SRS Core (Trái tim của App)
+**Mục tiêu:** Xây dựng hệ thống lưu trữ từ vựng cá nhân, xử lý việc nhập dữ liệu hàng loạt và cài đặt thuật toán lặp ngắt quãng (SM-2).
+
+| Task (Việc cần làm) | Vị trí file | Outcome chi tiết |
+| :--- | :--- | :--- |
+| **1. Nhập từ vựng hàng loạt (Import)** | `lib/features/library/data/import_service.dart` | Tích hợp package `file_picker` (chọn file) và `csv` (đọc file). Viết logic parse từng dòng CSV thành danh sách Object `VocabModel`. Dùng `FirebaseFirestore.instance.batch()` (WriteBatch) để đẩy danh sách này lên collection `users/{uid}/vocabs` nhằm tránh quá tải API. |
+| **2. Cài đặt thuật toán SM-2 (SRS)** | `lib/features/study/data/srs_engine.dart` | Định nghĩa 3 trường cho mỗi thẻ: `easinessFactor` (float, mặc định 2.5), `interval` (int), `repetition` (int). Viết hàm tính toán trả về ngày `nextReview` mới dựa trên điểm số đánh giá của user: 1 (Hard), 2 (Good), 3 (Easy). |
+| **3. Truy vấn danh sách ôn tập** | `lib/features/study/data/study_service.dart` | Viết hàm `getDueCards()`. Sử dụng Firestore Query với điều kiện: `where('nextReview', isLessThanOrEqualTo: Timestamp.now())` để giới hạn chỉ tải về máy các thẻ đã đến hạn cần ôn tập hôm nay. |
+| **4. Quản lý thẻ cá nhân (CRUD)** | `lib/features/library/data/library_service.dart` | Viết các hàm cơ bản để Thêm/Sửa/Xóa từng từ vựng riêng lẻ trong sub-collection `users/{uid}/vocabs`. |
+
+---
+
+#### 👨‍💻 Thành viên 4: AI Assistant, Speech-to-Text & Security (Tính năng đột phá)
+**Mục tiêu:** Tích hợp trí tuệ nhân tạo (Gemini) làm Chatbot giáo viên, chấm điểm phát âm bằng giọng nói và chốt hạ hệ thống bảo mật Database.
+
+| Task (Việc cần làm) | Vị trí file | Outcome chi tiết |
+| :--- | :--- | :--- |
+| **1. Cấu hình AI Gemini** | `lib/features/tools/data/ai_service.dart` | Truy cập Google AI Studio lấy API Key. Cài đặt package `google_generative_ai`. Khởi tạo đối tượng `GenerativeModel` (dùng model `gemini-1.5-flash`). Viết hàm `askTeacher(String prompt)` gửi câu hỏi và đợi trả về text. |
+| **2. Thiết lập Luật cho AI (System Prompt)** | `lib/features/tools/data/ai_service.dart` | Trong phần cấu hình model, thiết lập `systemInstruction`: "Bạn là một giáo viên tiếng Anh nhiệt tình. Chỉ trả lời các câu hỏi liên quan đến tiếng Anh. Bắt buộc phải cung cấp ít nhất 2 câu ví dụ cho mỗi từ vựng. Trả lời ngắn gọn bằng tiếng Việt.". |
+| **3. Kiểm tra phát âm (STT)** | `lib/features/tools/data/speech_service.dart` | Cài đặt package `permission_handler`. Viết hàm xin quyền `RECORD_AUDIO`. Dùng `speech_to_text` bắt giọng nói user chuyển thành String. Viết logic so sánh chuỗi (dùng thuật toán khoảng cách Levenshtein) giữa từ user đọc và từ gốc để tính ra số % chính xác. |
+| **4. Firestore Security Rules** | Trên Firebase Console (`firestore.rules`) | Truy cập tab Rules, thiết lập luật bảo vệ dữ liệu cấp độ User: <br>`match /users/{userId}/vocabs/{document=**} {` <br> `allow read, write: if request.auth != null && request.auth.uid == userId;` <br>`}` (Chặn tuyệt đối User này sửa/xóa từ vựng của User khác). |
+
+---
+### LƯU Ý SPRINT 2. Quy chuẩn giao tiếp với Database (Firestore)
+
+**TUYỆT ĐỐI KHÔNG gõ trực tiếp tên collection vào code.**
+
+Việc gõ chay các chuỗi văn bản như `'users'`, `'vocabs'` rải rác ở nhiều file rất dễ gây ra lỗi sai chính tả (nhầm chữ hoa/chữ thường, thiếu chữ "s"). Điều này sẽ khiến Firestore tạo ra các thư mục rác, gây phân mảnh và làm mất dữ liệu của người dùng.
+
+**Quy tắc bắt buộc:**
+Tất cả các lệnh gọi đến Firestore phải sử dụng các biến static đã được định nghĩa sẵn tại file `lib/core/utils/firestore_collections.dart`.
+
+**❌ Code Sai (Sẽ bị từ chối khi Review PR):**
+```dart
+// Gõ trực tiếp chuỗi 'users' và 'vocabs'
+await _firestore.collection('users').doc(uid).collection('vocabs').get();
+```
+
+**✅ Code Đúng:**
+```dart
+import 'package:vitaminc/core/utils/firestore_collections.dart';
+
+// Gọi thông qua class FirestoreCollections
+await _firestore.collection(FirestoreCollections.users)
+                .doc(uid)
+                .collection(FirestoreCollections.vocabs)
+                .get();
+```
+
+**📌 Quy trình khi cần thêm Collection mới:**
+Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Firebase, bạn phải tuân thủ 2 bước:
+1. Mở file `firestore_collections.dart` và khai báo thêm 1 biến `static const String` mới.
+2. Nhắn tin thông báo vào group chat của nhóm để mọi người cùng cập nhật, sau đó mới được sử dụng biến đó vào code của mình.
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="facebook_app_id">26492102773773296</string>
+    
+    <string name="fb_login_protocol_scheme">fb26492102773773296</string>
+    
+    <string name="facebook_client_token">a0988c3e48e30720809dff593ce8c5b9</string>
+    
+    <string name="app_name">VitaminC</string>
+</resources>

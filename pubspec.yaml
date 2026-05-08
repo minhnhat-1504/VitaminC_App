@@ -30,27 +30,43 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
-  # --- THÊM MỚI CHO GIAI ĐOẠN 1 ---
-
-  # 1. State Management (Quản lý trạng thái)
+  # --- STATE MANAGEMENT ---
   flutter_riverpod: ^2.5.1
 
-  # 2. UI & Design System (Giao diện & Thành phần)
-  google_fonts: ^6.2.1            # Lấy font Lexend từ Google Fonts
-  flutter_svg: ^2.0.10            # Render file SVG sắc nét (rất cần cho các icon tùy chỉnh)
-  cached_network_image: ^3.3.1    # Tải và lưu cache ảnh từ internet mượt mà
-  percent_indicator: ^4.2.3       # Vẽ biểu đồ tròn/ngang cho tiến độ học tập (Streak/Dashboard)
-  
-  # 3. Routing (Quản lý điều hướng)
-  go_router: ^13.2.0              # Giúp chuyển trang, truyền dữ liệu giữa các màn hình chuyên nghiệp hơn
+  # --- UI & DESIGN SYSTEM ---
+  google_fonts: ^6.2.1
+  flutter_svg: ^2.0.10
+  cached_network_image: ^3.3.1
+  percent_indicator: ^4.2.3
+  font_awesome_flutter: ^10.7.0 # Rất cần để vẽ icon Google/Facebook chuẩn
 
-  # 4. Backend Base (Chuẩn bị sẵn cho Giai đoạn 2)
-  firebase_core: ^2.30.0
+  # --- ROUTING ---
+  go_router: ^13.2.0
+
+  # --- FIREBASE CORE ---
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.1.0
+  cloud_firestore: ^5.0.1
+  firebase_storage: ^12.0.1
+
+  # --- SOCIAL AUTH (MỚI BỔ SUNG) ---
+  google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^7.1.1
+
+  # --- AI & TOOLS (CHO TV 4 & TV 3) ---
+  google_generative_ai: ^0.4.5    # API Gemini chính thức từ Google
+  speech_to_text: ^7.3.0         # Nhận diện giọng nói để chấm điểm
+  
+  # --- UTILITIES ---
+  intl: ^0.19.0                  # Xử lý format ngày tháng cho thuật toán SRS
+  permission_handler: ^11.3.1    # Quản lý quyền Micro, Camera, Storage
+  equatable: ^2.0.5              # Giúp so sánh các Model (cần thiết cho Riverpod)
+  flutter_markdown: ^0.7.7+1
+  flutter_dotenv: ^6.0.1
+  file_picker: ^11.0.2
+  excel: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -66,5 +82,6 @@ flutter:
   # Khai báo thư mục chứa tài nguyên nội bộ (Local assets)
   # Nhóm bạn nhớ tạo 2 thư mục này ở ngang hàng với thư mục lib/ nhé
   assets:
-    - assets/images/
+    - .env
+    - assets/images/logo.png
     - assets/icons/
