@@ -32,3 +32,12 @@ final learnedVocabCountProvider = FutureProvider.autoDispose<int>((ref) async {
   final service = ref.watch(dashboardServiceProvider);
   return await service.getLearnedVocabCount(user.uid);
 });
+
+/// FutureProvider lấy [Tổng số thẻ] từ Firestore
+final totalVocabCountProvider = FutureProvider.autoDispose<int>((ref) async {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return 0;
+
+  final service = ref.watch(dashboardServiceProvider);
+  return await service.getTotalVocabCount(user.uid);
+});

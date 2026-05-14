@@ -24,4 +24,18 @@ class DashboardService {
       return 0;
     }
   }
+  /// Lấy tổng số từ vựng người dùng có trong collection vocabs (tất cả các deck)
+  Future<int> getTotalVocabCount(String uid) async {
+    try {
+      final query = _firestore
+          .collection(FirestoreCollections.users)
+          .doc(uid)
+          .collection(FirestoreCollections.vocabs);
+
+      final countQuery = await query.count().get();
+      return countQuery.count ?? 0;
+    } catch (e) {
+      return 0;
+    }
+  }
 }
