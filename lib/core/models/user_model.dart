@@ -4,6 +4,8 @@ class UserModel {
   final String displayName;
   final String photoUrl;
   final String role; // 'admin' hoặc 'user'
+  final int xp;
+  final int rank;
 
   UserModel({
     required this.uid,
@@ -11,6 +13,8 @@ class UserModel {
     required this.displayName,
     required this.photoUrl,
     required this.role,
+    this.xp = 0,
+    this.rank = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +24,8 @@ class UserModel {
       'displayName': displayName,
       'photoUrl': photoUrl,
       'role': role,
+      'xp': xp,
+      'rank': rank,
     };
   }
 
@@ -30,6 +36,8 @@ class UserModel {
       displayName: map['displayName'] ?? '',
       photoUrl: map['photoUrl'] ?? '',
       role: map['role'] ?? 'user',
+      xp: map['xp'] ?? 0,
+      rank: map['rank'] ?? 0,
     );
   }
 }
