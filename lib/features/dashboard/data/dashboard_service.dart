@@ -7,7 +7,7 @@ class DashboardService {
   DashboardService({FirebaseFirestore? firestore})
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  /// Lấy tổng số từ vựng người dùng đã học
+  /// Lấy tổng từ vựng người dùng đã học
   /// Bằng cách đếm các từ có repetition > 0 trong collection vocabs
   Future<int> getLearnedVocabCount(String uid) async {
     try {
