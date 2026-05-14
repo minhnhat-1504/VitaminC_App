@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../data/repositories/auth_repository.dart'; 
+import '../../data/user_service.dart';
 import '../../../../core/models/user_model.dart';
 
 // Provider cung cấp Repository cho toàn bộ app
 final authRepositoryProvider = Provider((ref) => AuthRepository());
+
+final userServiceProvider = Provider((ref) => UserService());
 
 // StreamProvider theo dõi trạng thái đăng nhập (User có null hay không) từ Firebase
 final authStateProvider = StreamProvider<User?>((ref) {

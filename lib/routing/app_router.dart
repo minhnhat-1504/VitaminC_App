@@ -20,40 +20,57 @@ import '../features/tools/presentation/screens/chatbot_screen.dart';
 
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
-// Khai báo GoRouter dưới dạng một Provider để có thể lắng nghe Auth State
+// Notifier để lắng nghe các thay đổi trạng thái và thông báo cho GoRouter
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
+
+  RouterNotifier(this._ref) {
+    // Lắng nghe thay đổi của authStateProvider và currentUserProvider
+    _ref.listen(authStateProvider, (_, __) => notifyListeners());
+    _ref.listen(currentUserProvider, (_, __) => notifyListeners());
+  }
+
+  String? redirect(BuildContext context, GoRouterState state) {
+    final authState = _ref.read(authStateProvider);
+    final userModel = _ref.read(currentUserProvider);
+
+    // Chờ cho đến khi Firebase tải xong dữ liệu khởi tạo (tránh nhảy màn hình quá sớm)
+    if (authState.isLoading || userModel.isLoading) return null;
+
+    final bool loggedIn = authState.value != null;
+    final String location = state.matchedLocation;
+    
+    // Các đường dẫn thuộc nhóm xác thực
+    final bool isAuthPath = location == '/login' || 
+                            location == '/splash' || 
+                            location == '/onboarding';
+
+    // 1. Nếu chưa đăng nhập: Buộc quay về màn Login (trừ khi đang ở Splash/Onboarding)
+    if (!loggedIn) {
+      return isAuthPath ? null : '/login';
+    }
+
+    // 2. Nếu đã đăng nhập thành công:
+    if (isAuthPath) {
+      return '/home';
+    }
+
+    return null;
+  }
+}
+
+final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+  return RouterNotifier(ref);
+});
+
+// Provider cung cấp GoRouter ổn định
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
-  final userModel = ref.watch(currentUserProvider);
+  final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
     initialLocation: '/splash',
-    // Logic điều hướng tự động dựa trên trạng thái đăng nhập
-    redirect: (context, state) {
-      // Chờ cho đến khi Firebase tải xong dữ liệu khởi tạo
-      if (authState.isLoading || userModel.isLoading) return null;
-
-      final bool loggedIn = authState.value != null;
-      final String location = state.matchedLocation;
-      
-      // Các đường dẫn thuộc nhóm xác thực
-      final bool isAuthPath = location == '/login' || 
-                              location == '/splash' || 
-                              location == '/onboarding';
-
-      // 1. Nếu chưa đăng nhập: Buộc quay về màn Login (trừ khi đang ở Splash/Onboarding)
-      if (!loggedIn) {
-        return isAuthPath ? null : '/login';
-      }
-
-      // 2. Nếu đã đăng nhập thành công:
-      if (isAuthPath) {
-        // Có thể thêm kiểm tra Admin ở đây để chuyển vào dashboard riêng
-        // if (userModel.value?.role == 'admin') return '/admin-home';
-        return '/home';
-      }
-
-      return null;
-    },
+    refreshListenable: notifier,
+    redirect: notifier.redirect,
     routes: [
       // Các màn hình độc lập
       GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),

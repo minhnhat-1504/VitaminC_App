@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../providers/dashboard_providers.dart';
+import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
@@ -17,15 +20,15 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(),
+              _buildTopBar(ref),
               const SizedBox(height: 25),
               _buildSearchBar(context),
               const SizedBox(height: 20),
-              _buildStatsCards(),
+              _buildStatsCards(ref),
               const SizedBox(height: 25),
               _buildDailyGoal(),
               const SizedBox(height: 25),
-              _buildContinueLearning(),
+              _buildContinueLearning(context, ref),
               const SizedBox(height: 20),
               _buildCommonPhrases(),
             ],
@@ -35,27 +38,123 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(WidgetRef ref) {
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.value;
+    
+    // Theo dõi streak để hiển thị viền
+    final streakAsync = ref.watch(streakCountProvider);
+    final streak = streakAsync.value ?? 0;
+
+    // Xác định màu viền dựa trên thứ hạng (Rank)
+    Color ringColor = AppColors.slate200; // Mặc định là xám cho các hạng khác
+    final rank = user?.rank ?? 0;
+    
+    if (rank == 1) {
+      ringColor = AppColors.gold;
+    } else if (rank == 2) {
+      ringColor = AppColors.slate300; // Xám bạc
+    } else if (rank == 3) {
+      ringColor = AppColors.secondary; // Hổ phách
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Row(
           children: [
-            const CircleAvatar(
-              radius: 20,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
+            Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(2.5),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: ringColor, width: 3),
+                  ),
+                  child: CircleAvatar(
+                    radius: 22,
+                    backgroundImage: NetworkImage(
+                      user?.photoUrl.isNotEmpty == true 
+                        ? user!.photoUrl 
+                        : 'https://i.pravatar.cc/150?img=11'
+                    ),
+                  ),
+                ),
+                streakAsync.when(
+                  data: (streak) => streak > 0 
+                    ? Positioned(
+                        right: -2,
+                        bottom: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: AppColors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: ringColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  "🔥",
+                                  style: TextStyle(fontSize: 8),
+                                ),
+                                Text(
+                                  "$streak",
+                                  style: const TextStyle(
+                                    color: AppColors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 8,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : const SizedBox.shrink(),
+                  loading: () => const SizedBox.shrink(),
+                  error: (_, __) => const SizedBox.shrink(),
+                ),
+              ],
             ),
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  "Chào mừng trở lại,",
-                  style: TextStyle(color: AppColors.slate500, fontSize: 13),
+              children: [
+                const Text(
+                  "Chào mừng trở lại",
+                  style: TextStyle(color: AppColors.slate500, fontSize: 12),
                 ),
-                Text(
-                  "Alex 👋",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                Row(
+                  children: [
+                    Text(
+                      "${user?.displayName ?? 'Người dùng'}",
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        "${user?.xp ?? 0} XP",
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -126,62 +225,93 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsCards() {
+  Widget _buildStatsCards(WidgetRef ref) {
+    // Theo dõi giá trị số từ vựng đã học và Streak
+    final vocabCountAsync = ref.watch(learnedVocabCountProvider);
+    final streakCountAsync = ref.watch(streakCountProvider);
+
     return Row(
       children: [
         Expanded(
           child: _cardWrapper(
-            child: Column(
-              children: [
-                const Icon(
-                  Icons.local_fire_department_rounded,
-                  color: AppColors.warning,
-                  size: 30,
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "12",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const Text(
-                  "Chuỗi ngày",
-                  style: TextStyle(fontSize: 14, color: AppColors.slate500),
-                ),
-              ],
+            child: streakCountAsync.when(
+              data: (streakCount) => Column(
+                children: [
+                  CircularPercentIndicator(
+                    radius: 30.0,
+                    lineWidth: 6.0,
+                    percent: streakCount > 0 ? 1.0 : 0.0,
+                    center: const Icon(
+                      Icons.local_fire_department_rounded,
+                      color: AppColors.warning,
+                      size: 26,
+                    ),
+                    progressColor: AppColors.warning,
+                    backgroundColor: AppColors.warning.withOpacity(0.1),
+                    circularStrokeCap: CircularStrokeCap.round,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "$streakCount",
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const Text(
+                    "CHUỖI NGÀY",
+                    style: TextStyle(
+                      fontSize: 12, 
+                      color: AppColors.slate500,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              loading: () => const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => Center(child: Text("Lỗi: $err", style: const TextStyle(fontSize: 10))),
             ),
           ),
         ),
         const SizedBox(width: 15),
         Expanded(
           child: _cardWrapper(
-            child: Column(
-              children: [
-                CircularPercentIndicator(
-                  radius: 30.0,
-                  lineWidth: 6.0,
-                  percent: 0.95,
-                  center: const Text(
-                    "95%",
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+            child: vocabCountAsync.when(
+              data: (vocabCount) => Column(
+                children: [
+                  CircularPercentIndicator(
+                    radius: 30.0,
+                    lineWidth: 6.0,
+                    percent: vocabCount > 0 ? 1.0 : 0.0,
+                    center: const Icon(
+                      Icons.school_rounded,
+                      color: AppColors.primary,
+                      size: 26,
+                    ),
+                    progressColor: AppColors.primary,
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    circularStrokeCap: CircularStrokeCap.round,
                   ),
-                  progressColor: AppColors.primary,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
-                  circularStrokeCap: CircularStrokeCap.round,
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  "850",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const Text(
-                  "TỪ VỰNG",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.slate500,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(height: 8),
+                  Text(
+                    "$vocabCount",
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
+                  const Text(
+                    "TỪ ĐÃ HỌC",
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.slate500,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              loading: () => const SizedBox(
+                height: 100,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (err, _) => Center(child: Text("Lỗi: $err", style: const TextStyle(fontSize: 10))),
             ),
           ),
         ),
@@ -257,8 +387,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildContinueLearning() {
+  Widget _buildContinueLearning(BuildContext context, WidgetRef ref) {
+    final totalVocabAsync = ref.watch(totalVocabCountProvider);
+    final totalVocab = totalVocabAsync.value ?? 0;
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -277,64 +411,151 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 15),
-        _cardWrapper(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(20),
-                ),
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500',
-                  height: 140,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15),
-                child: Row(
+        totalVocabAsync.when(
+          data: (totalVocab) {
+            if (totalVocab == 0) {
+              return _cardWrapper(
+                padding: const EdgeInsets.all(8),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "3000 từ vựng Oxford",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000&auto=format&fit=crop', // Một lựa chọn ảnh bàn học trắng đen khác
+                        height: 160,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "Bạn chưa có từ vựng nào",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textLight,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      "Hãy thêm từ vựng mới để bắt đầu hành trình chinh phục tiếng Anh của bạn!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.slate500, fontSize: 13),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => context.push('/library'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text(
+                          "Bắt đầu thêm từ vựng ngay!",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else {
+              return _cardWrapper(
+                padding: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(20),
+                      ),
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500',
+                        height: 140,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  "3000 từ vựng Oxford",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                Text(
+                                  "🎴 Còn 25 thẻ",
+                                  style: TextStyle(
+                                    color: AppColors.slate500,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                            "🎴 Còn 25 thẻ",
-                            style: TextStyle(
-                              color: AppColors.slate500,
-                              fontSize: 12,
+                          ElevatedButton(
+                            onPressed: () async {
+                              final user = ref.read(authStateProvider).value;
+                              if (user != null) {
+                                await ref.read(streakServiceProvider).updateStreak(user.uid);
+                                // Refresh lại streak count sau khi học
+                                ref.invalidate(streakCountProvider);
+                                
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Tuyệt vời! Streak của bạn đã được cập nhật."),
+                                      backgroundColor: AppColors.success,
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text(
+                              "Học ▶",
+                              style: TextStyle(color: AppColors.white),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: const Text(
-                        "Học ▶",
-                        style: TextStyle(color: AppColors.white),
-                      ),
-                    ),
                   ],
                 ),
+              );
+            }
+          },
+          loading: () => _cardWrapper(
+            child: const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
               ),
-            ],
+            ),
+          ),
+          error: (err, _) => _cardWrapper(
+            child: Center(child: Text("Lỗi tải dữ liệu: $err")),
           ),
         ),
       ],
