@@ -150,6 +150,7 @@ class SettingsScreen extends ConsumerWidget {
                   // Xóa cache (trạng thái) của các màn hình/tính năng
                   ref.invalidate(libraryControllerProvider);
                   ref.invalidate(studyControllerProvider);
+                  ref.invalidate(currentUserProvider);
                   // TODO: ref.invalidate(localDbProvider); khi Member 3 tạo xong Local DB
 
                   // Thực hiện đăng xuất
