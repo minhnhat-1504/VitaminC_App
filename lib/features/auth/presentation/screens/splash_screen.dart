@@ -20,6 +20,10 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) setState(() => _opacity = 1.0);
     });
+
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (mounted) context.go('/onboarding');
+    });
   }
 
   @override
