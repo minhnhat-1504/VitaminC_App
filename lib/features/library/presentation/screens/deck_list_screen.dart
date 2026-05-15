@@ -383,23 +383,33 @@ class DeckListScreen extends ConsumerWidget {
                     icon: const Icon(Icons.download, color: AppColors.primary),
                     tooltip: 'Tải về máy',
                     onPressed: () async {
+                      // Hiển thị loading dialog có nền trắng rõ ràng
                       showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+                        builder: (ctx) => const AlertDialog(
+                          content: Row(
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(width: 20),
+                              Text('Đang tải bộ thẻ...'),
+                            ],
+                          ),
+                        ),
                       );
                       try {
                         await ref.read(globalDeckServiceProvider).cloneToPersonal(deck);
                         ref.invalidate(libraryControllerProvider);
                         if (context.mounted) {
-                          Navigator.pop(context); // Đóng loading
+                          // Dùng rootNavigator để chắc chắn chỉ pop dialog, không pop màn hình
+                          Navigator.of(context, rootNavigator: true).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Đã tải bộ thẻ về Thư viện cá nhân!')),
                           );
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          Navigator.pop(context);
+                          Navigator.of(context, rootNavigator: true).pop();
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Lỗi: $e')),
                           );
