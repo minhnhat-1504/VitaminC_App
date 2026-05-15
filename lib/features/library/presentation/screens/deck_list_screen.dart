@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/shared_widgets/custom_app_bar.dart';
 import '../controllers/library_controller.dart';
+import '../library_providers.dart';
 import '../../data/models/deck_model.dart';
-import 'package:vitaminc/features/library/presentation/screens/add_vocab_screen.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
 class DeckListScreen extends ConsumerWidget {
   const DeckListScreen({super.key});
@@ -100,8 +100,7 @@ class DeckListScreen extends ConsumerWidget {
                 if (error != null) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
                 } else if (newDeck != null) {
-                  Navigator.pop(ctx); // Đóng Dialog
-                  // Chuyển luôn sang trang chi tiết để thêm từ
+                  Navigator.pop(ctx);
                   context.push('/deck-detail', extra: newDeck.id);
                 }
               }
@@ -117,42 +116,75 @@ class DeckListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(libraryControllerProvider);
     final controller = ref.read(libraryControllerProvider.notifier);
+    final userAsync = ref.watch(currentUserProvider);
+    final isAdmin = userAsync.value?.role == 'admin';
 
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: 'My Library',
-        showBackButton: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.file_upload, color: AppColors.primary),
-            tooltip: 'Import Excel',
-            onPressed: () async {
-              final newDeck = await controller.importExcel();
-              if (context.mounted) {
-                final currentState = ref.read(libraryControllerProvider);
-                if (currentState.errorMessage == null && newDeck != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Import dữ liệu thành công!')),
-                  );
-                  // Hiện form cho người dùng sửa tên bộ thẻ vừa import
-                  _showEditDeckDialog(context, ref, newDeck, isNew: true);
-                } else if (currentState.errorMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Lỗi: ${currentState.errorMessage}')),
-                  );
-                }
-              }
-            },
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.backgroundLight,
+          elevation: 0,
+          title: const Text(
+            'Thư viện',
+            style: TextStyle(color: AppColors.textLight, fontWeight: FontWeight.bold),
           ),
-        ],
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.file_upload, color: AppColors.primary),
+              tooltip: 'Import Excel',
+              onPressed: () async {
+                final newDeck = await controller.importExcel();
+                if (context.mounted) {
+                  final currentState = ref.read(libraryControllerProvider);
+                  if (currentState.errorMessage == null && newDeck != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Import dữ liệu thành công!')),
+                    );
+                    _showEditDeckDialog(context, ref, newDeck, isNew: true);
+                  } else if (currentState.errorMessage != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Lỗi: ${currentState.errorMessage}')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+          bottom: const TabBar(
+            labelColor: AppColors.primary,
+            unselectedLabelColor: AppColors.slate500,
+            indicatorColor: AppColors.primary,
+            tabs: [
+              Tab(text: 'Cá nhân'),
+              Tab(text: 'Mẫu (Cộng đồng)'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildPersonalDecks(context, ref, state, controller, isAdmin),
+            _buildGlobalDecks(context, ref),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: AppColors.primary,
+          onPressed: () => _showAddDeckDialog(context, ref),
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(libraryControllerProvider.notifier).loadDecks(),
-        child: state.isLoading && state.decks.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : state.decks.isEmpty
-                ? const Center(child: Text('Bạn chưa có Bộ thẻ nào. Bấm dấu + hoặc Import Excel nhé!'))
-                : Padding(
+    );
+  }
+
+  Widget _buildPersonalDecks(BuildContext context, WidgetRef ref, LibraryState state, LibraryController controller, bool isAdmin) {
+    return RefreshIndicator(
+      onRefresh: () => controller.loadDecks(),
+      child: state.isLoading && state.decks.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : state.decks.isEmpty
+              ? const Center(child: Text('Bạn chưa có Bộ thẻ nào. Bấm dấu + hoặc Import Excel nhé!'))
+              : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: GridView.builder(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -172,12 +204,8 @@ class DeckListScreen extends ConsumerWidget {
                       final isFinished = dueCount == 0 && !isEmpty;
 
                       return GestureDetector(
-                        onTap: () {
-                          context.push('/deck-detail', extra: deck.id);
-                        },
-                        onLongPress: () {
-                          _showEditDeckDialog(context, ref, deck);
-                        },
+                        onTap: () => context.push('/deck-detail', extra: deck.id),
+                        onLongPress: () => _showEditDeckDialog(context, ref, deck),
                         child: Container(
                           decoration: BoxDecoration(
                             color: isFinished ? Colors.white : AppColors.primary.withOpacity(0.05),
@@ -212,8 +240,8 @@ class DeckListScreen extends ConsumerWidget {
                                       child: Text(
                                         deck.title,
                                         style: TextStyle(
-                                          fontSize: 20, // To rõ và dễ nhìn hơn
-                                          fontWeight: FontWeight.w800, // Đậm nét hơn
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w800,
                                           color: isEmpty ? Colors.grey.shade700 : AppColors.slate900,
                                           letterSpacing: 0.5,
                                         ),
@@ -247,17 +275,13 @@ class DeckListScreen extends ConsumerWidget {
                                 child: IconButton(
                                   icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
                                   onPressed: () {
-                                    // Xác nhận xóa
                                     showDialog(
                                       context: context,
                                       builder: (ctx) => AlertDialog(
                                         title: const Text('Xóa bộ thẻ?'),
                                         content: const Text('Tất cả từ vựng trong bộ này cũng sẽ bị xóa.'),
                                         actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(ctx),
-                                            child: const Text('Hủy'),
-                                          ),
+                                          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
                                           ElevatedButton(
                                             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                                             onPressed: () {
@@ -272,6 +296,51 @@ class DeckListScreen extends ConsumerWidget {
                                   },
                                 ),
                               ),
+                              if (isAdmin && !isEmpty)
+                                Positioned(
+                                  top: 0,
+                                  left: 0,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.public, color: AppColors.primary, size: 20),
+                                    tooltip: 'Xuất bản thành Bộ thẻ Mẫu',
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('Xuất bản bộ thẻ?'),
+                                          content: const Text('Đưa bộ thẻ này lên kho mẫu chung cho tất cả người dùng?'),
+                                          actions: [
+                                            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
+                                            ElevatedButton(
+                                              onPressed: () async {
+                                                Navigator.pop(ctx);
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Đang xuất bản...')),
+                                                );
+                                                try {
+                                                  await ref.read(globalDeckServiceProvider).publishToGlobal(deck);
+                                                  ref.invalidate(globalDecksProvider);
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      const SnackBar(content: Text('Xuất bản thành công!')),
+                                                    );
+                                                  }
+                                                } catch (e) {
+                                                  if (context.mounted) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(
+                                                      SnackBar(content: Text('Lỗi: $e')),
+                                                    );
+                                                  }
+                                                }
+                                              },
+                                              child: const Text('Xuất bản'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
                             ],
                           ),
                         ),
@@ -279,12 +348,71 @@ class DeckListScreen extends ConsumerWidget {
                     },
                   ),
                 ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        onPressed: () => _showAddDeckDialog(context, ref),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+    );
+  }
+
+  Widget _buildGlobalDecks(BuildContext context, WidgetRef ref) {
+    final globalDecksAsync = ref.watch(globalDecksProvider);
+
+    return globalDecksAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, st) => Center(child: Text('Lỗi tải bộ thẻ mẫu: $e')),
+      data: (decks) {
+        if (decks.isEmpty) {
+          return const Center(child: Text('Chưa có bộ thẻ mẫu nào từ Admin.'));
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(globalDecksProvider),
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: decks.length,
+            itemBuilder: (context, index) {
+              final deck = decks[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  leading: const CircleAvatar(
+                    backgroundColor: AppColors.backgroundLight,
+                    child: Icon(Icons.public, color: AppColors.primary),
+                  ),
+                  title: Text(deck.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  subtitle: deck.description.isNotEmpty ? Text(deck.description) : null,
+                  trailing: IconButton(
+                    icon: const Icon(Icons.download, color: AppColors.primary),
+                    tooltip: 'Tải về máy',
+                    onPressed: () async {
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+                      );
+                      try {
+                        await ref.read(globalDeckServiceProvider).cloneToPersonal(deck);
+                        ref.invalidate(libraryControllerProvider);
+                        if (context.mounted) {
+                          Navigator.pop(context); // Đóng loading
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Đã tải bộ thẻ về Thư viện cá nhân!')),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Lỗi: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
