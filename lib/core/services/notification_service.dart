@@ -48,8 +48,9 @@ class NotificationService {
       iOS: initializationSettingsDarwin,
     );
 
+    // v21.0.0: all parameters are now named
     await _localNotifications.initialize(
-      initializationSettings,
+      settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         debugPrint('Notification clicked with payload: ${response.payload}');
       },
@@ -87,11 +88,12 @@ class NotificationService {
     final android = message.notification?.android;
 
     if (notification != null && android != null) {
+      // v21.0.0: all parameters are now named
       await _localNotifications.show(
-        notification.hashCode,
-        notification.title,
-        notification.body,
-        const NotificationDetails(
+        id: notification.hashCode,
+        title: notification.title,
+        body: notification.body,
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'streak_reminders',
             'Streak Reminders',
@@ -118,12 +120,13 @@ class NotificationService {
       }
     }
 
+    // v21.0.0: all parameters are now named; UILocalNotificationDateInterpretation removed
     await _localNotifications.zonedSchedule(
-      0, 
-      'VitaminC - Đừng bỏ lỡ mục tiêu!',
-      'Streak của bạn đang gặp nguy hiểm! Học ngay 5 thẻ nhé!',
-      scheduledDate,
-      const NotificationDetails(
+      id: 0, 
+      title: 'VitaminC - Đừng bỏ lỡ mục tiêu!',
+      body: 'Streak của bạn đang gặp nguy hiểm! Học ngay 5 thẻ nhé!',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
           'streak_reminders',
           'Streak Reminders',
@@ -133,8 +136,6 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time, 
     );
     debugPrint('Đã lên lịch nhắc nhở Streak vào 20:00 hàng ngày (bắt đầu: $scheduledDate)');
@@ -142,7 +143,8 @@ class NotificationService {
 
   /// Hủy thông báo
   Future<void> cancelStreakReminder() async {
-    await _localNotifications.cancel(0);
+    // v21.0.0: cancel() now uses named parameter
+    await _localNotifications.cancel(id: 0);
     debugPrint('Đã hủy nhắc nhở Streak');
   }
 
