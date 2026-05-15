@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AppException implements Exception {
   final String message;
@@ -35,9 +36,13 @@ class AppExceptionHandler {
 
   /// Chuẩn hóa tất cả các Exception (Firebase, Mạng, Ứng dụng) thành một câu thông báo thân thiện
   static AppException handleException(dynamic error, [String defaultMessage = 'Đã xảy ra lỗi']) {
-    // 1. Lỗi mạng (SocketException)
-    if (error is SocketException || error.toString().contains('SocketException') || error.toString().contains('Failed host lookup')) {
-      return AppException('Không có kết nối mạng. Vui lòng kiểm tra lại Wifi/3G.');
+    // 1. Lỗi mạng (SocketException hoặc Google Sign In network_error)
+    if (error is SocketException || 
+        error.toString().contains('SocketException') || 
+        error.toString().contains('Failed host lookup') ||
+        error.toString().contains('network_error') ||
+        (error is PlatformException && error.code == 'network_error')) {
+      return AppException('Không có kết nối mạng. Vui lòng kiểm tra lại Wifi/4-5G');
     }
 
     // 2. Lỗi Firestore
