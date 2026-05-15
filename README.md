@@ -449,8 +449,13 @@ Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Fire
 **4. Quản trị Quyền truy cập (Permissions)**
 
 * Ứng dụng hiện tại đụng chạm đến quyền riêng tư sâu: Camera (quét chữ), Micro (phát âm) và Push Notification.
-* Sẽ bị crash trên Android đời mới nếu gọi Camera/Micro mà chưa xin quyền.
 * Bắt buộc phải dùng package `permission_handler`. Nên có một popup giải thích (*"VitaminC cần quyền truy cập Camera để quét từ vựng trên giấy..."*) trước khi hiện bảng xin quyền mặc định của máy.
+
+**5. Trách nhiệm Clear Cache khi Đăng xuất (Đặc biệt cho Thành viên 3)**
+
+* Tại nút Đăng xuất (`settings_screen.dart`), Thành viên 1 đã thiết lập sẵn bộ khung clear cache an toàn.
+* Đối với các Provider được làm sau (Ví dụ: `localDbProvider` của Thành viên 3), Thành viên 1 đã đặt sẵn `// TODO`.
+* **YÊU CẦU:** Khi Thành viên 3 (hoặc bất kỳ ai tạo thêm Provider lưu trữ trạng thái) hoàn thành code của mình, **phải TỰ CHỦ ĐỘNG** vào `settings_screen.dart` mở comment và gắn `ref.invalidate(...)` tương ứng. Không được quên và không cần đợi Thành viên 1 làm hộ.
 
 ---
 
