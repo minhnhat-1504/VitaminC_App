@@ -386,3 +386,73 @@ Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Fire
 1. Mở file `firestore_collections.dart` và khai báo thêm 1 biến `static const String` mới.
 2. Nhắn tin thông báo vào group chat của nhóm để mọi người cùng cập nhật, sau đó mới được sử dụng biến đó vào code của mình.
 
+---
+
+### Sprint 3: Tính năng nâng cao, Chế độ Offline & Giữ chân người dùng (Retention)
+
+**Mục tiêu cốt lõi:** Đưa ứng dụng từ "bản nháp trực tuyến" thành sản phẩm thực tế, có thể sử dụng mượt mà ngay cả khi không có mạng và bổ sung các tính năng đột phá (AI, TTS, OCR) để giữ chân người dùng.
+
+#### ⚠️ LƯU Ý QUAN TRỌNG CHO SPRINT 3 (TẤT CẢ THÀNH VIÊN CẦN ĐỌC KỸ)
+
+**1. Chiến lược "Offline-First" (Đồng bộ dữ liệu)**
+* Bắt đầu từ Sprint này, giao diện học tập (`flashcard_screen.dart`) **chỉ đọc và ghi dữ liệu từ Local DB** (Isar/Hive).
+* Firestore lúc này lùi về sau làm "Máy chủ sao lưu" (Backup Server).
+* Nguyên tắc đồng bộ: Khi người dùng lật thẻ, cập nhật Local DB ngay lập tức (UI phản hồi 0.1s) -> Đưa thẻ đó vào hàng đợi (Queue) -> Chạy tiến trình ngầm đẩy lên Firestore. Không có mạng thì giữ trong máy, có mạng đẩy bù.
+
+**2. Cấu hình Native & Cơn ác mộng Multidex**
+* Nhóm sẽ cài thêm rất nhiều thư viện nặng (FCM, ML Kit, TTS), chắc chắn sẽ làm ứng dụng vượt giới hạn 64K phương thức của Android.
+* **Bắt buộc:** Mở file `android/app/build.gradle` và thêm `multiDexEnabled true` vào khối `defaultConfig`.
+* Việc khai báo thêm Service trong `AndroidManifest.xml` cực kỳ nhạy cảm. Cần test kỹ, sai một dòng là ứng dụng crash ngay lúc khởi động.
+
+**3. Tối ưu "Hóa đơn" Firebase (Giới hạn Read/Write)**
+* Tính năng Leaderboard Real-time rất dễ ngốn sạch hạn mức miễn phí (Spark Tier) của Firebase.
+* Tuyệt đối không dùng `StreamProvider` lắng nghe toàn bộ Collection. **Bắt buộc** phải gắn thêm `.limit(50)` hoặc `.limit(100)` vào cuối các lệnh Query hiển thị danh sách.
+
+**4. Quản trị Quyền truy cập (Permissions)**
+* Ứng dụng hiện tại đụng chạm đến quyền riêng tư sâu: Camera (quét chữ), Micro (phát âm) và Push Notification.
+* Sẽ bị crash trên Android đời mới nếu gọi Camera/Micro mà chưa xin quyền.
+* Bắt buộc phải dùng package `permission_handler`. Nên có một popup giải thích (*"VitaminC cần quyền truy cập Camera để quét từ vựng trên giấy..."*) trước khi hiện bảng xin quyền mặc định của máy.
+
+---
+
+#### 👨‍💻 Phân công nhiệm vụ chi tiết
+
+**Thành viên 1 (Lead): Hoàn thiện luồng User, Thông báo & Phân quyền**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. Nối luồng Đăng xuất & Clear Cache** | `features/settings/presentation/screens/settings_screen.dart` | Gắn sự kiện `onTap` cho menu Đăng xuất. Gọi hàm `signOut()`. **Quan trọng:** Gọi thêm `ref.invalidate()` toàn bộ các Provider giữ trạng thái (đặc biệt là Local DB) để bảo mật dữ liệu giữa các User trên cùng 1 máy. |
+| **2. Tích hợp Thông báo (FCM)** | `core/services/notification_service.dart` | Cài đặt `firebase_messaging` và `flutter_local_notifications`. Đặt lịch cố định 20:00 mỗi ngày kiểm tra biến `last_study_date`. Nếu hôm nay chưa học -> Bắn thông báo: *"Streak của bạn đang gặp nguy hiểm! Học ngay 5 thẻ nhé!"*. |
+| **3. Mở khóa Admin Mode** | `features/library/data/global_deck_service.dart` | Nếu `currentUser.role == 'admin'`, cho phép hiện nút "Tạo bộ thẻ mẫu" (ghi vào collection `global_decks`). User thường chỉ thấy nút "Tải về" để nhân bản bộ thẻ này vào collection cá nhân. |
+| **4. Xử lý Exception toàn hệ thống** | Toàn bộ dự án | Bọc `try-catch` cho tất cả call API/Firestore. Bắt các lỗi rớt mạng, từ chối quyền, API lỗi để hiển thị `SnackBar` hoặc Dialog thân thiện. |
+
+<br>
+
+**Thành viên 2: Social Thực tế & Dữ liệu Tổng kết**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. Leaderboard Real-time** | `features/social/presentation/screens/leaderboard_screen.dart` | Xóa `dummy_data.dart`. Dùng `StreamProvider` lắng nghe collection `users` với Query: `orderBy('xp', descending: true).limit(50)`. Map dữ liệu vào 3 vị trí Podium và danh sách. |
+| **2. Xử lý Badges (Huy hiệu)** | `features/social/presentation/screens/badges_screen.dart` | Thêm mảng `earnedBadges: ['first_blood', 'streak_7']` vào `UserModel`. Viết logic: Khi `streak == 7`, thêm ID huy hiệu vào mảng. Giao diện Badges tự động đổi trạng thái từ Locked (mờ) sang Earned (sáng). |
+| **3. Tổng kết buổi học (Summary)** | `features/study/presentation/screens/study_summary_screen.dart` | Xóa dữ liệu tĩnh (20 words, +50 XP). Nhận tham số từ `StudyController` hiển thị đúng số thẻ User vừa học, sau đó tự động gọi API cộng `xp` vào Firestore. |
+
+<br>
+
+**Thành viên 3: Chế độ Offline & Tối ưu luồng thẻ (SRS)**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. Cấu hình Local DB** | `core/services/local_db_service.dart` | Cài đặt `isar`. Viết hàm `syncVocabsToLocal()`: Khi mở app có mạng, tải (hoặc đối chiếu) toàn bộ sub-collection `vocabs` của User về máy để khởi tạo database cục bộ. |
+| **2. Logic Flashcard Offline** | `features/study/data/study_service.dart` | Sửa `loadDueCards()`: Query trực tiếp trên Local DB (không gọi Firebase) để UX lật thẻ siêu tốc. Khi đánh giá (Hard/Good/Easy), update Local DB ngay, sau đó lưu ID thẻ vào Queue để tiến trình ngầm (Background Task) đồng bộ lên Firestore. |
+| **3. Bẫy lỗi CRUD Library** | `features/library/` | Hiển thị `SnackBar` báo lỗi "Không có kết nối mạng" nếu User đang cố tạo/sửa bộ thẻ hoặc Import file Excel (hàm `importExcel()`) trong lúc mất mạng. |
+
+<br>
+
+**Thành viên 4: Tính năng Thông minh (OCR, TTS & Memory AI)**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| :--- | :--- | :--- |
+| **1. Phát âm (Text-to-Speech)** | `features/tools/data/tts_service.dart` | Cài đặt `flutter_tts`. Khởi tạo config: ngôn ngữ (en-US), tốc độ đọc (0.5). Gắn hàm `speak(word)` vào icon loa trên `flashcard_screen.dart` và `pronunciation_screen.dart`. |
+| **2. Quét chữ từ Ảnh (OCR)** | `features/tools/presentation/screens/ocr_scanner_screen.dart` | Cài đặt `google_mlkit_text_recognition` và `image_picker`. Cho phép chụp ảnh tài liệu, ML Kit trả về Text Block. Viết logic: User chạm vào từ nào trong Text Block đó, tự động chuyển sang form `add_vocab_screen.dart` và điền sẵn từ vựng. |
+| **3. Trí nhớ cho Chatbot** | `features/tools/data/ai_service.dart` | Lưu lịch sử mảng tin nhắn (History) của lớp `ChatSession` xuống Local DB. Khi user mở lại `chatbot_screen.dart`, nạp History này vào để Gemini AI vẫn nhớ bối cảnh cuộc trò chuyện trước đó. |
+| **4. Trigger Animation Thực tế** | `features/social/presentation/widgets/streak_popup.dart` | Kết nối Popup với Riverpod. Viết logic chặn: Popup ăn mừng Streak CHỈ được hiển thị 1 lần duy nhất trong ngày, đúng vào khoảnh khắc User hoàn thành thẻ học khiến biến `streak_count` nhảy số. |

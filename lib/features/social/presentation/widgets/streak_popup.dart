@@ -196,62 +196,68 @@ class _StreakPopupState extends State<StreakPopup>
                     ],
                   ),
                 ),
-                ShaderMask(
-                  blendMode: BlendMode.srcIn,
-                  shaderCallback: (rect) {
-                    return LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.streakOrange.withOpacity(0.7),
-                        AppColors.streakOrange,
-                      ],
-                    ).createShader(rect);
-                  },
-                  child: Transform.scale(
-                    scale: 1.12,
-                    child: Icon(
-                      Icons.local_fire_department_rounded,
-                      size: _heroSize,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${DummyData.currentUserStreak}',
-                      style: GoogleFonts.lexend(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'DAYS / NGÀY',
-                      style: GoogleFonts.lexend(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white.withOpacity(0.9),
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                  ],
-                ),
+                if (child != null) child,
               ],
             ),
           ),
         );
       },
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          ShaderMask(
+            blendMode: BlendMode.srcIn,
+            shaderCallback: (rect) {
+              return LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.streakOrange.withOpacity(0.7),
+                  AppColors.streakOrange,
+                ],
+              ).createShader(rect);
+            },
+            child: Transform.scale(
+              scale: 1.12,
+              child: const Icon(
+                Icons.local_fire_department_rounded,
+                size: _heroSize,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${DummyData.currentUserStreak}',
+                style: GoogleFonts.lexend(
+                  fontSize: 60,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'DAYS / NGÀY',
+                style: GoogleFonts.lexend(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withOpacity(0.9),
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

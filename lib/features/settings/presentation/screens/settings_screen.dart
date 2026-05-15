@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../library/presentation/controllers/library_controller.dart';
+import '../../study/presentation/controllers/study_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -145,6 +147,12 @@ class SettingsScreen extends ConsumerWidget {
                 leading: const Icon(Icons.logout, color: Colors.red),
                 title: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
                 onTap: () async {
+                  // Xóa cache (trạng thái) của các màn hình/tính năng
+                  ref.invalidate(libraryControllerProvider);
+                  ref.invalidate(studyControllerProvider);
+                  // TODO: ref.invalidate(localDbProvider); khi Member 3 tạo xong Local DB
+
+                  // Thực hiện đăng xuất
                   await ref.read(authRepositoryProvider).signOut();
                 },
               ),
