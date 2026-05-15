@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vitaminc/core/utils/firestore_collections.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:vitaminc/features/library/data/models/vocab_model.dart';
+import 'package:vitaminc/core/utils/app_exception_handler.dart';
 
 class LibraryService {
   final FirebaseFirestore _firestore;
@@ -17,7 +18,7 @@ class LibraryService {
   String get _uid {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
-      throw Exception('Yêu cầu đăng nhập để thực hiện chức năng này!');
+      throw AppException('Yêu cầu đăng nhập để thực hiện chức năng này!');
     }
     return uid;
   }
@@ -46,7 +47,7 @@ class LibraryService {
       await docRef.set(newDeck.toMap());
       return newDeck;
     } catch (e) {
-      throw Exception('Lỗi khi tạo bộ thẻ: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi tạo bộ thẻ');
     }
   }
 
@@ -64,7 +65,7 @@ class LibraryService {
           .map((doc) => DeckModel.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      throw Exception('Lỗi khi tải danh sách bộ thẻ: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi tải danh sách bộ thẻ');
     }
   }
 
@@ -118,7 +119,7 @@ class LibraryService {
           .doc(deck.id)
           .update(updatedDeck.toMap());
     } catch (e) {
-      throw Exception('Lỗi khi cập nhật bộ thẻ: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi cập nhật bộ thẻ');
     }
   }
 
@@ -148,7 +149,7 @@ class LibraryService {
 
       await batch.commit();
     } catch (e) {
-      throw Exception('Lỗi khi xóa bộ thẻ: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi xóa bộ thẻ');
     }
   }
 
@@ -173,7 +174,7 @@ class LibraryService {
 
       await docRef.set(newVocab.toMap());
     } catch (e) {
-      throw Exception('Lỗi khi thêm từ vựng: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi thêm từ vựng');
     }
   }
 
@@ -191,7 +192,7 @@ class LibraryService {
           .doc(vocab.id)
           .update(updatedVocab.toMap());
     } catch (e) {
-      throw Exception('Lỗi khi cập nhật từ vựng: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi cập nhật từ vựng');
     }
   }
 
@@ -205,7 +206,7 @@ class LibraryService {
           .doc(vocabId)
           .delete();
     } catch (e) {
-      throw Exception('Lỗi khi xóa từ vựng: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi xóa từ vựng');
     }
   }
 
@@ -227,7 +228,7 @@ class LibraryService {
       vocabs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return vocabs;
     } catch (e) {
-      throw Exception('Lỗi khi tải danh sách từ vựng: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi tải danh sách từ vựng');
     }
   }
 

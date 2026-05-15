@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:vitaminc/features/library/presentation/library_providers.dart';
+import 'package:vitaminc/core/utils/app_exception_handler.dart';
 
 class LibraryState {
   final bool isLoading;
@@ -68,7 +69,7 @@ class LibraryController extends StateNotifier<LibraryState> {
       // Kiểm tra trùng tên (Case-insensitive)
       final isDuplicate = state.decks.any((d) => d.title.toLowerCase().trim() == title.toLowerCase().trim());
       if (isDuplicate) {
-        throw Exception('Tên bộ thẻ "$title" đã tồn tại!');
+        throw AppException('Tên bộ thẻ "$title" đã tồn tại!');
       }
 
       final newDeck = await libraryService.addDeck(title, description: desc);
@@ -103,7 +104,7 @@ class LibraryController extends StateNotifier<LibraryState> {
           d.title.toLowerCase().trim() == deck.title.toLowerCase().trim()
       );
       if (isDuplicate) {
-        throw Exception('Tên bộ thẻ "${deck.title}" đã tồn tại!');
+        throw AppException('Tên bộ thẻ "${deck.title}" đã tồn tại!');
       }
 
       await libraryService.updateDeck(deck);
