@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vitaminc/core/utils/firestore_collections.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:vitaminc/features/library/data/models/vocab_model.dart';
+import 'package:vitaminc/core/utils/app_exception_handler.dart';
 
 class GlobalDeckService {
   final FirebaseFirestore _firestore;
@@ -17,7 +18,7 @@ class GlobalDeckService {
   String get _uid {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
-      throw Exception('Yêu cầu đăng nhập!');
+      throw AppException('Yêu cầu đăng nhập!');
     }
     return uid;
   }
@@ -34,7 +35,7 @@ class GlobalDeckService {
           .map((doc) => DeckModel.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      throw Exception('Lỗi khi tải danh sách bộ thẻ mẫu: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi tải danh sách bộ thẻ mẫu');
     }
   }
 
@@ -91,7 +92,7 @@ class GlobalDeckService {
       await batch.commit();
       return personalDeck;
     } catch (e) {
-      throw Exception('Lỗi khi nhân bản bộ thẻ mẫu: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi nhân bản bộ thẻ mẫu');
     }
   }
 
@@ -139,7 +140,7 @@ class GlobalDeckService {
 
       await batch.commit();
     } catch (e) {
-      throw Exception('Lỗi khi xuất bản bộ thẻ mẫu: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi xuất bản bộ thẻ mẫu');
     }
   }
 }

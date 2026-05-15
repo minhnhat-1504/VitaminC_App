@@ -7,6 +7,7 @@ import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_tab_switcher.dart';
 import 'register_screen.dart';
+import 'package:vitaminc/core/utils/app_exception_handler.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -58,13 +59,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Lưu ý: Không cần context.go('/home') ở đây vì routerProvider 
       // sẽ tự động nhận diện trạng thái User != null và redirect.
     } catch (e) {
-      _showError(e.toString());
+      _showError(e);
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
   }
 
-  void _showError(String message) {
+  void _showError(dynamic error) {
+    final message = AppExceptionHandler.handleException(error, 'Đã xảy ra lỗi').message;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -285,7 +287,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               try {
                 await ref.read(authRepositoryProvider).signInWithGoogle();
               } catch (e) {
-                _showError(e.toString());
+                _showError(e);
               }
             }),
             const SizedBox(width: 16),
@@ -293,7 +295,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               try {
                 await ref.read(authRepositoryProvider).signInWithFacebook();
               } catch (e) {
-                _showError(e.toString());
+                _showError(e);
               }
             }),
           ],

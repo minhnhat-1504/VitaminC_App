@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:vitaminc/core/utils/firestore_collections.dart';
 import 'package:vitaminc/features/library/data/models/vocab_model.dart';
+import 'package:vitaminc/core/utils/app_exception_handler.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:path/path.dart' as path;
 
@@ -26,7 +27,7 @@ class ImportService {
     try {
       final uid = _auth.currentUser?.uid;
       if (uid == null) {
-        throw Exception('Vui lòng đăng nhập để thực hiện chức năng này.');
+        throw AppException('Vui lòng đăng nhập để thực hiện chức năng này.');
       }
 
       // 1. Chọn file Excel
@@ -49,7 +50,7 @@ class ImportService {
       try {
         excel = Excel.decodeBytes(bytes);
       } catch (e) {
-        throw Exception('File Excel không đúng định dạng (.xlsx chuẩn) hoặc bị hỏng.');
+        throw AppException('File Excel không đúng định dạng (.xlsx chuẩn) hoặc bị hỏng.');
       }
       
       List<VocabModel> vocabsToImport = [];
@@ -128,7 +129,7 @@ class ImportService {
       if (vocabsToImport.isEmpty) {
         // Nếu không có từ nào hợp lệ, xóa Deck trống vừa tạo
         await deckRef.delete();
-        throw Exception('Không tìm thấy dữ liệu hợp lệ trong file Excel.');
+        throw AppException('Không tìm thấy dữ liệu hợp lệ trong file Excel.');
       }
 
       // 5. Lưu hàng loạt vào Firestore
@@ -155,7 +156,7 @@ class ImportService {
 
       return newDeck;
     } catch (e) {
-      throw Exception('Lỗi khi import Excel: ${e.toString()}');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi import Excel');
     }
   }
 }

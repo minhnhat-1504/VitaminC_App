@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:vitaminc/core/utils/app_exception_handler.dart';
 import 'package:vitaminc/core/utils/firestore_collections.dart';
 import 'package:vitaminc/features/library/data/models/vocab_model.dart';
 
@@ -18,7 +19,7 @@ class StudyService {
     try {
       final uid = _auth.currentUser?.uid;
       if (uid == null) {
-        throw Exception('Vui lòng đăng nhập để thực hiện chức năng này.');
+        throw AppException('Vui lòng đăng nhập để thực hiện chức năng này.');
       }
 
       // Query Firestore lấy những thẻ có nextReview <= thời điểm hiện tại
@@ -49,9 +50,9 @@ class StudyService {
       if (e.message != null && e.message!.contains('requires an index')) {
         return await _getDueCardsFallback(deckId: deckId, forceStudy: forceStudy);
       }
-      throw Exception('Lỗi kết nối CSDL: ${e.message}');
+      throw AppExceptionHandler.handleException(e, 'Lỗi kết nối CSDL khi tải thẻ ôn tập');
     } catch (e) {
-      throw Exception('Lỗi không xác định khi tải thẻ ôn tập: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi kết nối CSDL khi tải thẻ ôn tập');
     }
   }
 
@@ -91,7 +92,7 @@ class StudyService {
     try {
       final uid = _auth.currentUser?.uid;
       if (uid == null) {
-        throw Exception('Vui lòng đăng nhập.');
+        throw AppException('Vui lòng đăng nhập.');
       }
 
       await _firestore
@@ -101,7 +102,7 @@ class StudyService {
           .doc(updatedCard.id)
           .update(updatedCard.toMap());
     } catch (e) {
-      throw Exception('Lỗi khi lưu kết quả ôn tập: $e');
+      throw AppExceptionHandler.handleException(e, 'Lỗi khi lưu kết quả ôn tập');
     }
   }
 }

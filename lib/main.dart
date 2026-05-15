@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,10 +7,23 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/services/notification_service.dart';
+import 'core/utils/app_exception_handler.dart';
 import 'routing/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Bắt các lỗi do Flutter UI ném ra
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    AppExceptionHandler.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
+  };
+  
+  // Bắt các lỗi Async (Platform) ném ra
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AppExceptionHandler.handleUncaughtError(error, stack);
+    return true; // Ngăn chặn crash app
+  };
 
   try {
     await dotenv.load(fileName: ".env");
@@ -32,15 +46,15 @@ void main() async {
   );
 }
 
-class VitaminCApp extends ConsumerWidget { // Chuyển thành ConsumerWidget
+class VitaminCApp extends ConsumerWidget {
   const VitaminCApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Lấy router từ Provider đã định nghĩa trong app_router.dart
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
+      scaffoldMessengerKey: AppExceptionHandler.rootScaffoldMessengerKey,
       title: 'VitaminC',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
