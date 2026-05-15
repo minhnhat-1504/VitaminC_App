@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../../library/presentation/controllers/library_controller.dart';
-import '../../../study/presentation/controllers/study_controller.dart';
+import 'package:vitaminc/features/library/presentation/controllers/library_controller.dart';
+import 'package:vitaminc/features/study/presentation/controllers/study_controller.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});

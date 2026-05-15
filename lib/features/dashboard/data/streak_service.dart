@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/utils/firestore_collections.dart';
+import '../../../../core/services/notification_service.dart';
 
 class StreakService {
   final FirebaseFirestore _firestore;
@@ -90,6 +91,10 @@ class StreakService {
         });
       });
       
+      // Thành công cập nhật streak (tức là đã học hôm nay),
+      // Dời lịch nhắc nhở sang 20:00 ngày mai.
+      await NotificationService().scheduleDailyStreakReminder(startFromTomorrow: true);
+
       return newStreak;
     } catch (e) {
       print("Lỗi updateStreak: $e");

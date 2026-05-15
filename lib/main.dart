@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/constants/app_colors.dart';
+import 'core/services/notification_service.dart';
 import 'routing/app_router.dart';
 
 void main() async {
@@ -17,6 +18,9 @@ void main() async {
     debugPrint(">>> FIREBASE CONNECTED SUCCESSFULLY! <<<");
     debugPrint("Project ID: ${Firebase.app().options.projectId}");
     debugPrint("====================================================");
+    
+    // Khởi tạo Notification Service
+    await NotificationService().initialize();
   } catch (e) {
     debugPrint("====================================================");
     debugPrint(">>> FIREBASE CONNECTION FAILED: $e");
