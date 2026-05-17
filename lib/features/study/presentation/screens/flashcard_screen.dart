@@ -6,6 +6,7 @@ import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/shared_widgets/custom_app_bar.dart';
 import '../controllers/study_controller.dart';
 import '../../data/srs_engine.dart';
+import '../../../tools/data/tts_service.dart';
 
 class FlashcardScreen extends ConsumerStatefulWidget {
   final String? deckId;
@@ -161,11 +162,13 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                         text: currentWord.meaning,
                         subtext: 'Tap to flip back\n${currentWord.example ?? ''}',
                         isBack: true,
+                        onSpeak: () => ref.read(ttsServiceProvider).speak(currentWord.word),
                       )
                     : _buildCardContent(
                         key: const ValueKey(false),
                         text: currentWord.word,
                         subtext: 'Tap to view meaning',
+                        onSpeak: () => ref.read(ttsServiceProvider).speak(currentWord.word),
                       ),
               ),
             ),
@@ -203,6 +206,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     required String text,
     required String subtext,
     bool isBack = false,
+    VoidCallback? onSpeak,
   }) {
     return Container(
       key: key,
@@ -225,26 +229,40 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
           ),
         ],
       ),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+      child: Stack(
+        children: [
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: isBack ? AppColors.primary : AppColors.textLight,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  subtext,
+                  style: const TextStyle(fontSize: 16, color: AppColors.textLight),
+                ),
+              ],
+            ),
+          ),
+          if (onSpeak != null)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: IconButton(
+                icon: const Icon(Icons.volume_up_rounded, size: 32),
                 color: isBack ? AppColors.primary : AppColors.textLight,
+                onPressed: onSpeak,
               ),
-              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            Text(
-              subtext,
-              style: const TextStyle(fontSize: 16, color: AppColors.textLight),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

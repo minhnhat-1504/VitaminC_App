@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
 import '../../data/speech_service.dart';
+import '../../data/tts_service.dart';
 
 class PronunciationScreen extends ConsumerStatefulWidget {
   const PronunciationScreen({super.key});
@@ -627,7 +628,9 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
       child: Column(
         children: [
           OutlinedButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              ref.read(ttsServiceProvider).speak(_phrase);
+            },
             icon: Icon(Icons.volume_up_rounded, size: _s(20, uiScale)),
             label: Text(
               'Listen to Native',
