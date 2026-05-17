@@ -59,6 +59,8 @@ dependencies:
   google_generative_ai: ^0.4.5    # API Gemini chính thức từ Google
   speech_to_text: ^7.3.0         # Nhận diện giọng nói để chấm điểm
   flutter_tts: ^4.0.2            # Text to speech để phát âm từ vựng
+  google_mlkit_text_recognition: ^0.14.0  # Nhận diện chữ từ ảnh (OCR)
+  image_picker: ^1.1.2           # Chọn ảnh từ Camera hoặc Gallery
   
   # --- UTILITIES ---
   intl: ^0.19.0                  # Xử lý format ngày tháng cho thuật toán SRS

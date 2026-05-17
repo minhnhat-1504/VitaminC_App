@@ -144,6 +144,12 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => context.push('/chatbot'),
               ),
               ListTile(
+                leading: const Icon(Icons.document_scanner_outlined),
+                title: const Text('Quét từ vựng (OCR)'),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                onTap: () => context.push('/ocr'),
+              ),
+              ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
                 title: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
                 onTap: () async {
