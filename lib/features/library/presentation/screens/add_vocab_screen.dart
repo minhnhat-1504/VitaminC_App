@@ -12,7 +12,8 @@ import 'package:vitaminc/features/library/presentation/library_providers.dart';
 
 class AddVocabScreen extends ConsumerStatefulWidget {
   final String deckId;
-  const AddVocabScreen({super.key, required this.deckId});
+  final String? initialWord;
+  const AddVocabScreen({super.key, required this.deckId, this.initialWord});
 
   @override
   ConsumerState<AddVocabScreen> createState() => _AddVocabScreenState();
@@ -24,6 +25,15 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
   final _exampleController = TextEditingController();
   bool isPublic = false;
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Nếu được truyền từ OCR, điền sẵn từ vựng
+    if (widget.initialWord != null) {
+      _wordController.text = widget.initialWord!;
+    }
+  }
 
   Future<void> _saveVocab() async {
     final word = _wordController.text.trim();

@@ -17,6 +17,7 @@ import '../features/study/presentation/screens/flashcard_screen.dart';
 import '../features/study/presentation/screens/study_summary_screen.dart';
 import '../features/tools/presentation/screens/pronunciation_screen.dart';
 import '../features/tools/presentation/screens/chatbot_screen.dart';
+import '../features/tools/presentation/screens/ocr_scanner_screen.dart';
 
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -105,6 +106,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/add-vocab', 
         builder: (context, state) {
+          // Hỗ trợ cả 2 kiểu: String (tương thích ngược) và Map (từ OCR)
+          if (state.extra is Map<String, String>) {
+            final data = state.extra as Map<String, String>;
+            return AddVocabScreen(
+              deckId: data['deckId']!,
+              initialWord: data['word'],
+            );
+          }
           final deckId = state.extra as String;
           return AddVocabScreen(deckId: deckId);
         }
@@ -120,6 +129,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/study-summary', builder: (context, state) => const StudySummaryScreen()),
       GoRoute(path: '/pronunciation', builder: (context, state) => const PronunciationScreen()),
       GoRoute(path: '/chatbot', builder: (context, state) => const ChatbotScreen()),
+      GoRoute(path: '/ocr', builder: (context, state) => const OcrScannerScreen()),
     ],
   );
 });
