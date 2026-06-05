@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
+
+import 'core/models/vocab_local.dart';
+import 'core/models/sync_queue_item.dart';
+import 'core/services/local_db_service.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/services/notification_service.dart';
@@ -27,7 +32,14 @@ void main() async {
 
   try {
     await dotenv.load(fileName: ".env");
+
+    // Khởi tạo Local DB (Hive CE)
+    await Hive.initFlutter();
+    Hive.registerAdapter(VocabLocalAdapter());
+    Hive.registerAdapter(SyncQueueItemAdapter());
+
     await Firebase.initializeApp();
+    await LocalDbService().init();
     debugPrint("====================================================");
     debugPrint(">>> FIREBASE CONNECTED SUCCESSFULLY! <<<");
     debugPrint("Project ID: ${Firebase.app().options.projectId}");

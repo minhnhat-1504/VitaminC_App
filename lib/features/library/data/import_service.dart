@@ -9,6 +9,7 @@ import 'package:vitaminc/features/library/data/models/vocab_model.dart';
 import 'package:vitaminc/core/utils/app_exception_handler.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:path/path.dart' as path;
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ImportService {
   final FirebaseFirestore _firestore;
@@ -25,6 +26,12 @@ class ImportService {
   /// Trả về DeckModel vừa tạo
   Future<DeckModel?> importExcel() async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
+
       final uid = _auth.currentUser?.uid;
       if (uid == null) {
         throw AppException('Vui lòng đăng nhập để thực hiện chức năng này.');

@@ -39,9 +39,13 @@ class DeckDetailController extends StateNotifier<DeckDetailState> {
     try {
       final libraryService = _ref.read(libraryServiceProvider);
       final vocabs = await libraryService.getVocabsByDeck(deckId);
-      state = state.copyWith(isLoading: false, vocabs: vocabs);
+      if (mounted) {
+        state = state.copyWith(isLoading: false, vocabs: vocabs);
+      }
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted) {
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
     }
   }
 
@@ -51,7 +55,9 @@ class DeckDetailController extends StateNotifier<DeckDetailState> {
       await libraryService.deleteVocab(vocabId);
       await loadVocabs(); // Tải lại
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      if (mounted) {
+        state = state.copyWith(errorMessage: e.toString());
+      }
     }
   }
 
@@ -61,7 +67,9 @@ class DeckDetailController extends StateNotifier<DeckDetailState> {
       await libraryService.updateVocab(updatedVocab);
       await loadVocabs(); // Tải lại
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      if (mounted) {
+        state = state.copyWith(errorMessage: e.toString());
+      }
     }
   }
 }

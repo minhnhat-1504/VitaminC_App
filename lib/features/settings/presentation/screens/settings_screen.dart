@@ -6,6 +6,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import 'package:vitaminc/features/library/presentation/controllers/library_controller.dart';
 import 'package:vitaminc/features/study/presentation/controllers/study_controller.dart';
+import 'package:vitaminc/core/services/local_db_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -150,6 +151,32 @@ class SettingsScreen extends ConsumerWidget {
                 onTap: () => context.push('/ocr'),
               ),
               ListTile(
+                leading: const Icon(Icons.sync, color: Colors.blue),
+                title: const Text('Test Đồng bộ Local DB (Task 1)', style: TextStyle(color: Colors.blue)),
+                trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.blue),
+                onTap: () async {
+                  try {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Đang đồng bộ...')),
+                    );
+                    await ref.read(localDbServiceProvider).syncVocabsFromFirestore(user.uid);
+                    
+                    final count = ref.read(localDbServiceProvider).getLocalDueCards().length;
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Đồng bộ thành công! Số thẻ Local: $count')),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lỗi đồng bộ: $e'), backgroundColor: Colors.red),
+                      );
+                    }
+                  }
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.logout, color: Colors.red),
                 title: const Text("Đăng xuất", style: TextStyle(color: Colors.red)),
                 onTap: () async {
@@ -157,7 +184,9 @@ class SettingsScreen extends ConsumerWidget {
                   ref.invalidate(libraryControllerProvider);
                   ref.invalidate(studyControllerProvider);
                   ref.invalidate(currentUserProvider);
-                  // TODO: ref.invalidate(localDbProvider); khi Member 3 tạo xong Local DB
+                  
+                  // Xóa Local DB
+                  await ref.read(localDbServiceProvider).clearAllData();
 
                   // Thực hiện đăng xuất
                   await ref.read(authRepositoryProvider).signOut();

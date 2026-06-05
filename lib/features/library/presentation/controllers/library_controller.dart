@@ -56,9 +56,11 @@ class LibraryController extends StateNotifier<LibraryState> {
         totalCounts[deck.id] = await libraryService.getTotalCount(deck.id);
       }
       
-      state = state.copyWith(isLoading: false, decks: decks, dueCardsCount: dueCounts, totalCardsCount: totalCounts);
+      if (mounted) {
+        state = state.copyWith(isLoading: false, decks: decks, dueCardsCount: dueCounts, totalCardsCount: totalCounts);
+      }
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted) state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
@@ -76,7 +78,7 @@ class LibraryController extends StateNotifier<LibraryState> {
       await loadDecks(); // Tải lại danh sách sau khi thêm
       return newDeck;
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      if (mounted) state = state.copyWith(errorMessage: e.toString());
       return null;
     }
   }
@@ -89,7 +91,7 @@ class LibraryController extends StateNotifier<LibraryState> {
       await loadDecks(); // Tải lại danh sách Deck vì file Excel tự tạo Deck mới
       return newDeck;
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted) state = state.copyWith(isLoading: false, errorMessage: e.toString());
       return null;
     }
   }
@@ -110,7 +112,7 @@ class LibraryController extends StateNotifier<LibraryState> {
       await libraryService.updateDeck(deck);
       await loadDecks(); // Tải lại danh sách
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      if (mounted) state = state.copyWith(errorMessage: e.toString());
     }
   }
 
@@ -121,7 +123,7 @@ class LibraryController extends StateNotifier<LibraryState> {
       await libraryService.deleteDeck(deckId);
       await loadDecks(); // Tải lại danh sách
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      if (mounted) state = state.copyWith(errorMessage: e.toString());
     }
   }
 }
