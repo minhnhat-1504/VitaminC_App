@@ -42,11 +42,12 @@ class StreakService {
   }
 
   /// Cập nhật chuỗi ngày học liên tiếp (Streak)
-  /// Trả về số streak mới sau khi cập nhật
-  Future<int> updateStreak(String uid) async {
+  /// Trả về số streak mới và trạng thái có phải là streak mới tăng trong hôm nay không
+  Future<(int, bool)> updateStreak(String uid) async {
     try {
       final userDocRef = _firestore.collection(FirestoreCollections.users).doc(uid);
       int newStreak = 0;
+      bool isNewToday = false;
 
       await _firestore.runTransaction((transaction) async {
         final snapshot = await transaction.get(userDocRef);
@@ -71,17 +72,21 @@ class StreakService {
           if (difference == 0) {
             // Đã học hôm nay rồi -> Giữ nguyên streak
             newStreak = currentStreak;
-            return;
+            isNewToday = false;
+            return; // Thoát ngang transaction vì không cần update
           } else if (difference == 1) {
             // Ngày hôm qua học, hôm nay học tiếp -> Tăng streak
             newStreak = currentStreak + 1;
+            isNewToday = true;
           } else {
             // Bỏ lỡ > 1 ngày -> Reset streak về 1 (vì hôm nay đang học)
             newStreak = 1;
+            isNewToday = true;
           }
         } else {
           // Chưa học bao giờ -> Chuỗi ngày đầu tiên
           newStreak = 1;
+          isNewToday = true;
         }
 
         // Lưu lại kết quả mới
@@ -91,14 +96,16 @@ class StreakService {
         });
       });
       
-      // Thành công cập nhật streak (tức là đã học hôm nay),
-      // Dời lịch nhắc nhở sang 20:00 ngày mai.
-      await NotificationService().scheduleDailyStreakReminder(startFromTomorrow: true);
+      if (isNewToday) {
+        // Thành công cập nhật streak (tức là đã học hôm nay),
+        // Dời lịch nhắc nhở sang 20:00 ngày mai.
+        await NotificationService().scheduleDailyStreakReminder(startFromTomorrow: true);
+      }
 
-      return newStreak;
+      return (newStreak, isNewToday);
     } catch (e) {
       print("Lỗi updateStreak: $e");
-      return 0;
+      return (0, false);
     }
   }
 }

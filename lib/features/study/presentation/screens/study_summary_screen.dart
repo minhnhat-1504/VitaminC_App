@@ -1,11 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import '../../../social/presentation/widgets/streak_popup.dart';
 
-class StudySummaryScreen extends StatelessWidget {
+class StudySummaryScreen extends ConsumerStatefulWidget {
   const StudySummaryScreen({super.key});
 
+  @override
+  ConsumerState<StudySummaryScreen> createState() => _StudySummaryScreenState();
+}
+
+class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

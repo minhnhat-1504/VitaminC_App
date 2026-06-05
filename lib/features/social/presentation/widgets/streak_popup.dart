@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/dummy_data.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 
-class StreakPopup extends StatefulWidget {
+class StreakPopup extends ConsumerStatefulWidget {
   const StreakPopup({super.key});
 
   @override
-  State<StreakPopup> createState() => _StreakPopupState();
+  ConsumerState<StreakPopup> createState() => _StreakPopupState();
 }
 
-class _StreakPopupState extends State<StreakPopup>
+class _StreakPopupState extends ConsumerState<StreakPopup>
     with SingleTickerProviderStateMixin {
   static const double _heroSize = 192;
   static const double _bottomBarHeight = 160;
@@ -59,6 +60,9 @@ class _StreakPopupState extends State<StreakPopup>
 
   @override
   Widget build(BuildContext context) {
+    final streakAsync = ref.watch(streakCountProvider);
+    final currentStreak = streakAsync.value ?? 0;
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -105,7 +109,7 @@ class _StreakPopupState extends State<StreakPopup>
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 8),
-                          _buildHero(),
+                          _buildHero(currentStreak),
                           const SizedBox(height: 24),
                           _buildMotivation(),
                           const SizedBox(height: 24),
@@ -171,7 +175,7 @@ class _StreakPopupState extends State<StreakPopup>
     );
   }
 
-  Widget _buildHero() {
+  Widget _buildHero(int currentStreak) {
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -230,7 +234,7 @@ class _StreakPopupState extends State<StreakPopup>
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '${DummyData.currentUserStreak}',
+                '$currentStreak',
                 style: GoogleFonts.lexend(
                   fontSize: 60,
                   fontWeight: FontWeight.w800,

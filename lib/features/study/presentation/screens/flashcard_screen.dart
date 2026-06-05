@@ -7,6 +7,9 @@ import '../../../../../core/shared_widgets/custom_app_bar.dart';
 import '../controllers/study_controller.dart';
 import '../../data/srs_engine.dart';
 import '../../../tools/data/tts_service.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import '../../../social/presentation/widgets/streak_popup.dart';
 
 class FlashcardScreen extends ConsumerStatefulWidget {
   final String? deckId;
@@ -88,8 +91,39 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
               const Text('Tuyệt vời! Bạn đã hoàn thành phiên học.', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-                  context.pushReplacement('/study-summary');
+                onPressed: () async {
+                  // Hiển thị loading overlay
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (context) => const Center(child: CircularProgressIndicator()),
+                  );
+
+                  final user = ref.read(authStateProvider).value;
+                  bool isNewToday = false;
+
+                  if (user != null) {
+                    final result = await ref.read(streakServiceProvider).updateStreak(user.uid);
+                    isNewToday = result.$2;
+                    ref.invalidate(streakCountProvider);
+                  }
+
+                  if (context.mounted) {
+                    // Tắt loading overlay
+                    Navigator.of(context).pop();
+
+                    if (isNewToday) {
+                      await showDialog(
+                        context: context,
+                        barrierColor: Colors.black87,
+                        builder: (context) => const StreakPopup(),
+                      );
+                    }
+                    
+                    if (context.mounted) {
+                      context.pushReplacement('/study-summary');
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
