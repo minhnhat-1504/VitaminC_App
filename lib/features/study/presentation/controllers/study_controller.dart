@@ -12,6 +12,8 @@ class StudyState {
   final int currentIndex;
   final String? errorMessage;
   final bool isFinished;
+  final Map<String, ReviewQuality> reviewedQualities;
+  final bool forceStudy;
 
   StudyState({
     this.isLoading = false,
@@ -19,6 +21,8 @@ class StudyState {
     this.currentIndex = 0,
     this.errorMessage,
     this.isFinished = false,
+    this.reviewedQualities = const {},
+    this.forceStudy = false,
   });
 
   StudyState copyWith({
@@ -27,6 +31,8 @@ class StudyState {
     int? currentIndex,
     String? errorMessage,
     bool? isFinished,
+    Map<String, ReviewQuality>? reviewedQualities,
+    bool? forceStudy,
   }) {
     return StudyState(
       isLoading: isLoading ?? this.isLoading,
@@ -34,6 +40,8 @@ class StudyState {
       currentIndex: currentIndex ?? this.currentIndex,
       errorMessage: errorMessage,
       isFinished: isFinished ?? this.isFinished,
+      reviewedQualities: reviewedQualities ?? this.reviewedQualities,
+      forceStudy: forceStudy ?? this.forceStudy,
     );
   }
 }
@@ -61,6 +69,8 @@ class StudyController extends StateNotifier<StudyState> {
           dueCards: cards,
           currentIndex: 0,
           isFinished: cards.isEmpty,
+          reviewedQualities: {},
+          forceStudy: forceStudy,
         );
       }
     } catch (e) {
@@ -88,9 +98,14 @@ class StudyController extends StateNotifier<StudyState> {
       final nextIndex = state.currentIndex + 1;
       final finished = nextIndex >= state.dueCards.length;
 
+      // Cập nhật Map chất lượng đã đánh giá
+      final newReviewedQualities = Map<String, ReviewQuality>.from(state.reviewedQualities)
+        ..[currentCard.id] = quality;
+
       state = state.copyWith(
         currentIndex: nextIndex,
         isFinished: finished,
+        reviewedQualities: newReviewedQualities,
       );
 
       // 4. Nếu đã học xong thẻ cuối, báo cho Library tải lại danh sách để hiện trạng thái "Đã học xong"

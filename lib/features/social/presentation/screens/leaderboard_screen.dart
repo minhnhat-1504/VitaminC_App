@@ -213,7 +213,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       const SizedBox(height: 20),
       _buildRestOfLeague(users),
       const SizedBox(height: 40),
-      _buildAchievementsPreview(),
+      _buildAchievementsPreview(currentUser),
     ];
   }
 
@@ -736,8 +736,19 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   // ─── ACHIEVEMENTS PREVIEW ───
-  Widget _buildAchievementsPreview() {
-    final previewBadges = BadgesScreen.badges.take(6).toList();
+  Widget _buildAchievementsPreview(UserModel? currentUser) {
+    final earnedBadges = currentUser?.earnedBadges ?? [];
+    final previewBadges = BadgesScreen.badges.map((badge) {
+      final isAchieved = earnedBadges.contains(badge['id']);
+      return {
+        ...badge,
+        'achieved': isAchieved,
+      };
+    }).take(6).toList();
+
+    final achievedCount = BadgesScreen.badges.where((b) => earnedBadges.contains(b['id'])).length;
+    final totalCount = BadgesScreen.badges.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -761,7 +772,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  '${BadgesScreen.achievedBadges} / ${BadgesScreen.totalBadges}',
+                  '$achievedCount / $totalCount',
                   style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,

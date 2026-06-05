@@ -15,29 +15,55 @@ class SettingsScreen extends ConsumerWidget {
     final controller = TextEditingController(text: currentName);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text("Đổi tên hiển thị"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: "Nhập tên mới"),
+          maxLength: 20,
+          decoration: const InputDecoration(
+            hintText: "Nhập tên mới",
+            counterStyle: TextStyle(fontSize: 12),
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text("Hủy"),
           ),
           ElevatedButton(
             onPressed: () async {
               final newName = controller.text.trim();
               if (newName.isNotEmpty) {
-                final userService = ref.read(userServiceProvider);
-                await userService.updateUserProfile(
-                  displayName: newName,
-                  photoUrl: currentPhotoUrl, // Giữ nguyên avatar hiện tại
-                );
-                // Refresh dữ liệu user
-                ref.invalidate(currentUserProvider);
-                if (context.mounted) Navigator.pop(context);
+                if (newName.length > 20) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tên hiển thị không được vượt quá 20 ký tự'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                // Đóng dialog ngay lập tức để tránh trì hoãn giao diện
+                Navigator.pop(dialogContext);
+                
+                try {
+                  final userService = ref.read(userServiceProvider);
+                  await userService.updateUserProfile(
+                    displayName: newName,
+                    photoUrl: currentPhotoUrl, // Giữ nguyên avatar hiện tại
+                  );
+                  // Refresh dữ liệu user
+                  ref.invalidate(currentUserProvider);
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Lỗi cập nhật tên: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
               }
             },
             child: const Text("Lưu"),

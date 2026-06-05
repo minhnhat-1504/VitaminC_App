@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import '../../../social/presentation/providers/social_providers.dart';
+import '../../data/srs_engine.dart';
 import '../controllers/study_controller.dart';
 
 class StudySummaryScreen extends ConsumerStatefulWidget {
@@ -28,24 +31,74 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
 
   Future<void> _updateStatsAndXP() async {
     final studyState = ref.read(studyControllerProvider);
-    final count = studyState.dueCards.length;
-    final xp = count * 10; // 10 XP per word reviewed
+    
+    int wordsReviewed = 0;
+    int xp = 0;
+
+    // Cơ chế chống spam điểm XP vô tận: không cộng điểm trong chế độ học ép (forceStudy)
+    if (!studyState.forceStudy) {
+      for (final card in studyState.dueCards) {
+        final quality = studyState.reviewedQualities[card.id];
+        if (quality != null) {
+          wordsReviewed++;
+          
+          // Từ mới (repetition == 0 trước phiên học) -> không được tính điểm XP (0 XP)
+          if (card.repetition == 0) {
+            continue;
+          }
+          
+          // Chỉ tính điểm trong lượt nhắc (repetition > 0 trước phiên học) dựa theo chất lượng lựa chọn
+          if (card.repetition > 0) {
+            if (quality == ReviewQuality.good) {
+              xp += 10;
+            } else if (quality == ReviewQuality.easy) {
+              xp += 15;
+            } else if (quality == ReviewQuality.hard) {
+              xp += 0; // Chọn Hard (quên từ) -> 0 XP
+            }
+          }
+        }
+      }
+    } else {
+      // Trong chế độ học ép, vẫn đếm số từ đã học nhưng không cộng XP
+      for (final card in studyState.dueCards) {
+        if (studyState.reviewedQualities[card.id] != null) {
+          wordsReviewed++;
+        }
+      }
+    }
 
     setState(() {
-      _wordsReviewed = count;
+      _wordsReviewed = wordsReviewed;
       _xpEarned = xp;
     });
 
-    if (xp > 0) {
-      final user = ref.read(authStateProvider).value;
-      if (user != null) {
-        try {
+    final user = ref.read(authStateProvider).value;
+    if (user != null) {
+      try {
+        // 1. Cộng XP nếu có tích lũy XP hợp lệ
+        if (xp > 0) {
           await ref.read(userServiceProvider).addXP(user.uid, xp);
-          // Invalidate user data to update the stream for real-time XP values
-          ref.invalidate(currentUserProvider);
-        } catch (e) {
-          debugPrint('Lỗi cộng XP: $e');
         }
+
+        // 2. Cập nhật Streak và nhận số streak mới
+        final newStreak = await ref.read(streakServiceProvider).updateStreak(user.uid);
+        ref.invalidate(streakCountProvider);
+
+        // 3. Lấy số từ vựng đã học thực tế để làm căn cứ trao huy hiệu
+        final learnedVocabCount = await ref.read(dashboardServiceProvider).getLearnedVocabCount(user.uid);
+
+        // 4. Kiểm tra và trao huy hiệu tự động
+        await ref.read(badgeServiceProvider).checkAndAwardBadges(
+              uid: user.uid,
+              newStreak: newStreak,
+              learnedVocabCount: learnedVocabCount,
+            );
+
+        // 5. Làm mới thông tin người dùng hiện tại để đồng bộ UI
+        ref.invalidate(currentUserProvider);
+      } catch (e) {
+        debugPrint('Lỗi cập nhật tiến trình học (XP, Streak, Badges): $e');
       }
     }
 

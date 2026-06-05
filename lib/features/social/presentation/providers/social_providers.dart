@@ -3,6 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/utils/firestore_collections.dart';
 import '../../../../core/models/user_model.dart';
 
+import '../../data/badge_service.dart';
+
+/// Provider cung cấp BadgeService
+final badgeServiceProvider = Provider<BadgeService>((ref) {
+  return BadgeService();
+});
+
 /// StreamProvider lắng nghe CSDL Firestore danh sách 50 người dùng có XP cao nhất
 final leaderboardProvider = StreamProvider.autoDispose<List<UserModel>>((ref) {
   return FirebaseFirestore.instance
