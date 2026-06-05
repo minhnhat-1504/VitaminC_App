@@ -7,6 +7,10 @@ class UserModel {
   final int xp;
   final int rank;
 
+  /// Danh sách ID các huy hiệu người dùng đã đạt được
+  /// Ví dụ: ['first_blood', 'streak_7', 'streak_30']
+  final List<String> earnedBadges;
+
   UserModel({
     required this.uid,
     required this.email,
@@ -15,6 +19,7 @@ class UserModel {
     required this.role,
     this.xp = 0,
     this.rank = 0,
+    this.earnedBadges = const [],
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +31,7 @@ class UserModel {
       'role': role,
       'xp': xp,
       'rank': rank,
+      'earnedBadges': earnedBadges,
     };
   }
 
@@ -38,6 +44,7 @@ class UserModel {
       role: map['role'] ?? 'user',
       xp: map['xp'] ?? 0,
       rank: map['rank'] ?? 0,
+      earnedBadges: List<String>.from(map['earnedBadges'] ?? []),
     );
   }
 }

@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_app_bar.dart';
-import '../../../../core/utils/dummy_data.dart';
+import '../../../../core/models/user_model.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import '../providers/social_providers.dart';
 import 'badges_screen.dart';
 import '../widgets/streak_popup.dart';
 
-class LeaderboardScreen extends StatefulWidget {
+class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
 
   @override
-  State<LeaderboardScreen> createState() => _LeaderboardScreenState();
+  ConsumerState<LeaderboardScreen> createState() => _LeaderboardScreenState();
 }
 
-class _LeaderboardScreenState extends State<LeaderboardScreen> {
+class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   int _selectedTab = 0;
+
+  // Hạng giải đấu tĩnh (Local constants)
+  static const String leagueName = 'RUBY LEAGUE';
+  static const String leagueTimeLeft = '2d 14h';
 
   void _openStreakPopup() {
     showGeneralDialog(
@@ -44,6 +52,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Đọc dữ liệu Leaderboard thời gian thực từ Firestore StreamProvider
+    final leaderboardAsync = ref.watch(leaderboardProvider);
+    final currentUser = ref.watch(currentUserProvider).value;
+    final currentStreak = ref.watch(streakCountProvider).value ?? 0;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: const CustomAppBar(title: 'Leaderboard', showBackButton: false),
@@ -63,7 +76,27 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                     const SizedBox(height: 16),
                     _buildTabSwitcher(),
                     const SizedBox(height: 32),
-                    if (_selectedTab == 0) ..._buildRankingContent(),
+                    if (_selectedTab == 0)
+                      ...leaderboardAsync.when(
+                        data: (users) => _buildRankingContent(
+                          users,
+                          currentUser,
+                          currentStreak,
+                        ),
+                        loading: () => [
+                          const SizedBox(height: 120),
+                          const Center(child: CircularProgressIndicator()),
+                        ],
+                        error: (err, stack) => [
+                          const SizedBox(height: 120),
+                          Center(
+                            child: Text(
+                              'Lỗi khi tải bảng xếp hạng: $err',
+                              style: GoogleFonts.lexend(color: AppColors.error),
+                            ),
+                          ),
+                        ],
+                      ),
                     if (_selectedTab == 1) const BadgesScreen(),
                     const SizedBox(height: 24),
                   ],
@@ -82,7 +115,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          DummyData.leagueName,
+          leagueName,
           style: GoogleFonts.lexend(
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -106,7 +139,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ),
               const SizedBox(width: 4),
               Text(
-                DummyData.leagueTimeLeft,
+                leagueTimeLeft,
                 style: GoogleFonts.lexend(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
@@ -167,21 +200,29 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     );
   }
 
-  // ─── RANKING TAB ───
-  List<Widget> _buildRankingContent() {
+  // ─── RANKING TAB CONTENT ───
+  List<Widget> _buildRankingContent(
+    List<UserModel> users,
+    UserModel? currentUser,
+    int currentStreak,
+  ) {
     return [
-      _buildPodium(),
+      _buildPodium(users),
       const SizedBox(height: 32),
-      _buildYourPosition(),
+      _buildYourPosition(users, currentUser, currentStreak),
       const SizedBox(height: 20),
-      _buildRestOfLeague(),
+      _buildRestOfLeague(users),
       const SizedBox(height: 40),
-      _buildAchievementsPreview(),
+      _buildAchievementsPreview(currentUser),
     ];
   }
 
   // ─── PODIUM ───
-  Widget _buildPodium() {
+  Widget _buildPodium(List<UserModel> users) {
+    final first = users.isNotEmpty ? users[0] : null;
+    final second = users.length > 1 ? users[1] : null;
+    final third = users.length > 2 ? users[2] : null;
+
     return SizedBox(
       height: 310,
       child: Stack(
@@ -211,8 +252,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             children: [
               Expanded(
                 child: _podiumPlayer(
-                  name: 'Sarah',
-                  xp: '2,450 XP',
+                  user: second,
                   rank: 2,
                   avatarSize: 64,
                   ringColor: AppColors.slate300,
@@ -226,8 +266,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: _podiumPlayer(
-                  name: 'Marcus',
-                  xp: '3,100 XP',
+                  user: first,
                   rank: 1,
                   avatarSize: 80,
                   ringColor: AppColors.gold,
@@ -246,8 +285,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: _podiumPlayer(
-                  name: 'Elena',
-                  xp: '2,120 XP',
+                  user: third,
                   rank: 3,
                   avatarSize: 64,
                   ringColor: AppColors.bronze,
@@ -269,8 +307,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   Widget _podiumPlayer({
-    required String name,
-    required String xp,
+    required UserModel? user,
     required int rank,
     required double avatarSize,
     required Color ringColor,
@@ -282,6 +319,33 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
     bool showCrown = false,
     bool isFirst = false,
   }) {
+    if (user == null) {
+      // Giữ chỗ trống nếu chưa đủ người dùng trong database
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: avatarSize + (showCrown ? 28 : 0) + 12 + 20),
+          Container(
+            height: pedestalHeight,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: pedestalColors,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final name = user.displayName.isNotEmpty ? user.displayName : 'Learner';
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -316,11 +380,16 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               child: CircleAvatar(
                 radius: avatarSize / 2,
                 backgroundColor: avatarBgColor.withOpacity(0.15),
-                child: Icon(
-                  Icons.person_rounded,
-                  size: avatarSize * 0.45,
-                  color: avatarBgColor,
-                ),
+                backgroundImage: user.photoUrl.isNotEmpty
+                    ? NetworkImage(user.photoUrl)
+                    : null,
+                child: user.photoUrl.isEmpty
+                    ? Icon(
+                        Icons.person_rounded,
+                        size: avatarSize * 0.45,
+                        color: avatarBgColor,
+                      )
+                    : null,
               ),
             ),
             Positioned(
@@ -353,6 +422,8 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
         const SizedBox(height: 12),
         Text(
           name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: GoogleFonts.lexend(
             fontSize: isFirst ? 16 : 14,
             fontWeight: FontWeight.bold,
@@ -360,7 +431,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
           ),
         ),
         Text(
-          xp,
+          '${_formatXp(user.xp)} XP',
           style: GoogleFonts.lexend(
             fontSize: 12,
             fontWeight: isFirst ? FontWeight.bold : FontWeight.w500,
@@ -402,7 +473,18 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   // ─── YOUR POSITION ───
-  Widget _buildYourPosition() {
+  Widget _buildYourPosition(
+    List<UserModel> users,
+    UserModel? currentUser,
+    int currentStreak,
+  ) {
+    if (currentUser == null) return const SizedBox.shrink();
+
+    final index = users.indexWhere((u) => u.uid == currentUser.uid);
+    final rankStr = index != -1
+        ? '${index + 1}'
+        : (currentUser.rank > 0 ? '${currentUser.rank}' : '-');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -459,7 +541,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                           SizedBox(
                             width: 24,
                             child: Text(
-                              '${DummyData.currentUserRank}',
+                              rankStr,
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lexend(
                                 fontSize: 18,
@@ -477,14 +559,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               color: AppColors.slate200,
                               border: Border.all(color: Colors.white, width: 2),
                             ),
-                            child: const CircleAvatar(
+                            child: CircleAvatar(
                               radius: 18,
                               backgroundColor: AppColors.slate200,
-                              child: Icon(
-                                Icons.person_rounded,
-                                size: 20,
-                                color: AppColors.slate400,
-                              ),
+                              backgroundImage: currentUser.photoUrl.isNotEmpty
+                                  ? NetworkImage(currentUser.photoUrl)
+                                  : null,
+                              child: currentUser.photoUrl.isEmpty
+                                  ? const Icon(
+                                      Icons.person_rounded,
+                                      size: 20,
+                                      color: AppColors.slate400,
+                                    )
+                                  : null,
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -494,7 +581,9 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'You',
+                                  currentUser.displayName.isNotEmpty
+                                      ? currentUser.displayName
+                                      : 'You',
                                   style: GoogleFonts.lexend(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
@@ -508,7 +597,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                                       style: TextStyle(fontSize: 10),
                                     ),
                                     Text(
-                                      '${DummyData.currentUserStreak} day streak',
+                                      '$currentStreak day streak',
                                       style: GoogleFonts.lexend(
                                         fontSize: 12,
                                         color: AppColors.slate500,
@@ -520,7 +609,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                             ),
                           ),
                           Text(
-                            '${_formatXp(DummyData.currentUserXp)} XP',
+                            '${_formatXp(currentUser.xp)} XP',
                             style: GoogleFonts.lexend(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
@@ -541,7 +630,11 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   // ─── REST OF THE LEAGUE ───
-  Widget _buildRestOfLeague() {
+  Widget _buildRestOfLeague(List<UserModel> users) {
+    if (users.length <= 3) return const SizedBox.shrink();
+
+    final restUsers = users.sublist(3);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -557,12 +650,23 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             ),
           ),
         ),
-        ...DummyData.restOfLeague.map((user) => _leagueItem(user)),
+        ...restUsers.asMap().entries.map((entry) {
+          final rank = entry.key + 4;
+          final user = entry.value;
+          return _leagueItem(user, rank);
+        }),
       ],
     );
   }
 
-  Widget _leagueItem(Map<String, dynamic> user) {
+  Widget _leagueItem(UserModel user, int rank) {
+    final name = user.displayName.isNotEmpty ? user.displayName : 'Learner';
+    final initials = name.length >= 2
+        ? name.substring(0, 2).toUpperCase()
+        : (name.isNotEmpty ? name[0].toUpperCase() : 'L');
+    final avatarBg = user.uid.hashCode % 2 == 0 ? 0xFFE0E7FF : 0xFFFCE7F3;
+    final avatarFg = user.uid.hashCode % 2 == 0 ? 0xFF6366F1 : 0xFFEC4899;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Container(
@@ -577,7 +681,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             SizedBox(
               width: 24,
               child: Text(
-                '${user['rank']}',
+                '$rank',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.lexend(
                   fontSize: 14,
@@ -589,20 +693,27 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
             const SizedBox(width: 16),
             CircleAvatar(
               radius: 18,
-              backgroundColor: Color(user['avatarBg'] as int),
-              child: Text(
-                user['initials'] as String,
-                style: GoogleFonts.lexend(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Color(user['avatarFg'] as int),
-                ),
-              ),
+              backgroundColor: user.photoUrl.isNotEmpty
+                  ? Colors.transparent
+                  : Color(avatarBg),
+              backgroundImage: user.photoUrl.isNotEmpty
+                  ? NetworkImage(user.photoUrl)
+                  : null,
+              child: user.photoUrl.isEmpty
+                  ? Text(
+                      initials,
+                      style: GoogleFonts.lexend(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(avatarFg),
+                      ),
+                    )
+                  : null,
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
-                user['name'] as String,
+                name,
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -611,7 +722,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
               ),
             ),
             Text(
-              '${_formatXp(user['xp'] as int)} XP',
+              '${_formatXp(user.xp)} XP',
               style: GoogleFonts.lexend(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -625,8 +736,19 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 
   // ─── ACHIEVEMENTS PREVIEW ───
-  Widget _buildAchievementsPreview() {
-    final previewBadges = DummyData.badges.take(6).toList();
+  Widget _buildAchievementsPreview(UserModel? currentUser) {
+    final earnedBadges = currentUser?.earnedBadges ?? [];
+    final previewBadges = BadgesScreen.badges.map((badge) {
+      final isAchieved = earnedBadges.contains(badge['id']);
+      return {
+        ...badge,
+        'achieved': isAchieved,
+      };
+    }).take(6).toList();
+
+    final achievedCount = BadgesScreen.badges.where((b) => earnedBadges.contains(b['id'])).length;
+    final totalCount = BadgesScreen.badges.length;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -650,7 +772,7 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  '${DummyData.achievedBadges} / ${DummyData.totalBadges}',
+                  '$achievedCount / $totalCount',
                   style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -784,7 +906,6 @@ class _LeaderboardScreenState extends State<LeaderboardScreen> {
   }
 }
 
-// ─── Custom Painter: vien dut net cho badge chua dat ───
 class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;

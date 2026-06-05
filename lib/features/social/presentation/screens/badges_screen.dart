@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/dummy_data.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
 
-class BadgesScreen extends StatelessWidget {
+class BadgesScreen extends ConsumerWidget {
   const BadgesScreen({super.key});
 
   static const Color _slate900 = Color(0xFF0F172A);
@@ -12,8 +13,93 @@ class BadgesScreen extends StatelessWidget {
   static const Color _slate300 = Color(0xFFCBD5E1);
   static const Color _slate200 = Color(0xFFE2E8F0);
 
+  static const List<Map<String, dynamic>> badges = [
+    {
+      'id': 'streak_7',
+      'name': 'On Fire',
+      'icon': 0xe518,
+      'gradient1': 0xFF38BDF8,
+      'gradient2': 0xFF2563EB,
+      'shadowColor': 0xFF3B82F6,
+    },
+    {
+      'id': 'words_100',
+      'name': 'Scholar',
+      'icon': 0xe3c7,
+      'gradient1': 0xFF34D399,
+      'gradient2': 0xFF16A34A,
+      'shadowColor': 0xFF22C55E,
+    },
+    {
+      'id': 'first_blood',
+      'name': 'Speedster',
+      'icon': 0xe0e7,
+      'gradient1': 0xFFFBBF24,
+      'gradient2': 0xFFEA580C,
+      'shadowColor': 0xFFF97316,
+    },
+    {
+      'id': 'streak_30',
+      'name': 'Elite',
+      'icon': 0xe1f5,
+      'gradient1': 0xFFEC4899,
+      'gradient2': 0xFFBE185D,
+      'shadowColor': 0xFFF43F5E,
+    },
+    {
+      'id': 'orator',
+      'name': 'Orator',
+      'icon': 0xf518,
+      'gradient1': 0xFFA855F7,
+      'gradient2': 0xFF4F46E5,
+      'shadowColor': 0xFF6366F1,
+    },
+    {
+      'id': 'master',
+      'name': 'Master',
+      'icon': 0xe559,
+      'gradient1': 0xFF0D9488,
+      'gradient2': 0xFF0891B2,
+      'shadowColor': 0xFF06B6D4,
+    },
+    {
+      'id': 'polyglot',
+      'name': 'Polyglot',
+      'icon': 0xe8e2,
+      'gradient1': 0xFF8B5CF6,
+      'gradient2': 0xFF6D28D9,
+      'shadowColor': 0xFF7C3AED,
+    },
+    {
+      'id': 'night_owl',
+      'name': 'Night Owl',
+      'icon': 0xef67,
+      'gradient1': 0xFF1E293B,
+      'gradient2': 0xFF0F172A,
+      'shadowColor': 0xFF334155,
+    },
+    {
+      'id': 'pioneer',
+      'name': 'Pioneer',
+      'icon': 0xe55f,
+      'gradient1': 0xFFF97316,
+      'gradient2': 0xFFDC2626,
+      'shadowColor': 0xFFEF4444,
+    },
+  ];
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider).value;
+    final earnedBadges = user?.earnedBadges ?? [];
+
+    final earnedList = badges.where((b) => earnedBadges.contains(b['id'])).toList();
+    final lockedList = badges.where((b) => !earnedBadges.contains(b['id'])).toList();
+
+    final totalBadgesCount = badges.length;
+    final achievedBadgesCount = earnedList.length;
+    final progress = totalBadgesCount > 0 ? achievedBadgesCount / totalBadgesCount : 0.0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -36,7 +122,7 @@ class BadgesScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                '${DummyData.achievedBadges} / ${DummyData.totalBadges}',
+                '$achievedBadgesCount / $totalBadgesCount',
                 style: GoogleFonts.lexend(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -51,7 +137,7 @@ class BadgesScreen extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: LinearProgressIndicator(
-            value: DummyData.achievedBadges / DummyData.totalBadges,
+            value: progress,
             minHeight: 8,
             backgroundColor: _slate200,
             valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
@@ -61,81 +147,78 @@ class BadgesScreen extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Text(
-            '${((DummyData.achievedBadges / DummyData.totalBadges) * 100).toInt()}% completed',
+            '${(progress * 100).toInt()}% completed',
             style: GoogleFonts.lexend(fontSize: 11, color: _slate500),
           ),
         ),
         const SizedBox(height: 24),
 
         // ─── EARNED SECTION ───
-        Text(
-          'EARNED',
-          style: GoogleFonts.lexend(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: _slate500,
-            letterSpacing: 0.35,
+        if (earnedList.isNotEmpty) ...[
+          Text(
+            'EARNED',
+            style: GoogleFonts.lexend(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _slate500,
+              letterSpacing: 0.35,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.85,
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: earnedList.length,
+            itemBuilder: (context, index) {
+              return _earnedBadgeCard(earnedList[index]);
+            },
           ),
-          itemCount: DummyData.badges
-              .where((b) => b['achieved'] == true)
-              .length,
-          itemBuilder: (context, index) {
-            final badge = DummyData.badges
-                .where((b) => b['achieved'] == true)
-                .toList()[index];
-            return _earnedBadgeCard(badge);
-          },
-        ),
-
-        const SizedBox(height: 32),
+          const SizedBox(height: 32),
+        ],
 
         // ─── LOCKED SECTION ───
-        Text(
-          'LOCKED',
-          style: GoogleFonts.lexend(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            color: _slate500,
-            letterSpacing: 0.35,
+        if (lockedList.isNotEmpty) ...[
+          Text(
+            'LOCKED',
+            style: GoogleFonts.lexend(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: _slate500,
+              letterSpacing: 0.35,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 0.85,
+          const SizedBox(height: 12),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.85,
+            ),
+            itemCount: lockedList.length,
+            itemBuilder: (context, index) {
+              return _lockedBadgeCard(lockedList[index]);
+            },
           ),
-          itemCount: DummyData.badges
-              .where((b) => b['achieved'] == false)
-              .length,
-          itemBuilder: (context, index) {
-            final badge = DummyData.badges
-                .where((b) => b['achieved'] == false)
-                .toList()[index];
-            return _lockedBadgeCard(badge);
-          },
-        ),
+        ],
       ],
     );
   }
 
   Widget _earnedBadgeCard(Map<String, dynamic> badge) {
     final rotations = {'On Fire': 0.05, 'Scholar': -0.035, 'Speedster': 0.018};
+    final int grad1 = badge['gradient1'] as int? ?? 0xFF94A3B8;
+    final int grad2 = badge['gradient2'] as int? ?? 0xFF64748B;
+    final int shadow = badge['shadowColor'] as int? ?? 0xFF475569;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -149,19 +232,19 @@ class BadgesScreen extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color(badge['gradient1'] as int),
-                  Color(badge['gradient2'] as int),
+                  Color(grad1),
+                  Color(grad2),
                 ],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Color(badge['shadowColor'] as int).withOpacity(0.2),
+                  color: Color(shadow).withOpacity(0.2),
                   blurRadius: 15,
                   offset: const Offset(0, 10),
                 ),
                 BoxShadow(
-                  color: Color(badge['shadowColor'] as int).withOpacity(0.2),
+                  color: Color(shadow).withOpacity(0.2),
                   blurRadius: 6,
                   offset: const Offset(0, 4),
                 ),
