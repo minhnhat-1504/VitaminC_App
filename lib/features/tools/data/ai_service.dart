@@ -1,14 +1,19 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/utils/firestore_collections.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 
 String get _apiKey => dotenv.env['GEMINI_API_KEY'] ?? '';
 
 class AiService {
+  final String? userId;
   late final GenerativeModel _model;
-  late final ChatSession _chat;
+  ChatSession? _chat;
 
-  AiService() {
+  AiService({this.userId}) {
     _initModel();
   }
 
@@ -24,21 +29,102 @@ class AiService {
         "4. Hình thức: Trả lời chủ yếu bằng tiếng Việt. Trình bày súc tích, chia ý rõ ràng (dùng gạch đầu dòng) để tối ưu trải nghiệm đọc trên thiết bị di động."
       ),
     );
-    
-    _chat = _model.startChat();
+  }
+
+  Future<void> initSession() async {
+    if (_chat != null) return;
+
+    List<Content> history = [];
+
+    if (userId != null) {
+      try {
+        final doc = await FirebaseFirestore.instance
+            .collection(FirestoreCollections.users)
+            .doc(userId)
+            .collection('chatbot')
+            .doc('history')
+            .get();
+
+        if (doc.exists) {
+          final data = doc.data()!;
+          final List<dynamic> historyData = data['messages'] ?? [];
+          for (var item in historyData) {
+            history.add(Content(item['role'], [TextPart(item['text'])]));
+          }
+        }
+      } catch (e) {
+        print('Lỗi parse history từ Firestore: $e');
+      }
+    }
+
+    _chat = _model.startChat(history: history);
+  }
+
+  Future<void> _saveHistory() async {
+    if (_chat == null || userId == null) return;
+    final List<Map<String, dynamic>> historyToSave = [];
+
+    for (var content in _chat!.history) {
+      final text = content.parts.whereType<TextPart>().map((p) => p.text).join('\n');
+      historyToSave.add({
+        'role': content.role,
+        'text': text,
+      });
+    }
+
+    await FirebaseFirestore.instance
+        .collection(FirestoreCollections.users)
+        .doc(userId)
+        .collection('chatbot')
+        .doc('history')
+        .set({'messages': historyToSave}, SetOptions(merge: true));
   }
 
   Future<String?> askTeacher(String prompt) async {
+    if (_chat == null) {
+      await initSession();
+    }
     try {
-      final response = await _chat.sendMessage(Content.text(prompt));
+      final response = await _chat!.sendMessage(Content.text(prompt));
+      await _saveHistory();
       return response.text;
     } catch (e) {
       print('Lỗi khi gọi Gemini AI: $e');
       return 'Xin lỗi, giáo viên AI đang gặp chút sự cố kết nối. Hãy thử lại nhé! Lỗi: $e';
     }
   }
+
+  Future<List<Map<String, dynamic>>> getHistoryForUI() async {
+    await initSession();
+    final uiMessages = <Map<String, dynamic>>[];
+    for (var content in _chat!.history) {
+      final text = content.parts.whereType<TextPart>().map((p) => p.text).join('\n');
+      uiMessages.add({
+        'isUser': content.role == 'user',
+        'text': text,
+      });
+    }
+    return uiMessages;
+  }
+
+  Future<void> clearHistory() async {
+    if (userId != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection(FirestoreCollections.users)
+            .doc(userId)
+            .collection('chatbot')
+            .doc('history')
+            .delete();
+      } catch (e) {
+        print('Lỗi xóa lịch sử từ Firestore: $e');
+      }
+    }
+    _chat = _model.startChat();
+  }
 }
 
 final aiServiceProvider = Provider<AiService>((ref) {
-  return AiService();
+  final user = ref.watch(authStateProvider).value;
+  return AiService(userId: user?.uid);
 });
