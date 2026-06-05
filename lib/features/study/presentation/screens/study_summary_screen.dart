@@ -1,14 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_button.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../controllers/study_controller.dart';
 
-class StudySummaryScreen extends StatelessWidget {
+class StudySummaryScreen extends ConsumerStatefulWidget {
   const StudySummaryScreen({super.key});
+
+  @override
+  ConsumerState<StudySummaryScreen> createState() => _StudySummaryScreenState();
+}
+
+class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
+  int _wordsReviewed = 0;
+  int _xpEarned = 0;
+  bool _isUpdating = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateStatsAndXP();
+    });
+  }
+
+  Future<void> _updateStatsAndXP() async {
+    final studyState = ref.read(studyControllerProvider);
+    final count = studyState.dueCards.length;
+    final xp = count * 10; // 10 XP per word reviewed
+
+    setState(() {
+      _wordsReviewed = count;
+      _xpEarned = xp;
+    });
+
+    if (xp > 0) {
+      final user = ref.read(authStateProvider).value;
+      if (user != null) {
+        try {
+          await ref.read(userServiceProvider).addXP(user.uid, xp);
+          // Invalidate user data to update the stream for real-time XP values
+          ref.invalidate(currentUserProvider);
+        } catch (e) {
+          debugPrint('Lỗi cộng XP: $e');
+        }
+      }
+    }
+
+    setState(() {
+      _isUpdating = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -44,8 +93,8 @@ class StudySummaryScreen extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatItem('Words Reviewed', '20', AppColors.primary),
-                    _buildStatItem('XP Earned', '+50', AppColors.success),
+                    _buildStatItem('Words Reviewed', '$_wordsReviewed', AppColors.primary),
+                    _buildStatItem('XP Earned', _isUpdating ? '...' : '+$_xpEarned', AppColors.success),
                   ],
                 ),
               ),
