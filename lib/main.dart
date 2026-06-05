@@ -20,6 +20,11 @@ void main() async {
 
   // Bắt các lỗi do Flutter UI ném ra
   FlutterError.onError = (FlutterErrorDetails details) {
+    // Bỏ qua lỗi ngầm (VD: lỗi tải ảnh từ NetworkImage) để không spam SnackBar
+    if (details.silent || details.library == 'image resource service') {
+      debugPrint('Silent or Image error ignored: ${details.exception}');
+      return;
+    }
     FlutterError.presentError(details);
     AppExceptionHandler.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
   };
