@@ -73,6 +73,7 @@ dependencies:
   firebase_messaging: ^15.2.10
   flutter_local_notifications: ^21.0.0
   timezone: ^0.11.0
+  shared_preferences: ^2.5.5
 
   # --- LOCAL DATABASE (OFFLINE) ---
   hive_ce: ^2.19.3
