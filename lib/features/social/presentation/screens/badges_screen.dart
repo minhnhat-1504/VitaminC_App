@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/utils/dummy_data.dart';
 
 class BadgesScreen extends StatelessWidget {
   const BadgesScreen({super.key});
@@ -11,6 +10,43 @@ class BadgesScreen extends StatelessWidget {
   static const Color _slate400 = Color(0xFF94A3B8);
   static const Color _slate300 = Color(0xFFCBD5E1);
   static const Color _slate200 = Color(0xFFE2E8F0);
+
+  // Huy hiệu cá nhân mẫu (Local backup cho Achievements)
+  static const int totalBadges = 50;
+  static const int achievedBadges = 12;
+
+  static const List<Map<String, dynamic>> badges = [
+    {
+      'name': 'On Fire',
+      'icon': 0xe518,
+      'achieved': true,
+      'gradient1': 0xFF38BDF8,
+      'gradient2': 0xFF2563EB,
+      'shadowColor': 0xFF3B82F6,
+    },
+    {
+      'name': 'Scholar',
+      'icon': 0xe3c7,
+      'achieved': true,
+      'gradient1': 0xFF34D399,
+      'gradient2': 0xFF16A34A,
+      'shadowColor': 0xFF22C55E,
+    },
+    {
+      'name': 'Speedster',
+      'icon': 0xe0e7,
+      'achieved': true,
+      'gradient1': 0xFFFBBF24,
+      'gradient2': 0xFFEA580C,
+      'shadowColor': 0xFFF97316,
+    },
+    {'name': 'Elite', 'icon': 0xe1f5, 'achieved': false},
+    {'name': 'Orator', 'icon': 0xf518, 'achieved': false},
+    {'name': 'Master', 'icon': 0xe559, 'achieved': false},
+    {'name': 'Polyglot', 'icon': 0xe8e2, 'achieved': false},
+    {'name': 'Night Owl', 'icon': 0xef67, 'achieved': false},
+    {'name': 'Pioneer', 'icon': 0xe55f, 'achieved': false},
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +72,7 @@ class BadgesScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
-                '${DummyData.achievedBadges} / ${DummyData.totalBadges}',
+                '$achievedBadges / $totalBadges',
                 style: GoogleFonts.lexend(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
@@ -51,7 +87,7 @@ class BadgesScreen extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(6),
           child: LinearProgressIndicator(
-            value: DummyData.achievedBadges / DummyData.totalBadges,
+            value: achievedBadges / totalBadges,
             minHeight: 8,
             backgroundColor: _slate200,
             valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
@@ -61,7 +97,7 @@ class BadgesScreen extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Text(
-            '${((DummyData.achievedBadges / DummyData.totalBadges) * 100).toInt()}% completed',
+            '${((achievedBadges / totalBadges) * 100).toInt()}% completed',
             style: GoogleFonts.lexend(fontSize: 11, color: _slate500),
           ),
         ),
@@ -87,11 +123,9 @@ class BadgesScreen extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 0.85,
           ),
-          itemCount: DummyData.badges
-              .where((b) => b['achieved'] == true)
-              .length,
+          itemCount: badges.where((b) => b['achieved'] == true).length,
           itemBuilder: (context, index) {
-            final badge = DummyData.badges
+            final badge = badges
                 .where((b) => b['achieved'] == true)
                 .toList()[index];
             return _earnedBadgeCard(badge);
@@ -120,11 +154,9 @@ class BadgesScreen extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 0.85,
           ),
-          itemCount: DummyData.badges
-              .where((b) => b['achieved'] == false)
-              .length,
+          itemCount: badges.where((b) => b['achieved'] == false).length,
           itemBuilder: (context, index) {
-            final badge = DummyData.badges
+            final badge = badges
                 .where((b) => b['achieved'] == false)
                 .toList()[index];
             return _lockedBadgeCard(badge);
