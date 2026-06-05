@@ -16,14 +16,54 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   
-  final List<Map<String, dynamic>> _messages = [
-    {
-      'isUser': false,
-      'text': 'Chào bạn! Mình là giáo viên tiếng Anh AI của bạn đây. Hôm nay bạn muốn học từ vựng gì nào? 👋',
-    },
-  ];
+  final List<Map<String, dynamic>> _messages = [];
 
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final aiService = ref.read(aiServiceProvider);
+    final history = await aiService.getHistoryForUI();
+
+    if (mounted) {
+      setState(() {
+        if (history.isNotEmpty) {
+          _messages.clear();
+          _messages.addAll(history);
+        } else {
+          _messages.add({
+            'isUser': false,
+            'text': 'Chào bạn! Mình là giáo viên tiếng Anh AI của bạn đây. Hôm nay bạn muốn học từ vựng gì nào? 👋',
+          });
+        }
+        _isLoading = false;
+      });
+      _scrollToBottom();
+    }
+  }
+
+  Future<void> _clearHistory() async {
+    final aiService = ref.read(aiServiceProvider);
+    await aiService.clearHistory();
+    if (mounted) {
+      setState(() {
+        _messages.clear();
+        _messages.add({
+          'isUser': false,
+          'text': 'Đã xóa lịch sử trò chuyện. Mình là giáo viên tiếng Anh AI của bạn đây, bạn cần giúp gì nào? 👋',
+        });
+      });
+    }
+  }
 
   void _sendMessage() async {
     final text = _controller.text.trim();
@@ -79,9 +119,15 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: const CustomAppBar(
+      appBar: CustomAppBar(
         title: 'AI Teacher', 
         showBackButton: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: AppColors.primary),
+            onPressed: _clearHistory,
+          ),
+        ],
       ),
       body: Column(
         children: [
