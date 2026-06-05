@@ -3,6 +3,8 @@ import 'package:vitaminc/features/library/data/models/vocab_model.dart';
 import 'package:vitaminc/features/library/presentation/controllers/library_controller.dart';
 import 'package:vitaminc/features/study/data/srs_engine.dart';
 import 'package:vitaminc/features/study/presentation/study_providers.dart';
+import 'package:vitaminc/core/services/local_db_provider.dart';
+import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
 
 class StudyState {
   final bool isLoading;
@@ -44,6 +46,13 @@ class StudyController extends StateNotifier<StudyState> {
   Future<void> loadDueCards({String? deckId, bool forceStudy = false}) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
+      // 1. Tự động đồng bộ từ Firestore về Local DB trước khi lấy thẻ học
+      final user = _ref.read(authStateProvider).value;
+      if (user != null) {
+        await _ref.read(localDbServiceProvider).syncVocabsFromFirestore(user.uid);
+      }
+
+      // 2. Lấy thẻ từ Local DB
       final studyService = _ref.read(studyServiceProvider);
       final cards = await studyService.getDueCards(deckId: deckId, forceStudy: forceStudy);
       if (mounted) {

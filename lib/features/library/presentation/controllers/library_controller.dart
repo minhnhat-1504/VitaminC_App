@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:vitaminc/features/library/presentation/library_providers.dart';
 import 'package:vitaminc/core/utils/app_exception_handler.dart';
+import 'package:vitaminc/core/services/local_db_provider.dart';
+import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
 
 class LibraryState {
   final bool isLoading;
@@ -45,6 +47,12 @@ class LibraryController extends StateNotifier<LibraryState> {
   Future<void> loadDecks() async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
+      // Kích hoạt đồng bộ Local DB ngầm (Không await để tránh làm chậm UI)
+      final user = _ref.read(authStateProvider).value;
+      if (user != null) {
+        _ref.read(localDbServiceProvider).syncVocabsFromFirestore(user.uid);
+      }
+
       final libraryService = _ref.read(libraryServiceProvider);
       final decks = await libraryService.getDecks();
       
