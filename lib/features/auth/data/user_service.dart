@@ -39,4 +39,18 @@ class UserService {
       throw AppExceptionHandler.handleException(e, 'Lỗi cập nhật hồ sơ');
     }
   }
+
+  /// Cộng điểm XP cho người dùng
+  Future<void> addXP(String uid, int amount) async {
+    try {
+      await _firestore
+          .collection(FirestoreCollections.users)
+          .doc(uid)
+          .update({
+        'xp': FieldValue.increment(amount),
+      });
+    } catch (e) {
+      throw AppExceptionHandler.handleException(e, 'Lỗi cộng điểm XP');
+    }
+  }
 }

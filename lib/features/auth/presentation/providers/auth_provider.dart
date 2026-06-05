@@ -4,6 +4,8 @@ import '../../data/repositories/auth_repository.dart';
 import '../../data/user_service.dart';
 import '../../../../core/models/user_model.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 // Provider cung cấp Repository cho toàn bộ app
 final authRepositoryProvider = Provider((ref) => AuthRepository());
 
@@ -15,11 +17,20 @@ final authStateProvider = StreamProvider<User?>((ref) {
   return ref.watch(authRepositoryProvider).auth.authStateChanges();
 });
 
-// FutureProvider lấy thông tin chi tiết User (bao gồm Role) từ Firestore
-final currentUserProvider = FutureProvider<UserModel?>((ref) async {
+// StreamProvider lấy thông tin chi tiết User (bao gồm Role) từ Firestore thời gian thực
+final currentUserProvider = StreamProvider<UserModel?>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user != null) {
-    return ref.watch(authRepositoryProvider).getUserData(user.uid);
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .snapshots()
+        .map((snapshot) {
+          if (snapshot.exists && snapshot.data() != null) {
+            return UserModel.fromMap(snapshot.data()!);
+          }
+          return null;
+        });
   }
-  return null;
+  return Stream.value(null);
 });
