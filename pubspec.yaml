@@ -74,12 +74,19 @@ dependencies:
   flutter_local_notifications: ^21.0.0
   timezone: ^0.11.0
 
+  # --- LOCAL DATABASE (OFFLINE) ---
+  hive_ce: ^2.19.3
+  hive_ce_flutter: ^2.3.4
+  connectivity_plus: ^6.1.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   
   # Bộ quy tắc viết code chuẩn (Linting), giúp 4 người trong nhóm code cùng một style
   flutter_lints: ^3.0.0
+  build_runner: ^2.4.14
+  hive_ce_generator: ^1.11.1
 
 # Các cấu hình mặc định của Flutter
 flutter:

@@ -4,6 +4,7 @@ import 'package:vitaminc/core/utils/firestore_collections.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
 import 'package:vitaminc/features/library/data/models/vocab_model.dart';
 import 'package:vitaminc/core/utils/app_exception_handler.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LibraryService {
   final FirebaseFirestore _firestore;
@@ -30,6 +31,11 @@ class LibraryService {
   /// Thêm một bộ thẻ mới
   Future<DeckModel> addDeck(String title, {String description = ''}) async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
       final docRef = _firestore
           .collection(FirestoreCollections.users)
           .doc(_uid)
@@ -109,6 +115,11 @@ class LibraryService {
   /// Cập nhật thông tin Bộ thẻ
   Future<void> updateDeck(DeckModel deck) async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
       final updatedDeck = deck.copyWith(
         updatedAt: Timestamp.now(),
       );
@@ -126,6 +137,11 @@ class LibraryService {
   /// Xóa bộ thẻ (Sẽ xóa luôn các từ vựng bên trong)
   Future<void> deleteDeck(String deckId) async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
       // 1. Xóa tất cả các thẻ nằm trong Deck này
       final vocabsSnapshot = await _firestore
           .collection(FirestoreCollections.users)
@@ -160,6 +176,11 @@ class LibraryService {
   /// Thêm một từ vựng mới vào bộ thẻ
   Future<void> addVocab(VocabModel vocab) async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
       final docRef = _firestore
           .collection(FirestoreCollections.users)
           .doc(_uid)
@@ -181,6 +202,11 @@ class LibraryService {
   /// Cập nhật từ vựng
   Future<void> updateVocab(VocabModel vocab) async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
       final updatedVocab = vocab.copyWith(
         updatedAt: Timestamp.now(),
       );
@@ -199,6 +225,11 @@ class LibraryService {
   /// Xóa từ vựng
   Future<void> deleteVocab(String vocabId) async {
     try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      if (isOffline) {
+        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+      }
       await _firestore
           .collection(FirestoreCollections.users)
           .doc(_uid)
