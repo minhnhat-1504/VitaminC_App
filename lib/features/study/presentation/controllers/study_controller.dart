@@ -46,14 +46,16 @@ class StudyController extends StateNotifier<StudyState> {
     try {
       final studyService = _ref.read(studyServiceProvider);
       final cards = await studyService.getDueCards(deckId: deckId, forceStudy: forceStudy);
-      state = state.copyWith(
-        isLoading: false,
-        dueCards: cards,
-        currentIndex: 0,
-        isFinished: cards.isEmpty,
-      );
+      if (mounted) {
+        state = state.copyWith(
+          isLoading: false,
+          dueCards: cards,
+          currentIndex: 0,
+          isFinished: cards.isEmpty,
+        );
+      }
     } catch (e) {
-      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted) state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
@@ -71,6 +73,8 @@ class StudyController extends StateNotifier<StudyState> {
       // 2. Lưu lên Firestore (Chờ lưu xong để Library cập nhật chuẩn xác)
       await studyService.updateCardAfterReview(updatedCard);
 
+      if (!mounted) return;
+
       // 3. Chuyển sang thẻ tiếp theo
       final nextIndex = state.currentIndex + 1;
       final finished = nextIndex >= state.dueCards.length;
@@ -85,7 +89,7 @@ class StudyController extends StateNotifier<StudyState> {
         _ref.read(libraryControllerProvider.notifier).loadDecks();
       }
     } catch (e) {
-      state = state.copyWith(errorMessage: e.toString());
+      if (mounted) state = state.copyWith(errorMessage: e.toString());
     }
   }
 }

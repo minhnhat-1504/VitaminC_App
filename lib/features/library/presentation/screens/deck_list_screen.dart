@@ -48,7 +48,7 @@ class DeckListScreen extends ConsumerWidget {
               ref.read(libraryControllerProvider.notifier).updateDeck(updated).then((_) {
                 final error = ref.read(libraryControllerProvider).errorMessage;
                 if (error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
                 } else {
                   Navigator.pop(ctx);
                 }
@@ -98,7 +98,7 @@ class DeckListScreen extends ConsumerWidget {
                 
                 final error = ref.read(libraryControllerProvider).errorMessage;
                 if (error != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
                 } else if (newDeck != null) {
                   Navigator.pop(ctx);
                   context.push('/deck-detail', extra: newDeck.id);
@@ -285,8 +285,15 @@ class DeckListScreen extends ConsumerWidget {
                                           ElevatedButton(
                                             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                                             onPressed: () {
-                                              controller.deleteDeck(deck.id);
-                                              Navigator.pop(ctx);
+                                              controller.deleteDeck(deck.id).then((_) {
+                                                if (context.mounted) {
+                                                  Navigator.pop(ctx); // Đóng popup xác nhận xóa
+                                                  final error = ref.read(libraryControllerProvider).errorMessage;
+                                                  if (error != null) {
+                                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
+                                                  }
+                                                }
+                                              });
                                             },
                                             child: const Text('Xóa', style: TextStyle(color: Colors.white)),
                                           ),

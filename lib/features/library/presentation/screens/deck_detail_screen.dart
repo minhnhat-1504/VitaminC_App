@@ -87,8 +87,14 @@ class DeckDetailScreen extends ConsumerWidget {
                 meaning: meaning,
                 example: exampleController.text.trim().isEmpty ? null : exampleController.text.trim(),
               );
-              ref.read(deckDetailControllerProvider(deckId).notifier).updateVocab(updated);
-              Navigator.pop(ctx);
+              ref.read(deckDetailControllerProvider(deckId).notifier).updateVocab(updated).then((_) {
+                final error = ref.read(deckDetailControllerProvider(deckId)).errorMessage;
+                if (error != null && context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
+                } else if (context.mounted) {
+                  Navigator.pop(ctx);
+                }
+              });
             },
             child: const Text('Lưu'),
           ),
@@ -190,8 +196,15 @@ class DeckDetailScreen extends ConsumerWidget {
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
                                         onPressed: () {
-                                          controller.deleteVocab(vocab.id);
-                                          Navigator.pop(ctx);
+                                          controller.deleteVocab(vocab.id).then((_) {
+                                            if (context.mounted) {
+                                              Navigator.pop(ctx); // Luôn đóng dialog xác nhận xóa
+                                              final error = ref.read(deckDetailControllerProvider(deckId)).errorMessage;
+                                              if (error != null) {
+                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
+                                              }
+                                            }
+                                          });
                                         },
                                         child: const Text('Xóa', style: TextStyle(color: Colors.white)),
                                       ),
