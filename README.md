@@ -500,3 +500,68 @@ Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Fire
 | **2. Quét chữ từ Ảnh (OCR)**   | `features/tools/presentation/screens/ocr_scanner_screen.dart` | Cài đặt `google_mlkit_text_recognition` và `image_picker`. Cho phép chụp ảnh tài liệu, ML Kit trả về Text Block. Viết logic: User chạm vào từ nào trong Text Block đó, tự động chuyển sang form `add_vocab_screen.dart` và điền sẵn từ vựng. |
 | **3. Trí nhớ cho Chatbot**       | `features/tools/data/ai_service.dart`                         | Lưu lịch sử mảng tin nhắn (History) của lớp `ChatSession` xuống Local DB. Khi user mở lại `chatbot_screen.dart`, nạp History này vào để Gemini AI vẫn nhớ bối cảnh cuộc trò chuyện trước đó.                                                     |
 | **4. Trigger Animation Thực tế** | `features/social/presentation/widgets/streak_popup.dart`      | Kết nối Popup với Riverpod. Viết logic chặn: Popup ăn mừng Streak CHỈ được hiển thị 1 lần duy nhất trong ngày, đúng vào khoảnh khắc User hoàn thành thẻ học khiến biến `streak_count` nhảy số.                                                  |
+---
+
+### Sprint 4: Hoàn thiện, Tối ưu Hiệu năng & Trải nghiệm Người dùng (Polishing)
+
+**Mục tiêu cốt lõi:** Liên kết toàn bộ ứng dụng thành một khối thống nhất, bít kín các lỗ hổng tính năng (như quên mật khẩu, trạng thái rỗng), tối ưu hóa hiệu năng bộ nhớ trên thiết bị Android và chuẩn hóa hệ thống thông báo lỗi (Error Handling) để giao tiếp thân thiện với người dùng.
+
+#### ⚠️ LƯU Ý QUAN TRỌNG CHO SPRINT 4 (TẤT CẢ THÀNH VIÊN CẦN ĐỌC KỸ)
+
+**1. Chuẩn hóa Thông điệp Lỗi (User-centric Error Handling)**
+
+* Tuyệt đối không hiển thị các mã lỗi hệ thống tiếng Anh (ví dụ: `Exception: timeout`, `null pointer`) ra màn hình cho người dùng cuối.
+* Trong các hệ thống hiện đại, một "Failure" (sự cố ngưng hoạt động) rất nhiều lúc xảy ra do đường truyền mạng hoặc dịch vụ bên thứ 3 (như Firebase, Gemini) bị sập, chứ không hoàn toàn do Bug trong code của nhóm. Do đó, các thông báo lỗi phải được bắt (catch) và dịch sang tiếng Việt thân thiện, ví dụ: *"Đường truyền mạng đang gặp sự cố, vui lòng kiểm tra lại kết nối"* hoặc *"Máy chủ đang bận, xin thử lại sau"*.
+
+**2. Tối ưu Bộ nhớ (Memory Leak Prevention)**
+
+* Việc sử dụng Local DB (Isar), Text-to-Speech, Camera OCR và Animation tạo ra gánh nặng rất lớn cho RAM của điện thoại Android.
+* **Yêu cầu bắt buộc:** Tất cả các màn hình có sử dụng `Controller` (TextEditingController, AnimationController) hoặc các stream lắng nghe dữ liệu liên tục đều phải được gọi lệnh `dispose()` khi đóng màn hình để giải phóng bộ nhớ.
+
+**3. Xử lý Trạng thái Rỗng (Empty States & Loading)**
+
+* Không được để một màn hình trắng tinh khi dữ liệu đang tải hoặc khi người dùng chưa có dữ liệu nào.
+* Phải luôn có `CircularProgressIndicator` (hoặc hiệu ứng Shimmer) khi chờ API. Nếu danh sách từ vựng trống, phải hiển thị hình ảnh minh họa và nút kêu gọi hành động: *"Bạn chưa có thẻ nào, hãy tạo ngay nhé!"*.
+
+**4. Dọn dẹp Codebase & Chuẩn bị Đóng gói Android**
+
+* Vì nhóm chỉ tập trung build cho Android, hãy kiểm tra lại file `android/app/build.gradle`. Xóa bỏ toàn bộ các thư viện (dependencies) thừa không sử dụng trong `pubspec.yaml` để giảm thiểu dung lượng file APK cuối cùng.
+
+---
+
+#### 👨‍💻 Phân công nhiệm vụ chi tiết
+
+**Thành viên 1 (Lead): Quản trị Lỗi trung tâm, Bảo mật & Automation Testing**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Trạm xử lý lỗi trung tâm** | `core/utils/app_exception_handler.dart` | Nâng cấp class này. Gom tất cả mã lỗi của Firebase (`user-not-found`, `network-request-failed`) và Isar lại. Viết hàm chuyển đổi (switch-case) các mã này thành một chuỗi String tiếng Việt chuẩn xác để UI gọi và hiển thị lên `SnackBar`. |
+| **2. Bổ sung Quên mật khẩu** | `features/auth/presentation/screens/login_screen.dart` | Nối logic cho nút "Quên mật khẩu?". Mở một Dialog yêu cầu nhập Email. Gọi hàm `FirebaseAuth.instance.sendPasswordResetEmail(email)`. Hiển thị thông báo: *"Link đặt lại mật khẩu đã được gửi đến email của bạn"*. |
+| **3. Khung Kiểm thử (Automation Test)** | `integration_test/app_test.dart` (Tạo mới) | Thiết lập kịch bản kiểm thử tự động (Integration Test) cho luồng quan trọng nhất: Mở app -> Đăng nhập -> Vào thư viện -> Bấm lật 1 thẻ. Đảm bảo luồng xương sống này không bao giờ bị gãy khi nhóm đẩy code mới lên. |
+| **4. Xử lý Token hết hạn** | `features/auth/data/auth_repository.dart` | Viết thêm logic lắng nghe sự kiện user bị khóa hoặc token hết hạn. Nếu xảy ra, tự động kích hoạt hàm `signOut()` và đẩy người dùng văng ra ngoài màn hình Login với thông báo: *"Phiên đăng nhập đã hết hạn"*. |
+
+**Thành viên 2: Tối ưu UI/UX, Hiệu ứng & Liên kết Điều hướng**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Empty States & Loading UI** | Toàn bộ thư mục `features/` | Rà soát tất cả các màn hình (Dashboard, Library, Leaderboard). Bổ sung widget `EmptyStateWidget` (kèm icon và text hướng dẫn) khi mảng dữ liệu trả về rỗng. Thay thế các màn hình chờ bằng hiệu ứng Shimmer (khung xám nhấp nháy) cho chuyên nghiệp. |
+| **2. Deep Link Thông báo (FCM)** | `routing/app_router.dart` & `notification_service.dart` | Cấu hình để khi người dùng đang ở ngoài màn hình chính của điện thoại, bấm vào thông báo nhắc nhở học tập (FCM), ứng dụng sẽ mở lên và tự động nhảy thẳng vào trang `/study` (Flashcard) thay vì chỉ mở trang chủ chung chung. |
+| **3. Xử lý UX Bàn phím ảo** | `features/library/presentation/screens/add_vocab_screen.dart` | Bọc các form nhập liệu bằng `SingleChildScrollView` và cấu hình `resizeToAvoidBottomInset = true` trong Scaffold. Đảm bảo khi bàn phím ảo của Android bật lên không bị che khuất nút "Lưu" hoặc báo lỗi vỡ layout sọc vàng đen. |
+
+**Thành viên 3: Khớp nối Đồng bộ, Tối ưu RAM & Xung đột Dữ liệu**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Quét dọn Memory (Dispose)** | Toàn bộ dự án | Kiểm tra lại toàn bộ các `StatefulWidget`. Đảm bảo các `TextEditingController`, `AnimationController`, và đặc biệt là stream kết nối với Isar/Firestore phải được hủy (close/dispose) trong hàm `dispose()` để tránh tràn RAM gây giật lag app. |
+| **2. Nút Đồng bộ thủ công (Force Sync)** | `features/settings/presentation/screens/settings_screen.dart` | Thêm nút "Đồng bộ dữ liệu" ở mục Cài đặt. Khi bấm vào, kích hoạt lệnh đẩy toàn bộ hàng đợi (Queue) từ Local Isar lên Firestore ngay lập tức (hiện loading vòng xoay). Dành cho trường hợp tiến trình ngầm bị hệ điều hành Android kill mất. |
+| **3. Xử lý Xung đột Đồng bộ** | `core/services/local_db_service.dart` | Khi kéo dữ liệu từ Firestore về đè lên Local DB, viết logic so sánh biến `updatedAt` (Timestamp). Thẻ nào có thời gian cập nhật mới hơn thì giữ lại thẻ đó, tránh việc đồng bộ ngược làm mất dữ liệu học Offline của người dùng. |
+
+**Thành viên 4: Hoàn thiện Tools, Analytics & Đóng gói APK**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Theo dõi Ứng dụng (Analytics)** | `main.dart` | Cài đặt `firebase_analytics` và `firebase_crashlytics`. Gắn các lệnh log event khi user thực hiện hành động quan trọng (VD: Hoàn thành 1 thẻ, Quét OCR thành công). Crashlytics sẽ tự bắt các lỗi crash Native Android gửi về Firebase Console. |
+| **2. Bẫy lỗi Công cụ Thông minh** | `features/tools/presentation/screens/` | Xử lý các góc chết của AI/OCR: Thêm vòng xoay loading khi đang đợi Gemini rep. Báo lỗi *"Không tìm thấy chữ trong ảnh"* nếu OCR ML Kit trả về rỗng. Tự ngắt micro thu âm nếu user im lặng quá 5 giây (tránh treo app). |
+| **3. Đóng gói & Tối ưu APK** | `android/app/build.gradle` & `android/app/src/main/` | Đổi tên ứng dụng chính thức trong `AndroidManifest.xml`. Cập nhật file logo (Icon) chuẩn của VitaminC vào thư mục `res/mipmap`. Bật cấu hình `minifyEnabled true` và `shrinkResources true` trong bản build release để nén giảm dung lượng file APK. |
+
+---
