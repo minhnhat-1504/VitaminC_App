@@ -5,6 +5,8 @@ import 'package:vitaminc/features/study/data/srs_engine.dart';
 import 'package:vitaminc/features/study/presentation/study_providers.dart';
 import 'package:vitaminc/core/services/local_db_provider.dart';
 import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 class StudyState {
   final bool isLoading;
@@ -91,6 +93,24 @@ class StudyController extends StateNotifier<StudyState> {
 
       // 2. Lưu lên Firestore (Chờ lưu xong để Library cập nhật chuẩn xác)
       await studyService.updateCardAfterReview(updatedCard);
+
+      // 2b. Tăng tiến độ nhiệm vụ đồng đội (Co-op Quest)
+      try {
+        final docRef = FirebaseFirestore.instance.collection('quests').doc('weekly_coop');
+        final doc = await docRef.get();
+        if (!doc.exists) {
+          await docRef.set({
+            'totalFlipped': 1,
+            'target': 500,
+          });
+        } else {
+          await docRef.update({
+            'totalFlipped': FieldValue.increment(1),
+          });
+        }
+      } catch (e) {
+        debugPrint('Error updating coop quest: $e');
+      }
 
       if (!mounted) return;
 
