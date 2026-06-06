@@ -11,7 +11,7 @@ class TtsService {
   Future<void> _initTts() async {
     // Thiết lập ngôn ngữ mặc định trước
     await _flutterTts.setLanguage("en-US");
-    
+
     // Tìm các giọng đọc có chất lượng cao (Network Voices thường nghe rất tự nhiên)
     try {
       List<dynamic>? voices = await _flutterTts.getVoices;
@@ -30,14 +30,16 @@ class TtsService {
 
           // Ưu tiên 2: Các gói giọng chất lượng cao (thường có chữ smt hoặc female)
           bestVoice ??= usVoices.cast<Map<dynamic, dynamic>?>().firstWhere(
-            (v) => v!["name"].toString().contains("sfg") || v["name"].toString().contains("female"),
+            (v) =>
+                v!["name"].toString().contains("sfg") ||
+                v["name"].toString().contains("female"),
             orElse: () => usVoices.first, // Fallback lấy cái đầu tiên
           );
 
           if (bestVoice != null) {
             await _flutterTts.setVoice({
               "name": bestVoice["name"],
-              "locale": bestVoice["locale"]
+              "locale": bestVoice["locale"],
             });
           }
         }
@@ -47,9 +49,13 @@ class TtsService {
     }
 
     // Tinh chỉnh một chút thông số để giọng bớt bị "robot" và "nghẹt"
-    await _flutterTts.setSpeechRate(0.45); // Chậm lại một chút xíu để nghe rõ âm tiết
+    await _flutterTts.setSpeechRate(
+      0.45,
+    ); // Chậm lại một chút xíu để nghe rõ âm tiết
     await _flutterTts.setVolume(1.0);
-    await _flutterTts.setPitch(1.05); // Tăng pitch lên 1 tí xíu cho giọng sáng hơn
+    await _flutterTts.setPitch(
+      1.05,
+    ); // Tăng pitch lên 1 tí xíu cho giọng sáng hơn
   }
 
   Future<void> speak(String text) async {

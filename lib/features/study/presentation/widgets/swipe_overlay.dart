@@ -98,7 +98,9 @@ class SwipeOverlay extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   border: Border.all(
-                    color: overlayColor.withValues(alpha: min(intensity * 1.5, 1.0)),
+                    color: overlayColor.withValues(
+                      alpha: min(intensity * 1.5, 1.0),
+                    ),
                     width: 4,
                   ),
                   borderRadius: BorderRadius.circular(12),
@@ -109,7 +111,9 @@ class SwipeOverlay extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.w900,
-                    color: overlayColor.withValues(alpha: min(intensity * 1.5, 1.0)),
+                    color: overlayColor.withValues(
+                      alpha: min(intensity * 1.5, 1.0),
+                    ),
                     letterSpacing: 4,
                   ),
                 ),

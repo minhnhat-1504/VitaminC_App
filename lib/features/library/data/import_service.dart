@@ -15,11 +15,9 @@ class ImportService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  ImportService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  ImportService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   /// Import từ vựng hàng loạt từ file Excel (.xlsx)
   /// Sẽ tự động tạo một Bộ Thẻ (Deck) mới lấy tên là tên file Excel
@@ -27,9 +25,13 @@ class ImportService {
   Future<DeckModel?> importExcel() async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
       if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
       }
 
       final uid = _auth.currentUser?.uid;
@@ -41,7 +43,8 @@ class ImportService {
       FilePickerResult? result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx', 'xls'],
-        withData: true, // Cực kỳ quan trọng: Ép hệ điều hành nạp thẳng file vào bộ nhớ
+        withData:
+            true, // Cực kỳ quan trọng: Ép hệ điều hành nạp thẳng file vào bộ nhớ
       );
 
       if (result == null || result.files.single.bytes == null) {
@@ -50,16 +53,21 @@ class ImportService {
 
       // Lấy thẳng byte data, tránh dùng đường dẫn vật lý (path) hay gây lỗi trên Android 13+
       final bytes = result.files.single.bytes!;
-      final fileName = result.files.single.name.replaceAll(RegExp(r'\.xlsx?$'), ''); // Tên file bỏ đuôi
-      
+      final fileName = result.files.single.name.replaceAll(
+        RegExp(r'\.xlsx?$'),
+        '',
+      ); // Tên file bỏ đuôi
+
       // 2. Đọc file Excel từ bytes
       Excel excel;
       try {
         excel = Excel.decodeBytes(bytes);
       } catch (e) {
-        throw AppException('File Excel không đúng định dạng (.xlsx chuẩn) hoặc bị hỏng.');
+        throw AppException(
+          'File Excel không đúng định dạng (.xlsx chuẩn) hoặc bị hỏng.',
+        );
       }
-      
+
       List<VocabModel> vocabsToImport = [];
       final now = Timestamp.now();
 
@@ -69,9 +77,9 @@ class ImportService {
           .doc(uid)
           .collection(FirestoreCollections.userDecks)
           .doc();
-      
+
       final String deckId = deckRef.id;
-      
+
       // Tạo Deck Document
       final newDeck = DeckModel(
         id: deckId,
@@ -95,8 +103,8 @@ class ImportService {
           // Bỏ qua header nếu dòng đầu tiên chứa chữ 'word'
           if (isFirstRow) {
             isFirstRow = false;
-            final firstCell = row.isNotEmpty && row[0]?.value != null 
-                ? row[0]!.value.toString().toLowerCase() 
+            final firstCell = row.isNotEmpty && row[0]?.value != null
+                ? row[0]!.value.toString().toLowerCase()
                 : '';
             if (firstCell.contains('word')) {
               continue; // Đây là dòng tiêu đề, bỏ qua
@@ -104,9 +112,15 @@ class ImportService {
           }
 
           try {
-            final wordValue = row.length > 0 && row[0]?.value != null ? row[0]!.value.toString().trim() : '';
-            final meaningValue = row.length > 1 && row[1]?.value != null ? row[1]!.value.toString().trim() : '';
-            final exampleValue = row.length > 2 && row[2]?.value != null ? row[2]!.value.toString().trim() : null;
+            final wordValue = row.length > 0 && row[0]?.value != null
+                ? row[0]!.value.toString().trim()
+                : '';
+            final meaningValue = row.length > 1 && row[1]?.value != null
+                ? row[1]!.value.toString().trim()
+                : '';
+            final exampleValue = row.length > 2 && row[2]?.value != null
+                ? row[2]!.value.toString().trim()
+                : null;
 
             if (wordValue.isEmpty || meaningValue.isEmpty) continue;
 
@@ -116,16 +130,18 @@ class ImportService {
                 .collection(FirestoreCollections.vocabs)
                 .doc();
 
-            vocabsToImport.add(VocabModel(
-              id: docRef.id,
-              deckId: deckId, 
-              word: wordValue,
-              meaning: meaningValue,
-              example: exampleValue?.isNotEmpty == true ? exampleValue : null,
-              nextReview: now,
-              createdAt: now,
-              updatedAt: now,
-            ));
+            vocabsToImport.add(
+              VocabModel(
+                id: docRef.id,
+                deckId: deckId,
+                word: wordValue,
+                meaning: meaningValue,
+                example: exampleValue?.isNotEmpty == true ? exampleValue : null,
+                nextReview: now,
+                createdAt: now,
+                updatedAt: now,
+              ),
+            );
           } catch (e) {
             // Bỏ qua dòng bị lỗi và tiếp tục đọc dòng khác
             continue;
@@ -141,22 +157,22 @@ class ImportService {
 
       // 5. Lưu hàng loạt vào Firestore
       int totalImported = 0;
-      final int batchSize = 500; 
-      
+      final int batchSize = 500;
+
       for (int i = 0; i < vocabsToImport.length; i += batchSize) {
         final batch = _firestore.batch();
         final chunk = vocabsToImport.skip(i).take(batchSize).toList();
-        
+
         for (var vocab in chunk) {
           final docRef = _firestore
               .collection(FirestoreCollections.users)
               .doc(uid)
               .collection(FirestoreCollections.vocabs)
               .doc(vocab.id);
-          
+
           batch.set(docRef, vocab.toMap());
         }
-        
+
         await batch.commit();
         totalImported += chunk.length;
       }

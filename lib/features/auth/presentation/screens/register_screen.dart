@@ -33,8 +33,8 @@ class RegisterForm extends StatelessWidget {
         // 2. Ô nhập Email
         _buildLabel("Email Address", "Địa chỉ Email"),
         CustomTextField(
-          controller: emailController, 
-          hintText: 'name@example.com', 
+          controller: emailController,
+          hintText: 'name@example.com',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
         ),
@@ -43,12 +43,12 @@ class RegisterForm extends StatelessWidget {
         // 3. Ô nhập Mật khẩu
         _buildLabel("Create Password", "Tạo mật khẩu"),
         CustomTextField(
-          controller: passwordController, 
-          hintText: '••••••••', 
-          prefixIcon: Icons.lock_outline, 
+          controller: passwordController,
+          hintText: '••••••••',
+          prefixIcon: Icons.lock_outline,
           isPassword: true,
         ),
-        
+
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -56,20 +56,20 @@ class RegisterForm extends StatelessWidget {
               // Bạn có thể thêm logic chuyển sang tab Login ở đây nếu cần
             },
             style: TextButton.styleFrom(
-              padding: EdgeInsets.zero, 
+              padding: EdgeInsets.zero,
               minimumSize: const Size(0, 40),
             ),
             child: const Text(
-              'Đã có tài khoản?', 
+              'Đã có tài khoản?',
               style: TextStyle(
-                color: AppColors.primary, 
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 8), 
-        
+        const SizedBox(height: 8),
+
         // Nút bấm được truyền từ LoginScreen
         submitButton,
       ],
@@ -82,16 +82,16 @@ class RegisterForm extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            en, 
+            en,
             style: const TextStyle(
-              fontWeight: FontWeight.bold, 
-              color: AppColors.textLight, 
+              fontWeight: FontWeight.bold,
+              color: AppColors.textLight,
               fontSize: 15,
             ),
           ),
           const SizedBox(width: 8),
           Text(
-            "- $vi", 
+            "- $vi",
             style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
           ),
         ],

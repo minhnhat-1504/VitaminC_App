@@ -75,6 +75,7 @@ class DeckDetailController extends StateNotifier<DeckDetailState> {
 }
 
 // Family provider để truyền deckId vào
-final deckDetailControllerProvider = StateNotifierProvider.family.autoDispose<DeckDetailController, DeckDetailState, String>((ref, deckId) {
-  return DeckDetailController(ref, deckId);
-});
+final deckDetailControllerProvider = StateNotifierProvider.family
+    .autoDispose<DeckDetailController, DeckDetailState, String>((ref, deckId) {
+      return DeckDetailController(ref, deckId);
+    });

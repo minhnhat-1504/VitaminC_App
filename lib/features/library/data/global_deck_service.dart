@@ -9,11 +9,9 @@ class GlobalDeckService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  GlobalDeckService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  GlobalDeckService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   String get _uid {
     final uid = _auth.currentUser?.uid;
@@ -35,7 +33,10 @@ class GlobalDeckService {
           .map((doc) => DeckModel.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      throw AppExceptionHandler.handleException(e, 'Lỗi khi tải danh sách bộ thẻ mẫu');
+      throw AppExceptionHandler.handleException(
+        e,
+        'Lỗi khi tải danh sách bộ thẻ mẫu',
+      );
     }
   }
 
@@ -43,7 +44,7 @@ class GlobalDeckService {
   Future<DeckModel> cloneToPersonal(DeckModel globalDeck) async {
     try {
       final batch = _firestore.batch();
-      
+
       // 1. Lấy tất cả từ vựng của global deck này
       final vocabsSnapshot = await _firestore
           .collection(FirestoreCollections.globalDecks)
@@ -57,7 +58,7 @@ class GlobalDeckService {
           .doc(_uid)
           .collection(FirestoreCollections.userDecks)
           .doc();
-          
+
       final personalDeck = globalDeck.copyWith(
         id: newDeckRef.id,
         createdAt: Timestamp.now(),
@@ -68,13 +69,13 @@ class GlobalDeckService {
       // 3. Clone các từ vựng vào personal vocabs
       for (var doc in vocabsSnapshot.docs) {
         final globalVocab = VocabModel.fromMap(doc.data(), doc.id);
-        
+
         final newVocabRef = _firestore
             .collection(FirestoreCollections.users)
             .doc(_uid)
             .collection(FirestoreCollections.vocabs)
             .doc();
-            
+
         final personalVocab = globalVocab.copyWith(
           id: newVocabRef.id,
           deckId: newDeckRef.id, // trỏ tới personal deck mới
@@ -92,7 +93,10 @@ class GlobalDeckService {
       await batch.commit();
       return personalDeck;
     } catch (e) {
-      throw AppExceptionHandler.handleException(e, 'Lỗi khi nhân bản bộ thẻ mẫu');
+      throw AppExceptionHandler.handleException(
+        e,
+        'Lỗi khi nhân bản bộ thẻ mẫu',
+      );
     }
   }
 
@@ -100,12 +104,12 @@ class GlobalDeckService {
   Future<void> publishToGlobal(DeckModel personalDeck) async {
     try {
       final batch = _firestore.batch();
-      
+
       // 1. Tạo document trong global_decks
       final globalDeckRef = _firestore
           .collection(FirestoreCollections.globalDecks)
           .doc();
-          
+
       final globalDeck = personalDeck.copyWith(
         id: globalDeckRef.id,
         createdAt: Timestamp.now(),
@@ -124,11 +128,11 @@ class GlobalDeckService {
       // 3. Đưa vào sub-collection vocabs của global_decks
       for (var doc in vocabsSnapshot.docs) {
         final personalVocab = VocabModel.fromMap(doc.data(), doc.id);
-        
+
         final newGlobalVocabRef = globalDeckRef
             .collection(FirestoreCollections.vocabs)
             .doc();
-            
+
         final globalVocab = personalVocab.copyWith(
           id: newGlobalVocabRef.id,
           deckId: globalDeckRef.id,
@@ -140,7 +144,10 @@ class GlobalDeckService {
 
       await batch.commit();
     } catch (e) {
-      throw AppExceptionHandler.handleException(e, 'Lỗi khi xuất bản bộ thẻ mẫu');
+      throw AppExceptionHandler.handleException(
+        e,
+        'Lỗi khi xuất bản bộ thẻ mẫu',
+      );
     }
   }
 }

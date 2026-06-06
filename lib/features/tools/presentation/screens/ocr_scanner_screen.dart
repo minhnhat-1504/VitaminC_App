@@ -78,7 +78,8 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
         _elements = allElements;
         _isProcessing = false;
         if (allElements.isEmpty) {
-          _errorMessage = 'Không tìm thấy chữ nào trong ảnh.\nThử chụp lại rõ hơn nhé!';
+          _errorMessage =
+              'Không tìm thấy chữ nào trong ảnh.\nThử chụp lại rõ hơn nhé!';
         }
       });
     } catch (e) {
@@ -129,7 +130,8 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
         _elements = allElements;
         _isProcessing = false;
         if (allElements.isEmpty) {
-          _errorMessage = 'Không tìm thấy chữ nào trong ảnh.\nThử chọn ảnh khác nhé!';
+          _errorMessage =
+              'Không tìm thấy chữ nào trong ảnh.\nThử chọn ảnh khác nhé!';
         }
       });
     } catch (e) {
@@ -179,18 +181,18 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
           decks: decks,
           onDeckSelected: (deck) {
             Navigator.pop(ctx);
-            context.push('/add-vocab', extra: {
-              'deckId': deck.id,
-              'word': word,
-            });
+            context.push(
+              '/add-vocab',
+              extra: {'deckId': deck.id, 'word': word},
+            );
           },
         ),
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi tải danh sách bộ thẻ: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi tải danh sách bộ thẻ: $e')));
       }
     }
   }
@@ -296,11 +298,18 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 56, color: AppColors.warning),
+              const Icon(
+                Icons.error_outline,
+                size: 56,
+                color: AppColors.warning,
+              ),
               const SizedBox(height: 16),
               Text(
                 _errorMessage!,
-                style: GoogleFonts.lexend(fontSize: 14, color: AppColors.slate500),
+                style: GoogleFonts.lexend(
+                  fontSize: 14,
+                  color: AppColors.slate500,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
@@ -375,10 +384,7 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
                       children: [
                         // Ảnh nền (vừa khít SizedBox)
                         Positioned.fill(
-                          child: Image.file(
-                            _imageFile!,
-                            fit: BoxFit.fill,
-                          ),
+                          child: Image.file(_imageFile!, fit: BoxFit.fill),
                         ),
 
                         // Overlay từng element (từ)
@@ -393,9 +399,13 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
                               onTap: () => _onElementTapped(el),
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.15),
+                                  color: AppColors.primary.withValues(
+                                    alpha: 0.15,
+                                  ),
                                   border: Border.all(
-                                    color: AppColors.primary.withValues(alpha: 0.5),
+                                    color: AppColors.primary.withValues(
+                                      alpha: 0.5,
+                                    ),
                                     width: 1,
                                   ),
                                   borderRadius: BorderRadius.circular(3),
@@ -546,7 +556,10 @@ class _DeckPickerSheet extends StatelessWidget {
                       color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.folder_rounded, color: AppColors.primary),
+                    child: const Icon(
+                      Icons.folder_rounded,
+                      color: AppColors.primary,
+                    ),
                   ),
                   title: Text(
                     deck.title,
@@ -566,7 +579,11 @@ class _DeckPickerSheet extends StatelessWidget {
                           ),
                         )
                       : null,
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.slate400),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: AppColors.slate400,
+                  ),
                 );
               },
             ),

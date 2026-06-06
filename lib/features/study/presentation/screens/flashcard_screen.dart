@@ -36,7 +36,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     super.initState();
     // Tải thẻ ôn tập của bộ hiện tại
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(studyControllerProvider.notifier).loadDueCards(deckId: widget.deckId);
+      ref
+          .read(studyControllerProvider.notifier)
+          .loadDueCards(deckId: widget.deckId);
     });
   }
 
@@ -71,27 +73,47 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
 
     if (state.dueCards.isEmpty) {
       return Scaffold(
-        appBar: const CustomAppBar(title: 'Review Complete', showBackButton: true),
+        appBar: const CustomAppBar(
+          title: 'Review Complete',
+          showBackButton: true,
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle_outline, size: 80, color: AppColors.success),
+              const Icon(
+                Icons.check_circle_outline,
+                size: 80,
+                color: AppColors.success,
+              ),
               const SizedBox(height: 24),
-              const Text('🎉 Bộ từ này hôm nay không có từ nào cần ôn!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const Text(
+                '🎉 Bộ từ này hôm nay không có từ nào cần ôn!',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  ref.read(studyControllerProvider.notifier).loadDueCards(deckId: widget.deckId, forceStudy: true);
+                  ref
+                      .read(studyControllerProvider.notifier)
+                      .loadDueCards(deckId: widget.deckId, forceStudy: true);
                 },
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-                child: const Text('Học lại toàn bộ (Cram mode)', style: TextStyle(color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                ),
+                child: const Text(
+                  'Học lại toàn bộ (Cram mode)',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () => context.pop(),
-                child: const Text('Trở về thư viện', style: TextStyle(color: AppColors.textLight)),
-              )
+                child: const Text(
+                  'Trở về thư viện',
+                  style: TextStyle(color: AppColors.textLight),
+                ),
+              ),
             ],
           ),
         ),
@@ -100,14 +122,20 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
 
     if (state.isFinished) {
       return Scaffold(
-        appBar: const CustomAppBar(title: 'Review Complete', showBackButton: true),
+        appBar: const CustomAppBar(
+          title: 'Review Complete',
+          showBackButton: true,
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.stars, size: 100, color: AppColors.secondary),
               const SizedBox(height: 24),
-              const Text('Tuyệt vời! Bạn đã hoàn thành phiên học.', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Tuyệt vời! Bạn đã hoàn thành phiên học.',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
@@ -115,11 +143,19 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                child: const Text('Xem tổng kết bài học', style: TextStyle(fontSize: 16, color: Colors.white)),
-              )
+                child: const Text(
+                  'Xem tổng kết bài học',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
             ],
           ),
         ),
@@ -160,35 +196,44 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
               child: CardSwiper(
                 isDisabled: !_hasFlippedOnce,
                 controller: _swiperController,
-              cardsCount: state.dueCards.length,
-              numberOfCardsDisplayed: min(3, state.dueCards.length),
-              isLoop: false,
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              // Cho phép vuốt 3 hướng: trái (Hard), phải (Easy), lên (Good)
-              allowedSwipeDirection: const AllowedSwipeDirection.only(
-                left: true,
-                right: true,
-                up: true,
-                down: false,
+                cardsCount: state.dueCards.length,
+                numberOfCardsDisplayed: min(3, state.dueCards.length),
+                isLoop: false,
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 8,
+                ),
+                // Cho phép vuốt 3 hướng: trái (Hard), phải (Easy), lên (Good)
+                allowedSwipeDirection: const AllowedSwipeDirection.only(
+                  left: true,
+                  right: true,
+                  up: true,
+                  down: false,
+                ),
+                onSwipe: _onSwipe,
+                onEnd: () {
+                  // Khi hết thẻ, CardSwiper gọi onEnd
+                  // StudyController đã đánh dấu isFinished trong processReview()
+                },
+                cardBuilder:
+                    (context, index, percentThresholdX, percentThresholdY) {
+                      if (index < 0 || index >= state.dueCards.length) {
+                        return const SizedBox.shrink();
+                      }
+                      final card = state.dueCards[index];
+                      return _buildSwipeCard(
+                        card,
+                        index,
+                        percentThresholdX.toDouble(),
+                        percentThresholdY.toDouble(),
+                      );
+                    },
               ),
-              onSwipe: _onSwipe,
-              onEnd: () {
-                // Khi hết thẻ, CardSwiper gọi onEnd
-                // StudyController đã đánh dấu isFinished trong processReview()
-              },
-              cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                if (index < 0 || index >= state.dueCards.length) {
-                  return const SizedBox.shrink();
-                }
-                final card = state.dueCards[index];
-                return _buildSwipeCard(card, index, percentThresholdX.toDouble(), percentThresholdY.toDouble());
-              },
             ),
           ),
-        ),
 
-        // ========== Hướng dẫn vuốt + Trạng thái ==========
+          // ========== Hướng dẫn vuốt + Trạng thái ==========
           _buildSwipeGuide(),
         ],
       ),
@@ -196,7 +241,11 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 
   /// Xử lý sự kiện khi user vuốt thẻ
-  bool _onSwipe(int previousIndex, int? currentIndex, CardSwiperDirection direction) {
+  bool _onSwipe(
+    int previousIndex,
+    int? currentIndex,
+    CardSwiperDirection direction,
+  ) {
     if (!_hasFlippedOnce) {
       _showFlipRequirementSnackBar();
       return false; // Chặn vuốt
@@ -222,7 +271,8 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   /// Hiển thị thông báo yêu cầu lật thẻ trước khi vuốt
   void _showFlipRequirementSnackBar() {
     final now = DateTime.now();
-    if (_lastSnackbarTime != null && now.difference(_lastSnackbarTime!).inMilliseconds < 1500) {
+    if (_lastSnackbarTime != null &&
+        now.difference(_lastSnackbarTime!).inMilliseconds < 1500) {
       return; // Tránh spam
     }
     _lastSnackbarTime = now;
@@ -234,7 +284,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
           children: [
             Icon(Icons.touch_app, color: Colors.white, size: 20),
             SizedBox(width: 8),
-            Expanded(child: Text('Hãy chạm vào thẻ để xem nghĩa trước khi vuốt!')),
+            Expanded(
+              child: Text('Hãy chạm vào thẻ để xem nghĩa trước khi vuốt!'),
+            ),
           ],
         ),
         duration: const Duration(seconds: 2),
@@ -247,9 +299,15 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   }
 
   /// Build widget thẻ Flashcard có khả năng flip và overlay feedback
-  Widget _buildSwipeCard(dynamic card, int index, double percentThresholdX, double percentThresholdY) {
+  Widget _buildSwipeCard(
+    dynamic card,
+    int index,
+    double percentThresholdX,
+    double percentThresholdY,
+  ) {
     // Chỉ thẻ đầu tiên (top card) mới hiện overlay và cho phép flip
-    final isTopCard = (index == (ref.read(studyControllerProvider).currentIndex));
+    final isTopCard =
+        (index == (ref.read(studyControllerProvider).currentIndex));
 
     return GestureDetector(
       onTap: isTopCard
@@ -271,10 +329,13 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 animation: rotateAnim,
                 child: child,
                 builder: (context, widget) {
-                  final isUnder = (ValueKey(_isCurrentCardFlipped) != widget!.key);
+                  final isUnder =
+                      (ValueKey(_isCurrentCardFlipped) != widget!.key);
                   var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
                   tilt *= isUnder ? -1.0 : 1.0;
-                  final value = isUnder ? min(rotateAnim.value, pi / 2) : rotateAnim.value;
+                  final value = isUnder
+                      ? min(rotateAnim.value, pi / 2)
+                      : rotateAnim.value;
                   return Transform(
                     transform: Matrix4.rotationY(value)..setEntry(3, 0, tilt),
                     alignment: Alignment.center,
@@ -289,13 +350,15 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                     text: card.meaning,
                     subtext: card.example ?? '',
                     isBack: true,
-                    onSpeak: () => ref.read(ttsServiceProvider).speak(card.word),
+                    onSpeak: () =>
+                        ref.read(ttsServiceProvider).speak(card.word),
                   )
                 : _buildCardContent(
                     key: const ValueKey(false),
                     text: card.word,
                     subtext: 'Chạm để xem nghĩa',
-                    onSpeak: () => ref.read(ttsServiceProvider).speak(card.word),
+                    onSpeak: () =>
+                        ref.read(ttsServiceProvider).speak(card.word),
                   ),
           ),
 
@@ -314,7 +377,10 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.slate900.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(20),
@@ -394,7 +460,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                       subtext,
                       style: TextStyle(
                         fontSize: 15,
-                        color: isBack ? AppColors.slate600 : AppColors.textLight,
+                        color: isBack
+                            ? AppColors.slate600
+                            : AppColors.textLight,
                         fontStyle: isBack ? FontStyle.italic : FontStyle.normal,
                       ),
                       textAlign: TextAlign.center,

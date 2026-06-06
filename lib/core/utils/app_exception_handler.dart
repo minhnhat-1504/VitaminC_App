@@ -14,16 +14,17 @@ class AppException implements Exception {
 
 class AppExceptionHandler {
   // Global key để hiển thị SnackBar từ bất cứ đâu
-  static final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  static final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   /// Xử lý ngoại lệ không bắt được (Uncaught Error) toàn cục
   static void handleUncaughtError(Object error, StackTrace stackTrace) {
     debugPrint('=== UNCAUGHT GLOBAL ERROR ===');
     debugPrint(error.toString());
     debugPrint(stackTrace.toString());
-    
+
     final appException = handleException(error, 'Lỗi hệ thống');
-    
+
     rootScaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(appException.message),
@@ -35,23 +36,32 @@ class AppExceptionHandler {
   }
 
   /// Chuẩn hóa tất cả các Exception (Firebase, Mạng, Ứng dụng) thành một câu thông báo thân thiện
-  static AppException handleException(dynamic error, [String defaultMessage = 'Đã xảy ra lỗi']) {
+  static AppException handleException(
+    dynamic error, [
+    String defaultMessage = 'Đã xảy ra lỗi',
+  ]) {
     // 1. Lỗi mạng (SocketException hoặc Google Sign In network_error)
-    if (error is SocketException || 
-        error.toString().contains('SocketException') || 
+    if (error is SocketException ||
+        error.toString().contains('SocketException') ||
         error.toString().contains('Failed host lookup') ||
         error.toString().contains('network_error') ||
         (error is PlatformException && error.code == 'network_error')) {
-      return AppException('Không có kết nối mạng. Vui lòng kiểm tra lại Wifi/4-5G');
+      return AppException(
+        'Không có kết nối mạng. Vui lòng kiểm tra lại Wifi/4-5G',
+      );
     }
 
     // 2. Lỗi Firestore
     if (error is FirebaseException) {
       switch (error.code) {
         case 'permission-denied':
-          return AppException('Hành động bị từ chối: Bạn không có quyền truy cập dữ liệu này.');
+          return AppException(
+            'Hành động bị từ chối: Bạn không có quyền truy cập dữ liệu này.',
+          );
         case 'unavailable':
-          return AppException('Mất kết nối với máy chủ. Ứng dụng sẽ tự đồng bộ khi có mạng trở lại.');
+          return AppException(
+            'Mất kết nối với máy chủ. Ứng dụng sẽ tự đồng bộ khi có mạng trở lại.',
+          );
         case 'not-found':
           return AppException('Dữ liệu không tồn tại hoặc đã bị xóa.');
         default:
@@ -69,11 +79,15 @@ class AppExceptionHandler {
         case 'invalid-credential':
           return AppException('Email hoặc mật khẩu không chính xác.');
         case 'email-already-in-use':
-          return AppException('Email này đã được sử dụng bởi một tài khoản khác.');
+          return AppException(
+            'Email này đã được sử dụng bởi một tài khoản khác.',
+          );
         case 'network-request-failed':
           return AppException('Lỗi kết nối máy chủ. Vui lòng kiểm tra mạng.');
         case 'too-many-requests':
-          return AppException('Bạn đã thử quá nhiều lần. Vui lòng đợi một lát.');
+          return AppException(
+            'Bạn đã thử quá nhiều lần. Vui lòng đợi một lát.',
+          );
         default:
           return AppException('$defaultMessage (${error.code})');
       }

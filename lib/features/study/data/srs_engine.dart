@@ -10,7 +10,7 @@ enum ReviewQuality {
 class SrsEngine {
   /// Hàm xử lý logic lặp ngắt quãng SM-2
   /// Dựa trên đánh giá độ khó [ReviewQuality], tính toán ngày ôn tập tiếp theo
-  /// 
+  ///
   /// Input: [VocabModel] thẻ hiện tại, [ReviewQuality] kết quả review
   /// Output: [VocabModel] bản sao mới được cập nhật (Immutable)
   VocabModel processReview(VocabModel currentCard, ReviewQuality quality) {

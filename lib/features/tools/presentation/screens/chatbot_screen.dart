@@ -15,7 +15,7 @@ class ChatbotScreen extends ConsumerStatefulWidget {
 class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+
   final List<Map<String, dynamic>> _messages = [];
 
   bool _isLoading = false;
@@ -42,7 +42,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
         } else {
           _messages.add({
             'isUser': false,
-            'text': 'Chào bạn! Mình là giáo viên tiếng Anh AI của bạn đây. Hôm nay bạn muốn học từ vựng gì nào? 👋',
+            'text':
+                'Chào bạn! Mình là giáo viên tiếng Anh AI của bạn đây. Hôm nay bạn muốn học từ vựng gì nào? 👋',
           });
         }
         _isLoading = false;
@@ -59,7 +60,8 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
         _messages.clear();
         _messages.add({
           'isUser': false,
-          'text': 'Đã xóa lịch sử trò chuyện. Mình là giáo viên tiếng Anh AI của bạn đây, bạn cần giúp gì nào? 👋',
+          'text':
+              'Đã xóa lịch sử trò chuyện. Mình là giáo viên tiếng Anh AI của bạn đây, bạn cần giúp gì nào? 👋',
         });
       });
     }
@@ -68,18 +70,15 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
   void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    
+
     setState(() {
-      _messages.add({
-        'isUser': true,
-        'text': text,
-      });
+      _messages.add({'isUser': true, 'text': text});
       _controller.clear();
       _isLoading = true;
     });
-    
+
     _scrollToBottom();
-    
+
     // Gọi API từ AiService
     final aiService = ref.read(aiServiceProvider);
     final response = await aiService.askTeacher(text);
@@ -120,7 +119,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: CustomAppBar(
-        title: 'AI Teacher', 
+        title: 'AI Teacher',
         showBackButton: true,
         actions: [
           IconButton(
@@ -148,10 +147,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                   );
                 }
                 final message = _messages[index];
-                return _buildMessageBubble(
-                  message['text'], 
-                  message['isUser'],
-                );
+                return _buildMessageBubble(message['text'], message['isUser']);
               },
             ),
           ),
@@ -186,41 +182,40 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             ),
           ],
         ),
-        child: isUser 
-          ? Text(
-              text,
-              style: TextStyle(
-                color: AppColors.white,
-                fontSize: 15,
-                height: 1.4,
-              ),
-            )
-          : MarkdownBody(
-              data: text,
-              styleSheet: MarkdownStyleSheet(
-                p: const TextStyle(
-                  color: AppColors.textLight, 
-                  fontSize: 15, 
+        child: isUser
+            ? Text(
+                text,
+                style: TextStyle(
+                  color: AppColors.white,
+                  fontSize: 15,
                   height: 1.4,
                 ),
-                strong: const TextStyle(
-                  color: AppColors.textLight, 
-                  fontWeight: FontWeight.bold,
-                ),
-                listBullet: const TextStyle(
-                  color: AppColors.textLight,
+              )
+            : MarkdownBody(
+                data: text,
+                styleSheet: MarkdownStyleSheet(
+                  p: const TextStyle(
+                    color: AppColors.textLight,
+                    fontSize: 15,
+                    height: 1.4,
+                  ),
+                  strong: const TextStyle(
+                    color: AppColors.textLight,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  listBullet: const TextStyle(color: AppColors.textLight),
                 ),
               ),
-            ),
       ),
     );
   }
 
   Widget _buildInputArea() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12).copyWith(
-        bottom: MediaQuery.of(context).padding.bottom + 12,
-      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 12),
       decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
@@ -244,7 +239,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 filled: true,
                 fillColor: AppColors.slate100,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20, 
+                  horizontal: 20,
                   vertical: 14,
                 ),
                 border: OutlineInputBorder(

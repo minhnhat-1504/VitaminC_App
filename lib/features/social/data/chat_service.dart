@@ -38,7 +38,7 @@ class ChatService {
   final FirebaseFirestore _firestore;
 
   ChatService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Gửi tin nhắn lên Firestore
   /// [timestamp] luôn dùng serverTimestamp() để đảm bảo thứ tự chính xác
@@ -65,7 +65,9 @@ class ChatService {
         .orderBy('timestamp', descending: true)
         .limit(limit)
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => ChatMessage.fromDoc(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => ChatMessage.fromDoc(doc)).toList(),
+        );
   }
 }

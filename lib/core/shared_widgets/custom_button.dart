@@ -23,10 +23,15 @@ class CustomPrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: color ?? AppColors.primary,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 0,
         ),
-        child: Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        child: Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

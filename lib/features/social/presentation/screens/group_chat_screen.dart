@@ -51,7 +51,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           margin: const EdgeInsets.all(16),
         ),
       );
@@ -194,11 +196,15 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                 return ListView.builder(
                   controller: _scrollController,
                   reverse: true,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
-                    final isMe = currentUser != null && msg.uid == currentUser.uid;
+                    final isMe =
+                        currentUser != null && msg.uid == currentUser.uid;
 
                     return _buildMessageItem(
                       message: msg.text,
@@ -257,7 +263,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.send_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     onPressed: _sendMessage,
                   ),
                 ),
@@ -283,17 +293,24 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!isMe) ...[
             CircleAvatar(
               radius: 16,
-              backgroundImage: senderPhotoUrl.isNotEmpty ? NetworkImage(senderPhotoUrl) : null,
+              backgroundImage: senderPhotoUrl.isNotEmpty
+                  ? NetworkImage(senderPhotoUrl)
+                  : null,
               child: senderPhotoUrl.isEmpty
                   ? Text(
                       senderName.isNotEmpty ? senderName[0].toUpperCase() : '?',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     )
                   : null,
             ),
@@ -301,7 +318,9 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
           ],
           Flexible(
             child: Column(
-              crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+              crossAxisAlignment: isMe
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
               children: [
                 if (!isMe)
                   Padding(
@@ -316,7 +335,10 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                     ),
                   ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: isMe ? AppColors.primary : AppColors.slate200,
                     borderRadius: BorderRadius.only(

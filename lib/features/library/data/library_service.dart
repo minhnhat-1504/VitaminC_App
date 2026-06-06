@@ -10,11 +10,9 @@ class LibraryService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
-  LibraryService({
-    FirebaseFirestore? firestore,
-    FirebaseAuth? auth,
-  })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+  LibraryService({FirebaseFirestore? firestore, FirebaseAuth? auth})
+    : _firestore = firestore ?? FirebaseFirestore.instance,
+      _auth = auth ?? FirebaseAuth.instance;
 
   String get _uid {
     final uid = _auth.currentUser?.uid;
@@ -32,14 +30,20 @@ class LibraryService {
   Future<DeckModel> addDeck(String title, {String description = ''}) async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
       if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
       }
       final docRef = _firestore
           .collection(FirestoreCollections.users)
           .doc(_uid)
-          .collection(FirestoreCollections.userDecks) // Sửa lại: userDecks thay vì vocabs
+          .collection(
+            FirestoreCollections.userDecks,
+          ) // Sửa lại: userDecks thay vì vocabs
           .doc();
 
       final newDeck = DeckModel(
@@ -71,7 +75,10 @@ class LibraryService {
           .map((doc) => DeckModel.fromMap(doc.data(), doc.id))
           .toList();
     } catch (e) {
-      throw AppExceptionHandler.handleException(e, 'Lỗi khi tải danh sách bộ thẻ');
+      throw AppExceptionHandler.handleException(
+        e,
+        'Lỗi khi tải danh sách bộ thẻ',
+      );
     }
   }
 
@@ -96,18 +103,19 @@ class LibraryService {
             .collection(FirestoreCollections.vocabs)
             .where('deckId', isEqualTo: deckId)
             .get();
-        
+
         final now = Timestamp.now();
         int count = 0;
         for (var doc in snapshot.docs) {
           final data = doc.data();
-          if (data['nextReview'] != null && (data['nextReview'] as Timestamp).compareTo(now) <= 0) {
+          if (data['nextReview'] != null &&
+              (data['nextReview'] as Timestamp).compareTo(now) <= 0) {
             count++;
           }
         }
         return count;
       } catch (innerE) {
-        return 0; 
+        return 0;
       }
     }
   }
@@ -116,13 +124,15 @@ class LibraryService {
   Future<void> updateDeck(DeckModel deck) async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
-      if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
-      }
-      final updatedDeck = deck.copyWith(
-        updatedAt: Timestamp.now(),
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
       );
+      if (isOffline) {
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
+      }
+      final updatedDeck = deck.copyWith(updatedAt: Timestamp.now());
       await _firestore
           .collection(FirestoreCollections.users)
           .doc(_uid)
@@ -138,9 +148,13 @@ class LibraryService {
   Future<void> deleteDeck(String deckId) async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
       if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
       }
       // 1. Xóa tất cả các thẻ nằm trong Deck này
       final vocabsSnapshot = await _firestore
@@ -149,12 +163,12 @@ class LibraryService {
           .collection(FirestoreCollections.vocabs)
           .where('deckId', isEqualTo: deckId)
           .get();
-      
+
       final batch = _firestore.batch();
       for (var doc in vocabsSnapshot.docs) {
         batch.delete(doc.reference);
       }
-      
+
       // 2. Xóa Deck
       final deckRef = _firestore
           .collection(FirestoreCollections.users)
@@ -177,15 +191,19 @@ class LibraryService {
   Future<void> addVocab(VocabModel vocab) async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
       if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
       }
       final docRef = _firestore
           .collection(FirestoreCollections.users)
           .doc(_uid)
           .collection(FirestoreCollections.vocabs)
-          .doc(); 
+          .doc();
 
       final newVocab = vocab.copyWith(
         id: docRef.id,
@@ -203,13 +221,15 @@ class LibraryService {
   Future<void> updateVocab(VocabModel vocab) async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
-      if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
-      }
-      final updatedVocab = vocab.copyWith(
-        updatedAt: Timestamp.now(),
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
       );
+      if (isOffline) {
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
+      }
+      final updatedVocab = vocab.copyWith(updatedAt: Timestamp.now());
 
       await _firestore
           .collection(FirestoreCollections.users)
@@ -226,9 +246,13 @@ class LibraryService {
   Future<void> deleteVocab(String vocabId) async {
     try {
       final connectivityResult = await Connectivity().checkConnectivity();
-      final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+      final isOffline = !connectivityResult.any(
+        (r) => r != ConnectivityResult.none,
+      );
       if (isOffline) {
-        throw AppException('Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.');
+        throw AppException(
+          'Không có kết nối mạng. Vui lòng kiểm tra lại để sử dụng tính năng này.',
+        );
       }
       await _firestore
           .collection(FirestoreCollections.users)
@@ -254,12 +278,15 @@ class LibraryService {
       final vocabs = snapshot.docs
           .map((doc) => VocabModel.fromMap(doc.data(), doc.id))
           .toList();
-          
+
       // Sort bằng Dart để tránh lỗi thiếu Firebase Composite Index (deckId + createdAt)
       vocabs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return vocabs;
     } catch (e) {
-      throw AppExceptionHandler.handleException(e, 'Lỗi khi tải danh sách từ vựng');
+      throw AppExceptionHandler.handleException(
+        e,
+        'Lỗi khi tải danh sách từ vựng',
+      );
     }
   }
 
@@ -275,7 +302,7 @@ class LibraryService {
           .get();
       return aggregateQuery.count ?? 0;
     } catch (e) {
-      return 0; 
+      return 0;
     }
   }
 }

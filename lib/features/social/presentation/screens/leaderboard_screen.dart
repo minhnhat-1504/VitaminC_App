@@ -104,11 +104,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...leaderboardAsync.when(
-                data: (users) => _buildRankingContent(
-                  users,
-                  currentUser,
-                  currentStreak,
-                ),
+                data: (users) =>
+                    _buildRankingContent(users, currentUser, currentStreak),
                 loading: () => [
                   const SizedBox(height: 120),
                   const Center(child: CircularProgressIndicator()),
@@ -130,12 +127,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       case 1:
         return const SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: [
-              BadgesScreen(),
-              SizedBox(height: 24),
-            ],
-          ),
+          child: Column(children: [BadgesScreen(), SizedBox(height: 24)]),
         );
       case 2:
         return const GroupChatScreen();
@@ -782,15 +774,17 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   // ─── ACHIEVEMENTS PREVIEW ───
   Widget _buildAchievementsPreview(UserModel? currentUser) {
     final earnedBadges = currentUser?.earnedBadges ?? [];
-    final previewBadges = BadgesScreen.badges.map((badge) {
-      final isAchieved = earnedBadges.contains(badge['id']);
-      return {
-        ...badge,
-        'achieved': isAchieved,
-      };
-    }).take(6).toList();
+    final previewBadges = BadgesScreen.badges
+        .map((badge) {
+          final isAchieved = earnedBadges.contains(badge['id']);
+          return {...badge, 'achieved': isAchieved};
+        })
+        .take(6)
+        .toList();
 
-    final achievedCount = BadgesScreen.badges.where((b) => earnedBadges.contains(b['id'])).length;
+    final achievedCount = BadgesScreen.badges
+        .where((b) => earnedBadges.contains(b['id']))
+        .length;
     final totalCount = BadgesScreen.badges.length;
 
     return Column(

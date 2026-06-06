@@ -93,12 +93,18 @@ class BadgesScreen extends ConsumerWidget {
     final user = ref.watch(currentUserProvider).value;
     final earnedBadges = user?.earnedBadges ?? [];
 
-    final earnedList = badges.where((b) => earnedBadges.contains(b['id'])).toList();
-    final lockedList = badges.where((b) => !earnedBadges.contains(b['id'])).toList();
+    final earnedList = badges
+        .where((b) => earnedBadges.contains(b['id']))
+        .toList();
+    final lockedList = badges
+        .where((b) => !earnedBadges.contains(b['id']))
+        .toList();
 
     final totalBadgesCount = badges.length;
     final achievedBadgesCount = earnedList.length;
-    final progress = totalBadgesCount > 0 ? achievedBadgesCount / totalBadgesCount : 0.0;
+    final progress = totalBadgesCount > 0
+        ? achievedBadgesCount / totalBadgesCount
+        : 0.0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,10 +237,7 @@ class BadgesScreen extends ConsumerWidget {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Color(grad1),
-                  Color(grad2),
-                ],
+                colors: [Color(grad1), Color(grad2)],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [

@@ -6,8 +6,10 @@ import '../../../../core/shared_widgets/custom_button.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../social/presentation/providers/social_providers.dart';
+import '../../../social/presentation/screens/lucky_spin_screen.dart';
 import '../../data/srs_engine.dart';
 import '../controllers/study_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StudySummaryScreen extends ConsumerStatefulWidget {
   const StudySummaryScreen({super.key});
@@ -31,7 +33,7 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
 
   Future<void> _updateStatsAndXP() async {
     final studyState = ref.read(studyControllerProvider);
-    
+
     int wordsReviewed = 0;
     int xp = 0;
 
@@ -41,12 +43,12 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         final quality = studyState.reviewedQualities[card.id];
         if (quality != null) {
           wordsReviewed++;
-          
+
           // Từ mới (repetition == 0 trước phiên học) -> không được tính điểm XP (0 XP)
           if (card.repetition == 0) {
             continue;
           }
-          
+
           // Chỉ tính điểm trong lượt nhắc (repetition > 0 trước phiên học) dựa theo chất lượng lựa chọn
           if (card.repetition > 0) {
             if (quality == ReviewQuality.good) {
@@ -82,14 +84,20 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         }
 
         // 2. Cập nhật Streak và nhận số streak mới
-        final newStreak = await ref.read(streakServiceProvider).updateStreak(user.uid);
+        final newStreak = await ref
+            .read(streakServiceProvider)
+            .updateStreak(user.uid);
         ref.invalidate(streakCountProvider);
 
         // 3. Lấy số từ vựng đã học thực tế để làm căn cứ trao huy hiệu
-        final learnedVocabCount = await ref.read(dashboardServiceProvider).getLearnedVocabCount(user.uid);
+        final learnedVocabCount = await ref
+            .read(dashboardServiceProvider)
+            .getLearnedVocabCount(user.uid);
 
         // 4. Kiểm tra và trao huy hiệu tự động
-        await ref.read(badgeServiceProvider).checkAndAwardBadges(
+        await ref
+            .read(badgeServiceProvider)
+            .checkAndAwardBadges(
               uid: user.uid,
               newStreak: newStreak,
               learnedVocabCount: learnedVocabCount,
@@ -97,6 +105,44 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
 
         // 5. Làm mới thông tin người dùng hiện tại để đồng bộ UI
         ref.invalidate(currentUserProvider);
+
+        // 6. Kích hoạt vòng quay may mắn (Daily Gacha) nếu đủ điều kiện
+        if (wordsReviewed >= 5) {
+          final prefs = await SharedPreferences.getInstance();
+          final lastSpinDateStr = prefs.getString('last_spin_date_${user.uid}');
+          final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+
+          if (lastSpinDateStr != todayStr) {
+            await prefs.setString('last_spin_date_${user.uid}', todayStr);
+            if (mounted) {
+              // Future.delayed to ensure dialog shows after build is stable
+              Future.microtask(() {
+                showGeneralDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                  transitionDuration: const Duration(milliseconds: 400),
+                  pageBuilder: (context, animation, secondaryAnimation) {
+                    return const LuckySpinScreen();
+                  },
+                  transitionBuilder: (context, animation, secondaryAnimation, child) {
+                    final curvedAnimation = CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
+                    );
+                    return ScaleTransition(
+                      scale: curvedAnimation,
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                );
+              });
+            }
+          // }
+        }
       } catch (e) {
         debugPrint('Lỗi cập nhật tiến trình học (XP, Streak, Badges): $e');
       }
@@ -146,8 +192,16 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    _buildStatItem('Words Reviewed', '$_wordsReviewed', AppColors.primary),
-                    _buildStatItem('XP Earned', _isUpdating ? '...' : '+$_xpEarned', AppColors.success),
+                    _buildStatItem(
+                      'Words Reviewed',
+                      '$_wordsReviewed',
+                      AppColors.primary,
+                    ),
+                    _buildStatItem(
+                      'XP Earned',
+                      _isUpdating ? '...' : '+$_xpEarned',
+                      AppColors.success,
+                    ),
                   ],
                 ),
               ),

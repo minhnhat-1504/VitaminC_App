@@ -41,7 +41,7 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildTopBar(WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
-    
+
     // Theo dõi streak để hiển thị viền
     final streakAsync = ref.watch(streakCountProvider);
     final streak = streakAsync.value ?? 0;
@@ -49,7 +49,7 @@ class HomeScreen extends ConsumerWidget {
     // Xác định màu viền dựa trên thứ hạng (Rank)
     Color ringColor = AppColors.slate200; // Mặc định là xám cho các hạng khác
     final rank = user?.rank ?? 0;
-    
+
     if (rank == 1) {
       ringColor = AppColors.gold;
     } else if (rank == 2) {
@@ -75,50 +75,53 @@ class HomeScreen extends ConsumerWidget {
                   child: CircleAvatar(
                     radius: 22,
                     backgroundImage: NetworkImage(
-                      user?.photoUrl.isNotEmpty == true 
-                        ? user!.photoUrl 
-                        : 'https://i.pravatar.cc/150?img=11'
+                      user?.photoUrl.isNotEmpty == true
+                          ? user!.photoUrl
+                          : 'https://i.pravatar.cc/150?img=11',
                     ),
                   ),
                 ),
                 streakAsync.when(
-                  data: (streak) => streak > 0 
-                    ? Positioned(
-                        right: -2,
-                        bottom: -2,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: AppColors.white,
-                            shape: BoxShape.circle,
-                          ),
+                  data: (streak) => streak > 0
+                      ? Positioned(
+                          right: -2,
+                          bottom: -2,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: ringColor,
-                              borderRadius: BorderRadius.circular(10),
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: AppColors.white,
+                              shape: BoxShape.circle,
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  "🔥",
-                                  style: TextStyle(fontSize: 8),
-                                ),
-                                Text(
-                                  "$streak",
-                                  style: const TextStyle(
-                                    color: AppColors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: ringColor,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    "🔥",
+                                    style: TextStyle(fontSize: 8),
                                   ),
-                                ),
-                              ],
+                                  Text(
+                                    "$streak",
+                                    style: const TextStyle(
+                                      color: AppColors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 8,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                    : const SizedBox.shrink(),
+                        )
+                      : const SizedBox.shrink(),
                   loading: () => const SizedBox.shrink(),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
@@ -136,11 +139,17 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Text(
                       "${user?.displayName ?? 'Người dùng'}",
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.primary.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
@@ -253,12 +262,15 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 10),
                   Text(
                     "$streakCount",
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text(
                     "CHUỖI NGÀY",
                     style: TextStyle(
-                      fontSize: 12, 
+                      fontSize: 12,
                       color: AppColors.slate500,
                       fontWeight: FontWeight.bold,
                     ),
@@ -269,7 +281,9 @@ class HomeScreen extends ConsumerWidget {
                 height: 100,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (err, _) => Center(child: Text("Lỗi: $err", style: const TextStyle(fontSize: 10))),
+              error: (err, _) => Center(
+                child: Text("Lỗi: $err", style: const TextStyle(fontSize: 10)),
+              ),
             ),
           ),
         ),
@@ -295,7 +309,10 @@ class HomeScreen extends ConsumerWidget {
                   const SizedBox(height: 8),
                   Text(
                     "$vocabCount",
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Text(
                     "TỪ ĐÃ HỌC",
@@ -311,7 +328,9 @@ class HomeScreen extends ConsumerWidget {
                 height: 100,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (err, _) => Center(child: Text("Lỗi: $err", style: const TextStyle(fontSize: 10))),
+              error: (err, _) => Center(
+                child: Text("Lỗi: $err", style: const TextStyle(fontSize: 10)),
+              ),
             ),
           ),
         ),
@@ -512,14 +531,18 @@ class HomeScreen extends ConsumerWidget {
                             onPressed: () async {
                               final user = ref.read(authStateProvider).value;
                               if (user != null) {
-                                await ref.read(streakServiceProvider).updateStreak(user.uid);
+                                await ref
+                                    .read(streakServiceProvider)
+                                    .updateStreak(user.uid);
                                 // Refresh lại streak count sau khi học
                                 ref.invalidate(streakCountProvider);
-                                
+
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Tuyệt vời! Streak của bạn đã được cập nhật."),
+                                      content: Text(
+                                        "Tuyệt vời! Streak của bạn đã được cập nhật.",
+                                      ),
                                       backgroundColor: AppColors.success,
                                       duration: Duration(seconds: 2),
                                     ),
@@ -554,9 +577,8 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
           ),
-          error: (err, _) => _cardWrapper(
-            child: Center(child: Text("Lỗi tải dữ liệu: $err")),
-          ),
+          error: (err, _) =>
+              _cardWrapper(child: Center(child: Text("Lỗi tải dữ liệu: $err"))),
         ),
       ],
     );

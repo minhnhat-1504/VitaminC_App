@@ -8,11 +8,9 @@ class UserService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
 
-  UserService({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance;
+  UserService({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Cập nhật thông tin hồ sơ người dùng (Đồng bộ Auth và Firestore)
   Future<void> updateUserProfile({
@@ -31,10 +29,7 @@ class UserService {
       await _firestore
           .collection(FirestoreCollections.users)
           .doc(user.uid)
-          .update({
-        'displayName': displayName,
-        'photoUrl': photoUrl,
-      });
+          .update({'displayName': displayName, 'photoUrl': photoUrl});
     } catch (e) {
       throw AppExceptionHandler.handleException(e, 'Lỗi cập nhật hồ sơ');
     }
@@ -43,10 +38,7 @@ class UserService {
   /// Cộng điểm XP cho người dùng
   Future<void> addXP(String uid, int amount) async {
     try {
-      await _firestore
-          .collection(FirestoreCollections.users)
-          .doc(uid)
-          .update({
+      await _firestore.collection(FirestoreCollections.users).doc(uid).update({
         'xp': FieldValue.increment(amount),
       });
     } catch (e) {
