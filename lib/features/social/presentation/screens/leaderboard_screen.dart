@@ -9,6 +9,8 @@ import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../providers/social_providers.dart';
 import 'badges_screen.dart';
 import '../widgets/streak_popup.dart';
+import 'group_chat_screen.dart';
+import 'coop_quest_screen.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -65,48 +67,83 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLeagueInfo(),
+                  const SizedBox(height: 16),
+                  _buildTabSwitcher(),
+                ],
+              ),
+            ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-                    _buildLeagueInfo(),
-                    const SizedBox(height: 16),
-                    _buildTabSwitcher(),
-                    const SizedBox(height: 32),
-                    if (_selectedTab == 0)
-                      ...leaderboardAsync.when(
-                        data: (users) => _buildRankingContent(
-                          users,
-                          currentUser,
-                          currentStreak,
-                        ),
-                        loading: () => [
-                          const SizedBox(height: 120),
-                          const Center(child: CircularProgressIndicator()),
-                        ],
-                        error: (err, stack) => [
-                          const SizedBox(height: 120),
-                          Center(
-                            child: Text(
-                              'Lỗi khi tải bảng xếp hạng: $err',
-                              style: GoogleFonts.lexend(color: AppColors.error),
-                            ),
-                          ),
-                        ],
-                      ),
-                    if (_selectedTab == 1) const BadgesScreen(),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+              child: _buildTabContent(
+                leaderboardAsync: leaderboardAsync,
+                currentUser: currentUser,
+                currentStreak: currentStreak,
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildTabContent({
+    required AsyncValue<List<UserModel>> leaderboardAsync,
+    required UserModel? currentUser,
+    required int currentStreak,
+  }) {
+    switch (_selectedTab) {
+      case 0:
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...leaderboardAsync.when(
+                data: (users) => _buildRankingContent(
+                  users,
+                  currentUser,
+                  currentStreak,
+                ),
+                loading: () => [
+                  const SizedBox(height: 120),
+                  const Center(child: CircularProgressIndicator()),
+                ],
+                error: (err, stack) => [
+                  const SizedBox(height: 120),
+                  Center(
+                    child: Text(
+                      'Lỗi khi tải bảng xếp hạng: $err',
+                      style: GoogleFonts.lexend(color: AppColors.error),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+        );
+      case 1:
+        return const SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              BadgesScreen(),
+              SizedBox(height: 24),
+            ],
+          ),
+        );
+      case 2:
+        return const GroupChatScreen();
+      case 3:
+        return const CoopQuestScreen();
+      default:
+        return const SizedBox.shrink();
+    }
   }
 
   // ─── LEAGUE INFO ───
@@ -161,7 +198,14 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         color: AppColors.slate200,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(children: [_tabItem('Ranking', 0), _tabItem('Badges', 1)]),
+      child: Row(
+        children: [
+          _tabItem('Ranking', 0),
+          _tabItem('Badges', 1),
+          _tabItem('Chat', 2),
+          _tabItem('Co-op', 3),
+        ],
+      ),
     );
   }
 

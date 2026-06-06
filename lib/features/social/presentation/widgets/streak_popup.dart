@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
+import 'dart:io';
+import 'dart:ui';
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class StreakPopup extends ConsumerStatefulWidget {
   const StreakPopup({super.key});
@@ -20,6 +25,51 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
   late final Animation<double> _scale;
   late final Animation<double> _rotation;
   late final Animation<double> _glow;
+
+  final GlobalKey _boundaryKey = GlobalKey();
+  bool _isSharing = false;
+
+  Future<void> _shareStreak() async {
+    if (_isSharing) return;
+    setState(() => _isSharing = true);
+
+    try {
+      final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) throw Exception('Cannot find repaint boundary');
+
+      // Chờ frame vẽ hoàn tất nếu cần
+      if (boundary.debugNeedsPaint) {
+        await Future.delayed(const Duration(milliseconds: 50));
+      }
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ImageByteFormat.png);
+      if (byteData == null) throw Exception('Cannot convert image to byte data');
+      final bytes = byteData.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/streak_milestone.png').create();
+      await file.writeAsBytes(bytes);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'Tôi vừa đạt cột mốc Streak ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
+        ),
+      );
+    } catch (e) {
+      debugPrint('Error sharing streak: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi chia sẻ: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
 
   static const List<_WeekDay> _weekDays = [
     _WeekDay('M', _DayState.completed),
@@ -102,18 +152,24 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
                         24,
                         _bottomBarHeight + 16,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 8),
-                          _buildHero(),
-                          const SizedBox(height: 24),
-                          _buildMotivation(),
-                          const SizedBox(height: 24),
-                          _buildWeekCard(),
-                          const SizedBox(height: 16),
-                          _buildStatsCards(),
-                        ],
+                      child: RepaintBoundary(
+                        key: _boundaryKey,
+                        child: Container(
+                          color: AppColors.backgroundLight,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 8),
+                              _buildHero(),
+                              const SizedBox(height: 24),
+                              _buildMotivation(),
+                              const SizedBox(height: 24),
+                              _buildWeekCard(),
+                              const SizedBox(height: 16),
+                              _buildStatsCards(),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -555,7 +611,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
               ],
             ),
             child: TextButton(
-              onPressed: () {},
+              onPressed: _isSharing ? null : _shareStreak,
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -569,7 +625,16 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.share_outlined, size: 18),
+                  _isSharing
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.share_outlined, size: 18),
                   const SizedBox(width: 8),
                   Column(
                     mainAxisSize: MainAxisSize.min,
