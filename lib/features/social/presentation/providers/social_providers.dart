@@ -4,10 +4,16 @@ import '../../../../core/utils/firestore_collections.dart';
 import '../../../../core/models/user_model.dart';
 
 import '../../data/badge_service.dart';
+import '../../data/chat_service.dart';
 
 /// Provider cung cấp BadgeService
 final badgeServiceProvider = Provider<BadgeService>((ref) {
   return BadgeService();
+});
+
+/// Provider cung cấp ChatService
+final chatServiceProvider = Provider<ChatService>((ref) {
+  return ChatService();
 });
 
 /// StreamProvider lắng nghe CSDL Firestore danh sách 50 người dùng có XP cao nhất

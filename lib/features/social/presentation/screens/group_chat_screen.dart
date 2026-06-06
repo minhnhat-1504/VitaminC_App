@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/language_validator.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../data/chat_service.dart';
+import '../providers/social_providers.dart';
 
 class GroupChatScreen extends ConsumerStatefulWidget {
   const GroupChatScreen({super.key});
@@ -25,20 +27,14 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     super.dispose();
   }
 
-  bool _isVietnamese(String text) {
-    // Regex phát hiện các nguyên âm có dấu tiếng Việt đặc trưng và chữ 'đ', 'Đ'
-    final regex = RegExp(
-      r'[áàảãạâấầẩẫậăắằẳẵặéèẻẽẹêếềểễệíìỉĩịóòỏõọôốồổỗộơớờởỡợúùủũụưứừửữựýỳỷỹỵđÁÀẢÃẠÂẤẦẨẪẬĂẮẰẲẴẶÉÈẺẼẸÊẾỀỂỄỆÍÌỈĨỊÓÒỎÕỌÔỐỒỔỖỘƠỚỜỞỠỢÚÙỔŨỤƯỨỪỬỮỰÝỲỶỸỴĐ]'
-    );
-    return regex.hasMatch(text);
-  }
+  // Logic kiểm tra tiếng Việt đã được tách ra LanguageValidator (core/utils)
 
   void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
     // Cảnh sát ngôn ngữ (Client-side validation)
-    if (_isVietnamese(text)) {
+    if (LanguageValidator.isVietnamese(text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
@@ -69,13 +65,13 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     _focusNode.requestFocus();
 
     try {
-      await FirebaseFirestore.instance.collection('group_chat').add({
-        'senderId': currentUser.uid,
-        'senderName': currentUser.displayName,
-        'senderPhotoUrl': currentUser.photoUrl,
-        'message': text,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+      final chatService = ref.read(chatServiceProvider);
+      await chatService.sendMessage(
+        uid: currentUser.uid,
+        displayName: currentUser.displayName,
+        photoUrl: currentUser.photoUrl,
+        text: text,
+      );
     } catch (e) {
       debugPrint('Error sending message: $e');
     }
@@ -154,12 +150,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
 
           // Danh sách tin nhắn
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('group_chat')
-                  .orderBy('timestamp', descending: true)
-                  .limit(30)
-                  .snapshots(),
+            child: StreamBuilder<List<ChatMessage>>(
+              stream: ref.read(chatServiceProvider).getMessages(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(
@@ -174,8 +166,8 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final docs = snapshot.data?.docs ?? [];
-                if (docs.isEmpty) {
+                final messages = snapshot.data ?? [];
+                if (messages.isEmpty) {
                   return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -203,23 +195,17 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
                   controller: _scrollController,
                   reverse: true,
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  itemCount: docs.length,
+                  itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final data = docs[index].data() as Map<String, dynamic>;
-                    final messageText = data['message'] ?? '';
-                    final senderId = data['senderId'] ?? '';
-                    final senderName = data['senderName'] ?? 'Anonymous';
-                    final senderPhotoUrl = data['senderPhotoUrl'] ?? '';
-                    final timestamp = data['timestamp'] as Timestamp?;
-                    
-                    final isMe = currentUser != null && senderId == currentUser.uid;
+                    final msg = messages[index];
+                    final isMe = currentUser != null && msg.uid == currentUser.uid;
 
                     return _buildMessageItem(
-                      message: messageText,
-                      senderName: senderName,
-                      senderPhotoUrl: senderPhotoUrl,
+                      message: msg.text,
+                      senderName: msg.displayName,
+                      senderPhotoUrl: msg.photoUrl,
                       isMe: isMe,
-                      timestamp: timestamp?.toDate(),
+                      timestamp: msg.timestamp,
                     );
                   },
                 );
