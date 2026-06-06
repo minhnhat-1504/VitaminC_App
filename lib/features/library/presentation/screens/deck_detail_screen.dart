@@ -30,19 +30,22 @@ class DeckDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final updated = deck.copyWith(
                 title: titleController.text.trim(),
                 description: descController.text.trim(),
               );
-              ref.read(libraryControllerProvider.notifier).updateDeck(updated).then((_) {
-                final error = ref.read(libraryControllerProvider).errorMessage;
-                if (error != null && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
-                } else if (context.mounted) {
-                  Navigator.pop(ctx);
-                }
-              });
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              await ref.read(libraryControllerProvider.notifier).updateDeck(updated);
+              
+              if (ctx.mounted) {
+                Navigator.pop(ctx);
+              }
+              
+              final error = ref.read(libraryControllerProvider).errorMessage;
+              if (error != null) {
+                scaffoldMessenger.showSnackBar(SnackBar(content: Text(error)));
+              }
             },
             child: const Text('Lưu'),
           ),
@@ -75,7 +78,7 @@ class DeckDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final word = wordController.text.trim();
               final meaning = meaningController.text.trim();
               if (word.isEmpty || meaning.isEmpty) {
@@ -87,14 +90,17 @@ class DeckDetailScreen extends ConsumerWidget {
                 meaning: meaning,
                 example: exampleController.text.trim().isEmpty ? null : exampleController.text.trim(),
               );
-              ref.read(deckDetailControllerProvider(deckId).notifier).updateVocab(updated).then((_) {
-                final error = ref.read(deckDetailControllerProvider(deckId)).errorMessage;
-                if (error != null && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
-                } else if (context.mounted) {
-                  Navigator.pop(ctx);
-                }
-              });
+              final scaffoldMessenger = ScaffoldMessenger.of(context);
+              await ref.read(deckDetailControllerProvider(deckId).notifier).updateVocab(updated);
+              
+              if (ctx.mounted) {
+                Navigator.pop(ctx);
+              }
+              
+              final error = ref.read(deckDetailControllerProvider(deckId)).errorMessage;
+              if (error != null) {
+                scaffoldMessenger.showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
+              }
             },
             child: const Text('Lưu'),
           ),
@@ -195,16 +201,18 @@ class DeckDetailScreen extends ConsumerWidget {
                                       TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                                        onPressed: () {
-                                          controller.deleteVocab(vocab.id).then((_) {
-                                            if (context.mounted) {
-                                              Navigator.pop(ctx); // Luôn đóng dialog xác nhận xóa
-                                              final error = ref.read(deckDetailControllerProvider(deckId)).errorMessage;
-                                              if (error != null) {
-                                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
-                                              }
-                                            }
-                                          });
+                                        onPressed: () async {
+                                          final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                          await controller.deleteVocab(vocab.id);
+                                          
+                                          if (ctx.mounted) {
+                                            Navigator.pop(ctx); // Luôn đóng dialog xác nhận xóa
+                                          }
+                                          
+                                          final error = ref.read(deckDetailControllerProvider(deckId)).errorMessage;
+                                          if (error != null) {
+                                            scaffoldMessenger.showSnackBar(SnackBar(content: Text(error), backgroundColor: Colors.redAccent));
+                                          }
                                         },
                                         child: const Text('Xóa', style: TextStyle(color: Colors.white)),
                                       ),
