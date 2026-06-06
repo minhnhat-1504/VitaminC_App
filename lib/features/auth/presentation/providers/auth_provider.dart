@@ -21,6 +21,9 @@ final authStateProvider = StreamProvider<User?>((ref) {
 final currentUserProvider = StreamProvider<UserModel?>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user != null) {
+    // Kiểm tra và reset dailyXp khi khởi động / đổi ngày mới
+    ref.read(userServiceProvider).checkAndResetDailyXp(user.uid);
+
     return FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)

@@ -26,7 +26,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 20),
               _buildStatsCards(ref),
               const SizedBox(height: 25),
-              _buildDailyGoal(),
+              _buildDailyGoal(ref),
               const SizedBox(height: 25),
               _buildContinueLearning(context, ref),
               const SizedBox(height: 20),
@@ -338,7 +338,15 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDailyGoal() {
+  Widget _buildDailyGoal(WidgetRef ref) {
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.value;
+    
+    final int dailyXp = user?.dailyXp ?? 0;
+    final int dailyGoal = user?.dailyGoal ?? 50;
+    final double percent = dailyGoal > 0 ? (dailyXp / dailyGoal).clamp(0.0, 1.0) : 0.0;
+    final int percentInt = (percent * 100).toInt();
+
     return _cardWrapper(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -370,22 +378,22 @@ class HomeScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 15),
           Row(
-            children: const [
+            children: [
               Text(
-                "20",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                "$dailyXp",
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               Text(
-                " / 30 XP",
-                style: TextStyle(
+                " / $dailyGoal XP",
+                style: const TextStyle(
                   color: AppColors.slate500,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
-                "66%",
-                style: TextStyle(
+                "$percentInt%",
+                style: const TextStyle(
                   color: AppColors.primary,
                   fontWeight: FontWeight.bold,
                 ),
@@ -395,7 +403,7 @@ class HomeScreen extends ConsumerWidget {
           const SizedBox(height: 10),
           LinearPercentIndicator(
             lineHeight: 12.0,
-            percent: 0.66,
+            percent: percent,
             padding: EdgeInsets.zero,
             backgroundColor: AppColors.primary.withOpacity(0.1),
             progressColor: AppColors.primary,

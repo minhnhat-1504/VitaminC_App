@@ -141,7 +141,7 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
                 );
               });
             }
-          // }
+          }
         }
       } catch (e) {
         debugPrint('Lỗi cập nhật tiến trình học (XP, Streak, Badges): $e');

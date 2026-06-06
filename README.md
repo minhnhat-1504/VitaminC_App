@@ -615,3 +615,49 @@ Vì nhóm chỉ tập trung build cho Android, hãy kiểm tra lại file `andro
 | **1. Theo dõi Ứng dụng (Analytics)** | `main.dart` | Cài đặt `firebase_analytics` và `firebase_crashlytics`. Gắn các lệnh log event khi user thực hiện hành động quan trọng (VD: Hoàn thành 1 thẻ, Quét OCR thành công). Crashlytics sẽ tự bắt các lỗi crash Native Android gửi về Firebase Console. |
 | **2. Bẫy lỗi Công cụ Thông minh** | `features/tools/presentation/screens/` | Xử lý các góc chết của AI/OCR: Thêm vòng xoay loading khi đang đợi Gemini rep. Báo lỗi *"Không tìm thấy chữ trong ảnh"* nếu OCR ML Kit trả về rỗng. Tự ngắt micro thu âm nếu user im lặng quá 5 giây (tránh treo app). |
 | **3. Đóng gói & Tối ưu APK** | `android/app/build.gradle` & `android/app/src/main/` | Đổi tên ứng dụng chính thức trong `AndroidManifest.xml`. Cập nhật file logo (Icon) chuẩn của VitaminC vào thư mục `res/mipmap`. Bật cấu hình `minifyEnabled true` và `shrinkResources true` trong bản build release để nén giảm dung lượng file APK. |
+
+---
+
+### Sprint 4 Nâng cao: Nâng cấp Gamification & Hệ thống Chat Đa phòng
+
+**Mục tiêu cốt lõi:** Nâng cấp trải nghiệm học tập và tương tác cộng đồng bằng cách xây dựng hệ thống điểm XP động, mục tiêu học tập hàng ngày, các nhiệm vụ hàng ngày/đồng đội phong phú và nâng cấp phòng chat đơn lẻ thành hệ thống chat đa phòng (Multi-room Chat) linh hoạt.
+
+#### ⚠️ LƯU Ý QUAN TRỌNG CHO SPRINT 4 NÂNG CAO (TẤT CẢ THÀNH VIÊN CẦN ĐỌC KỸ)
+
+**1. Đồng bộ và Tránh xung đột State**
+Khi thực hiện cộng điểm XP động và cập nhật trạng thái nhiệm vụ, phải đảm bảo đồng bộ hóa tức thì từ Firestore về giao diện (qua Riverpod StreamProvider) và xử lý ép kiểu số an toàn tránh lỗi crash khi nhận số thực.
+
+**2. Độc lập Phòng Chat**
+Khi phân tách phòng chat thành các phòng riêng biệt, các phòng phải hoạt động hoàn toàn độc lập, sử dụng collection phòng chat con và bảo mật dữ liệu theo mã phòng.
+
+#### 👨‍💻 Phân công nhiệm vụ chi tiết
+
+**Thành viên 1 (Lead): Nền tảng XP, Trạm Reset & Core Chat Đa phòng**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Trạm kiểm tra & Reset ngày mới** | `lib/features/auth/data/user_service.dart`<br>`lib/features/auth/presentation/providers/auth_provider.dart` | Triển khai hàm `checkAndResetDailyXp` tự động reset `dailyXp` về `0` khi người dùng mở app ở ngày mới. Gọi hàm bất đồng bộ trong `currentUserProvider`. |
+| **2. Tích hợp điểm XP kép** | `lib/features/auth/data/user_service.dart` | Nâng cấp hàm `addXP` để tăng song song cả `xp` (tổng) và `dailyXp` (trong ngày) trên Firestore. |
+| **3. Phân quyền và tạo phòng chat** | `lib/features/social/data/chat_service.dart` | Viết hàm tạo phòng chat mới ngẫu nhiên (hoặc bằng code nhập vào), lưu trữ ID phòng và danh sách thành viên tham gia. |
+
+**Thành viên 2: Quản lý Nhiệm vụ & Đồng hành**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. UI Mục tiêu ngày năng động** | `lib/features/dashboard/presentation/screens/home_screen.dart` | Thay đổi toàn bộ các chỉ số mục tiêu ngày tĩnh trên màn hình Home sang đọc dữ liệu động từ `currentUserProvider`. |
+| **2. Thiết kế Quest Model & Service** | `lib/features/social/data/quest_service.dart` (Tạo mới) | Xây dựng cấu trúc nhiệm vụ cá nhân (Personal Quests) gồm tên nhiệm vụ, tiến độ, mốc hoàn thành, số XP thưởng, trạng thái nhận thưởng. |
+| **3. Bảng Nhiệm vụ tuần Co-op đa mốc** | `lib/features/social/presentation/screens/coop_quest_screen.dart` | Nâng cấp thanh tiến độ Co-op đơn thành hiển thị nhiều cột mốc phần thưởng (Milestones/Tiers) để tăng động lực. |
+
+**Thành viên 3: Tối ưu Trải nghiệm quay thưởng & Đồng bộ phòng Chat**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. UI/UX Vòng quay mượt mà** | `lib/features/social/presentation/screens/lucky_spin_screen.dart` | Kết nối hành động quay thành công với lệnh invalidate provider để màn hình trang chủ phản ánh ngay XP mới nhất không bị trễ. |
+| **2. Tham gia phòng Chat bằng mã** | `lib/features/social/presentation/screens/chat_room_list_screen.dart` (Tạo mới) | Xây dựng giao diện danh sách phòng chat hiện tại kèm theo hộp thoại nhập Code phòng để tham gia phòng chat bất kỳ. |
+
+**Thành viên 4: Logic Nhiệm vụ & Chi tiết Phòng Chat**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Danh sách Nhiệm vụ cá nhân** | `lib/features/dashboard/presentation/screens/home_screen.dart` | Dựng danh sách nhiệm vụ cá nhân hôm nay (ví dụ: Học 5 từ, Quay vòng quay, Đạt 20 XP) và cho phép bấm nhận thưởng trực tiếp. |
+| **2. Giao diện Phòng Chat Độc lập** | `lib/features/social/presentation/screens/chat_room_screen.dart` | Cập nhật màn hình chat nhóm cũ để lấy tin nhắn theo ID phòng chat cụ thể thay vì dùng chung phòng Global. |

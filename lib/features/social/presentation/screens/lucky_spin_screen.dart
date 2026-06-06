@@ -95,6 +95,8 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
       try {
         await ref.read(userServiceProvider).addXP(user.uid, xpToAdd);
         if (mounted) {
+          // Buộc refresh lại provider để đảm bảo UI nhận XP mới nhất
+          ref.invalidate(currentUserProvider);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Chúc mừng! Bạn nhận được $xpToAdd XP'),
