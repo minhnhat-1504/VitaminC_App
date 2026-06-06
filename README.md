@@ -502,30 +502,82 @@ Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Fire
 | **4. Trigger Animation Thực tế** | `features/social/presentation/widgets/streak_popup.dart`      | Kết nối Popup với Riverpod. Viết logic chặn: Popup ăn mừng Streak CHỈ được hiển thị 1 lần duy nhất trong ngày, đúng vào khoảnh khắc User hoàn thành thẻ học khiến biến `streak_count` nhảy số.                                                  |
 ---
 
-### Sprint 4: Hoàn thiện, Tối ưu Hiệu năng & Trải nghiệm Người dùng (Polishing)
+### Sprint 4: Tương tác Xã hội & Kích thích Học tập (Social & Gamification)
 
-**Mục tiêu cốt lõi:** Liên kết toàn bộ ứng dụng thành một khối thống nhất, bít kín các lỗ hổng tính năng (như quên mật khẩu, trạng thái rỗng), tối ưu hóa hiệu năng bộ nhớ trên thiết bị Android và chuẩn hóa hệ thống thông báo lỗi (Error Handling) để giao tiếp thân thiện với người dùng.
+**Mục tiêu cốt lõi:** Nâng cấp VitaminC bằng các tính năng "Low Effort - High Impact", tập trung vào Gamification (Trò chơi hóa) và Tương tác xã hội để giữ chân người dùng (Retention), tạo động lực học tập mỗi ngày và tạo hiệu ứng lan truyền (Viral) tự nhiên cho ứng dụng.
 
 #### ⚠️ LƯU Ý QUAN TRỌNG CHO SPRINT 4 (TẤT CẢ THÀNH VIÊN CẦN ĐỌC KỸ)
 
-**1. Chuẩn hóa Thông điệp Lỗi (User-centric Error Handling)**
+**1. Tận dụng Thư viện UI (Package Utilization)**
+Tuyệt đối không tự code từ đầu các logic vật lý phức tạp (như vuốt thả thẻ, vòng quay may mắn). Bắt buộc sử dụng triệt để các package đã được kiểm chứng trên pub.dev (như `flutter_card_swiper`, `flutter_fortune_wheel`, `share_plus`) để tiết kiệm thời gian và đảm bảo hiệu năng mượt mà.
 
-* Tuyệt đối không hiển thị các mã lỗi hệ thống tiếng Anh (ví dụ: `Exception: timeout`, `null pointer`) ra màn hình cho người dùng cuối.
-* Trong các hệ thống hiện đại, một "Failure" (sự cố ngưng hoạt động) rất nhiều lúc xảy ra do đường truyền mạng hoặc dịch vụ bên thứ 3 (như Firebase, Gemini) bị sập, chứ không hoàn toàn do Bug trong code của nhóm. Do đó, các thông báo lỗi phải được bắt (catch) và dịch sang tiếng Việt thân thiện, ví dụ: *"Đường truyền mạng đang gặp sự cố, vui lòng kiểm tra lại kết nối"* hoặc *"Máy chủ đang bận, xin thử lại sau"*.
+**2. Xác thực Dữ liệu phía Client (Client-side Validation)**
+Tính năng "Cảnh sát ngôn ngữ" phải được xử lý ngay trên thiết bị của người dùng (dùng Regex). Không gọi API lên server hay Firebase để kiểm tra tiếng Việt nhằm tránh độ trễ (latency) và phản hồi lỗi (Error Handling) ngay lập tức cho người dùng.
+
+**3. Bảo toàn Core Logic (Thuật toán SRS)**
+Khi thay đổi giao diện học tập thành dạng quẹt thẻ (Tinder-style), phải hết sức cẩn thận để không làm đứt gãy luồng cập nhật dữ liệu của thuật toán lặp ngắt quãng. Giao diện thay đổi, nhưng dữ liệu đẩy xuống Local DB và Firebase phải giữ nguyên chuẩn cũ.
+
+**4. Tối ưu Chi phí Database**
+Phòng chat nhóm có thể sinh ra lượng Read/Write khổng lồ. Tuyệt đối không dùng `StreamProvider` lắng nghe toàn bộ collection Chat. **Bắt buộc** gắn `.orderBy('timestamp', descending: true).limit(30)` để chỉ tải những tin nhắn mới nhất.
+
+---
+
+#### 👨‍💻 Phân công nhiệm vụ chi tiết
+
+**Thành viên 1 (Lead): Hạ tầng Chat & Kích thích Học tập tự động**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Cảnh sát Ngôn ngữ (English-Only)** | `core/utils/language_validator.dart` | Viết hàm `isVietnamese(String text)`. Sử dụng Regex kiểm tra chuỗi có chứa ký tự tiếng Việt có dấu (ă, â, đ, ê, ô, ơ, ư...) hay không. Trả về `true` hoặc `false` để UI sử dụng. |
+| **2. Học bị động qua FCM** | `core/services/notification_service.dart` | Nâng cấp hàm gửi thông báo. Thay vì lời nhắc cố định, truy vấn ngẫu nhiên 1 từ vựng từ Local DB, nhét từ vựng + nghĩa + ví dụ vào nội dung thông báo đẩy ra màn hình khóa. |
+| **3. Core Logic Phòng Chat** | `features/social/data/chat_service.dart` | Khởi tạo collection `global_chat`. Viết hàm `sendMessage()`. Đặc biệt lưu ý chèn thêm `timestamp: FieldValue.serverTimestamp()` để đảm bảo thứ tự tin nhắn không bị lệch. |
+
+**Thành viên 2: Social UI & Viral Loop**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Khoe thành tích "Sống ảo"** | `features/social/presentation/widgets/streak_popup.dart` | Cài package `share_plus`. Dùng `RepaintBoundary` chụp ảnh Widget chúc mừng Streak thành file ảnh. Gắn vào nút "Chia sẻ" để gọi menu Share mặc định của điện thoại (lên FB/IG Story). |
+| **2. UI Phòng Chat Nhóm** | `features/social/presentation/screens/group_chat_screen.dart` | Dựng UI chat bằng `StreamBuilder`. Tích hợp hàm `isVietnamese()`. Nếu user gõ tiếng Việt và bấm gửi, chặn lại ngay và hiện SnackBar cảnh báo: "Khu vực English-Only, hãy thử lại bằng tiếng Anh nhé!". |
+| **3. Nhiệm vụ Đồng đội (Co-op)** | `features/social/presentation/screens/coop_quest_screen.dart` | Thiết kế một UI thanh tiến độ (Progress bar) hiển thị "Nhiệm vụ tuần: Lật 500 thẻ". Gọi dữ liệu tổng hợp từ Firestore để hiển thị phần trăm hoàn thành của cả hệ thống. |
+
+**Thành viên 3: Trải nghiệm Học tập Vuốt chạm (Flashcard)**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Tích hợp Quẹt thẻ (Tinder-style)** | `features/study/presentation/screens/flashcard_screen.dart` | Cài đặt package `flutter_card_swiper`. Bọc Widget thẻ từ vựng hiện tại vào Swiper. Đảm bảo hiệu ứng vuốt trái/phải mượt mà, không bị khựng hình. |
+| **2. Nối luồng Logic SRS** | `features/study/presentation/screens/flashcard_screen.dart` | Map thao tác vuốt với logic cũ: Bắt sự kiện quẹt trái (chưa thuộc) để gọi hàm đánh giá Hard; quẹt phải (đã thuộc) để gọi hàm đánh giá Easy. Ẩn/xóa các nút bấm Hard/Good/Easy cũ ở dưới đáy màn hình. |
+| **3. Hiệu ứng Feedback Hình ảnh** | `features/study/presentation/widgets/swipe_overlay.dart` | Bổ sung hiệu ứng mờ (Overlay): Khi ngón tay kéo thẻ sang phải, phủ một lớp màu Xanh lá nhạt chữ "EASY"; kéo sang trái phủ màu Đỏ nhạt chữ "HARD" để tăng trải nghiệm xúc giác. |
+
+**Thành viên 4: Gamification & Vòng quay may mắn**
+
+| Task (Việc cần làm) | Vị trí file | Hướng dẫn triển khai chi tiết |
+| --- | --- | --- |
+| **1. Giao diện Daily Gacha** | `features/social/presentation/screens/lucky_spin_screen.dart` | Cài package `flutter_fortune_wheel`. Thiết kế màn hình hiển thị vòng quay với các ô phần thưởng (ví dụ: +10 XP, +50 XP, Huy hiệu bí ẩn). |
+| **2. Logic Kích hoạt Vòng quay** | `features/study/presentation/screens/study_summary_screen.dart` | Viết logic điều kiện: Vòng quay chỉ hiện ra dưới dạng Dialog (hoặc chuyển trang) đúng 1 lần trong ngày sau khi người dùng hoàn thành 20 thẻ ôn tập đầu tiên. |
+| **3. Xử lý Trả thưởng** | `features/dashboard/data/dashboard_service.dart` | Nhận kết quả từ vòng quay ngẫu nhiên. Gọi hàm `update()` lên Firestore kèm lệnh `FieldValue.increment()` để tự động cộng chính xác số điểm XP đó vào tài khoản người dùng. |
+
+---
+
+### Sprint 5: Hoàn thiện, Tối ưu Hiệu năng & Trải nghiệm Người dùng (Polishing)
+
+**Mục tiêu cốt lõi:** Liên kết toàn bộ ứng dụng thành một khối thống nhất, bít kín các lỗ hổng tính năng (như quên mật khẩu, trạng thái rỗng), tối ưu hóa hiệu năng bộ nhớ trên thiết bị Android và chuẩn hóa hệ thống thông báo lỗi (Error Handling) để giao tiếp thân thiện với người dùng.
+
+#### ⚠️ LƯU Ý QUAN TRỌNG CHO SPRINT 5 (TẤT CẢ THÀNH VIÊN CẦN ĐỌC KỸ)
+
+**1. Chuẩn hóa Thông điệp Lỗi (User-centric Error Handling)**
+Tuyệt đối không hiển thị các mã lỗi hệ thống tiếng Anh (ví dụ: `Exception: timeout`, `null pointer`) ra màn hình cho người dùng cuối.
+Trong các hệ thống hiện đại, một "Failure" (sự cố ngưng hoạt động) rất nhiều lúc xảy ra do đường truyền mạng hoặc dịch vụ bên thứ 3 (như Firebase, Gemini) bị sập, chứ không hoàn toàn do Bug trong code của nhóm. Do đó, các thông báo lỗi phải được bắt (catch) và dịch sang tiếng Việt thân thiện, ví dụ: *"Đường truyền mạng đang gặp sự cố, vui lòng kiểm tra lại kết nối"* hoặc *"Máy chủ đang bận, xin thử lại sau"*.
 
 **2. Tối ưu Bộ nhớ (Memory Leak Prevention)**
-
-* Việc sử dụng Local DB (Isar), Text-to-Speech, Camera OCR và Animation tạo ra gánh nặng rất lớn cho RAM của điện thoại Android.
-* **Yêu cầu bắt buộc:** Tất cả các màn hình có sử dụng `Controller` (TextEditingController, AnimationController) hoặc các stream lắng nghe dữ liệu liên tục đều phải được gọi lệnh `dispose()` khi đóng màn hình để giải phóng bộ nhớ.
+Việc sử dụng Local DB (Isar), Text-to-Speech, Camera OCR và Animation tạo ra gánh nặng rất lớn cho RAM của điện thoại Android.
+**Yêu cầu bắt buộc:** Tất cả các màn hình có sử dụng Controller (`TextEditingController`, `AnimationController`) hoặc các stream lắng nghe dữ liệu liên tục đều phải được gọi lệnh `dispose()` khi đóng màn hình để giải phóng bộ nhớ.
 
 **3. Xử lý Trạng thái Rỗng (Empty States & Loading)**
-
-* Không được để một màn hình trắng tinh khi dữ liệu đang tải hoặc khi người dùng chưa có dữ liệu nào.
-* Phải luôn có `CircularProgressIndicator` (hoặc hiệu ứng Shimmer) khi chờ API. Nếu danh sách từ vựng trống, phải hiển thị hình ảnh minh họa và nút kêu gọi hành động: *"Bạn chưa có thẻ nào, hãy tạo ngay nhé!"*.
+Không được để một màn hình trắng tinh khi dữ liệu đang tải hoặc khi người dùng chưa có dữ liệu nào.
+Phải luôn có `CircularProgressIndicator` (hoặc hiệu ứng Shimmer) khi chờ API. Nếu danh sách từ vựng trống, phải hiển thị hình ảnh minh họa và nút kêu gọi hành động: *"Bạn chưa có thẻ nào, hãy tạo ngay nhé!"*.
 
 **4. Dọn dẹp Codebase & Chuẩn bị Đóng gói Android**
-
-* Vì nhóm chỉ tập trung build cho Android, hãy kiểm tra lại file `android/app/build.gradle`. Xóa bỏ toàn bộ các thư viện (dependencies) thừa không sử dụng trong `pubspec.yaml` để giảm thiểu dung lượng file APK cuối cùng.
+Vì nhóm chỉ tập trung build cho Android, hãy kiểm tra lại file `android/app/build.gradle`. Xóa bỏ toàn bộ các thư viện (dependencies) thừa không sử dụng trong `pubspec.yaml` để giảm thiểu dung lượng file APK cuối cùng.
 
 ---
 
@@ -546,7 +598,7 @@ Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Fire
 | --- | --- | --- |
 | **1. Empty States & Loading UI** | Toàn bộ thư mục `features/` | Rà soát tất cả các màn hình (Dashboard, Library, Leaderboard). Bổ sung widget `EmptyStateWidget` (kèm icon và text hướng dẫn) khi mảng dữ liệu trả về rỗng. Thay thế các màn hình chờ bằng hiệu ứng Shimmer (khung xám nhấp nháy) cho chuyên nghiệp. |
 | **2. Deep Link Thông báo (FCM)** | `routing/app_router.dart` & `notification_service.dart` | Cấu hình để khi người dùng đang ở ngoài màn hình chính của điện thoại, bấm vào thông báo nhắc nhở học tập (FCM), ứng dụng sẽ mở lên và tự động nhảy thẳng vào trang `/study` (Flashcard) thay vì chỉ mở trang chủ chung chung. |
-| **3. Xử lý UX Bàn phím ảo** | `features/library/presentation/screens/add_vocab_screen.dart` | Bọc các form nhập liệu bằng `SingleChildScrollView` và cấu hình `resizeToAvoidBottomInset = true` trong Scaffold. Đảm bảo khi bàn phím ảo của Android bật lên không bị che khuất nút "Lưu" hoặc báo lỗi vỡ layout sọc vàng đen. |
+| **3. Xử lý UX Bàn phím ảo** | `features/library/presentation/screens/add_vocab_screen.dart` | Bọc các form nhập liệu bằng `SingleChildScrollView` và cấu hình `resizeToAvoidBottomInset = true` trong `Scaffold`. Đảm bảo khi bàn phím ảo của Android bật lên không bị che khuất nút "Lưu" hoặc báo lỗi vỡ layout sọc vàng đen. |
 
 **Thành viên 3: Khớp nối Đồng bộ, Tối ưu RAM & Xung đột Dữ liệu**
 
@@ -563,5 +615,3 @@ Nếu task của bạn yêu cầu tạo một bảng/collection mới trên Fire
 | **1. Theo dõi Ứng dụng (Analytics)** | `main.dart` | Cài đặt `firebase_analytics` và `firebase_crashlytics`. Gắn các lệnh log event khi user thực hiện hành động quan trọng (VD: Hoàn thành 1 thẻ, Quét OCR thành công). Crashlytics sẽ tự bắt các lỗi crash Native Android gửi về Firebase Console. |
 | **2. Bẫy lỗi Công cụ Thông minh** | `features/tools/presentation/screens/` | Xử lý các góc chết của AI/OCR: Thêm vòng xoay loading khi đang đợi Gemini rep. Báo lỗi *"Không tìm thấy chữ trong ảnh"* nếu OCR ML Kit trả về rỗng. Tự ngắt micro thu âm nếu user im lặng quá 5 giây (tránh treo app). |
 | **3. Đóng gói & Tối ưu APK** | `android/app/build.gradle` & `android/app/src/main/` | Đổi tên ứng dụng chính thức trong `AndroidManifest.xml`. Cập nhật file logo (Icon) chuẩn của VitaminC vào thư mục `res/mipmap`. Bật cấu hình `minifyEnabled true` và `shrinkResources true` trong bản build release để nén giảm dung lượng file APK. |
-
----
