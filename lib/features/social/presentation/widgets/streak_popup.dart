@@ -34,7 +34,9 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     setState(() => _isSharing = true);
 
     try {
-      final boundary = _boundaryKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          _boundaryKey.currentContext?.findRenderObject()
+              as RenderRepaintBoundary?;
       if (boundary == null) throw Exception('Cannot find repaint boundary');
 
       // Chờ frame vẽ hoàn tất nếu cần
@@ -44,7 +46,8 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
 
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ImageByteFormat.png);
-      if (byteData == null) throw Exception('Cannot convert image to byte data');
+      if (byteData == null)
+        throw Exception('Cannot convert image to byte data');
       final bytes = byteData.buffer.asUint8List();
 
       final tempDir = await getTemporaryDirectory();
@@ -54,15 +57,16 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: 'Tôi vừa đạt cột mốc Streak ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
+          text:
+              'Tôi vừa đạt cột mốc Streak ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
         ),
       );
     } catch (e) {
       debugPrint('Error sharing streak: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi chia sẻ: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi chia sẻ: $e')));
       }
     } finally {
       if (mounted) {

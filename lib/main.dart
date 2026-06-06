@@ -26,9 +26,12 @@ void main() async {
       return;
     }
     FlutterError.presentError(details);
-    AppExceptionHandler.handleUncaughtError(details.exception, details.stack ?? StackTrace.empty);
+    AppExceptionHandler.handleUncaughtError(
+      details.exception,
+      details.stack ?? StackTrace.empty,
+    );
   };
-  
+
   // Bắt các lỗi Async (Platform) ném ra
   PlatformDispatcher.instance.onError = (error, stack) {
     AppExceptionHandler.handleUncaughtError(error, stack);
@@ -49,7 +52,7 @@ void main() async {
     debugPrint(">>> FIREBASE CONNECTED SUCCESSFULLY! <<<");
     debugPrint("Project ID: ${Firebase.app().options.projectId}");
     debugPrint("====================================================");
-    
+
     // Khởi tạo Notification Service
     await NotificationService().initialize();
   } catch (e) {
@@ -58,9 +61,7 @@ void main() async {
     debugPrint("====================================================");
   }
 
-  runApp(
-    const ProviderScope(child: VitaminCApp()),
-  );
+  runApp(const ProviderScope(child: VitaminCApp()));
 }
 
 class VitaminCApp extends ConsumerWidget {
@@ -97,7 +98,7 @@ class VitaminCApp extends ConsumerWidget {
         ),
       ),
       // Kết nối config mới từ Provider
-      routerConfig: router, 
+      routerConfig: router,
     );
   }
 }

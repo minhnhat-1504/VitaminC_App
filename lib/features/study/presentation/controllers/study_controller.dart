@@ -59,12 +59,17 @@ class StudyController extends StateNotifier<StudyState> {
       // 1. Tự động đồng bộ từ Firestore về Local DB trước khi lấy thẻ học
       final user = _ref.read(authStateProvider).value;
       if (user != null) {
-        await _ref.read(localDbServiceProvider).syncVocabsFromFirestore(user.uid);
+        await _ref
+            .read(localDbServiceProvider)
+            .syncVocabsFromFirestore(user.uid);
       }
 
       // 2. Lấy thẻ từ Local DB
       final studyService = _ref.read(studyServiceProvider);
-      final cards = await studyService.getDueCards(deckId: deckId, forceStudy: forceStudy);
+      final cards = await studyService.getDueCards(
+        deckId: deckId,
+        forceStudy: forceStudy,
+      );
       if (mounted) {
         state = state.copyWith(
           isLoading: false,
@@ -76,7 +81,8 @@ class StudyController extends StateNotifier<StudyState> {
         );
       }
     } catch (e) {
-      if (mounted) state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted)
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
@@ -96,17 +102,14 @@ class StudyController extends StateNotifier<StudyState> {
 
       // 2b. Tăng tiến độ nhiệm vụ đồng đội (Co-op Quest)
       try {
-        final docRef = FirebaseFirestore.instance.collection('quests').doc('weekly_coop');
+        final docRef = FirebaseFirestore.instance
+            .collection('quests')
+            .doc('weekly_coop');
         final doc = await docRef.get();
         if (!doc.exists) {
-          await docRef.set({
-            'totalFlipped': 1,
-            'target': 500,
-          });
+          await docRef.set({'totalFlipped': 1, 'target': 500});
         } else {
-          await docRef.update({
-            'totalFlipped': FieldValue.increment(1),
-          });
+          await docRef.update({'totalFlipped': FieldValue.increment(1)});
         }
       } catch (e) {
         debugPrint('Error updating coop quest: $e');
@@ -119,8 +122,9 @@ class StudyController extends StateNotifier<StudyState> {
       final finished = nextIndex >= state.dueCards.length;
 
       // Cập nhật Map chất lượng đã đánh giá
-      final newReviewedQualities = Map<String, ReviewQuality>.from(state.reviewedQualities)
-        ..[currentCard.id] = quality;
+      final newReviewedQualities = Map<String, ReviewQuality>.from(
+        state.reviewedQualities,
+      )..[currentCard.id] = quality;
 
       state = state.copyWith(
         currentIndex: nextIndex,
@@ -138,6 +142,7 @@ class StudyController extends StateNotifier<StudyState> {
   }
 }
 
-final studyControllerProvider = StateNotifierProvider<StudyController, StudyState>((ref) {
-  return StudyController(ref);
-});
+final studyControllerProvider =
+    StateNotifierProvider<StudyController, StudyState>((ref) {
+      return StudyController(ref);
+    });

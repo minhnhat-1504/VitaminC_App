@@ -113,7 +113,9 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Không thể truy cập Microphone hoặc thiết bị không hỗ trợ nhận diện giọng nói.'),
+              content: Text(
+                'Không thể truy cập Microphone hoặc thiết bị không hỗ trợ nhận diện giọng nói.',
+              ),
               backgroundColor: Colors.redAccent,
               behavior: SnackBarBehavior.floating,
             ),
@@ -345,9 +347,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
         }
 
         return Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: _s(4, uiScale),
-          ),
+          padding: EdgeInsets.symmetric(horizontal: _s(4, uiScale)),
           decoration: BoxDecoration(
             color: bg,
             borderRadius: BorderRadius.circular(_s(6, uiScale)),
@@ -557,7 +557,9 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
           ),
           SizedBox(height: _s(4, uiScale)),
           Text(
-            _recognizedText.isEmpty ? '(không nhận diện được)' : _recognizedText,
+            _recognizedText.isEmpty
+                ? '(không nhận diện được)'
+                : _recognizedText,
             textAlign: TextAlign.center,
             style: GoogleFonts.lexend(
               fontSize: _s(15, uiScale),

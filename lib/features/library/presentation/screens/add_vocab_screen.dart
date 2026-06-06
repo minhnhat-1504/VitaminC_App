@@ -63,7 +63,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
       );
 
       await libraryService.addVocab(newVocab);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đã thêm từ vựng thành công!')),
@@ -72,9 +72,9 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -161,7 +161,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
             const SizedBox(height: 32),
 
             // Nút Lưu chuẩn của Team
-            _isLoading 
+            _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : CustomPrimaryButton(
                     text: 'SAVE VOCABULARY',

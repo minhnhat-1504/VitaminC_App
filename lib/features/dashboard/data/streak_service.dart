@@ -6,12 +6,15 @@ class StreakService {
   final FirebaseFirestore _firestore;
 
   StreakService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Lấy chuỗi ngày học hiện tại (Streak) của người dùng
   Future<int> getStreakCount(String uid) async {
     try {
-      final doc = await _firestore.collection(FirestoreCollections.users).doc(uid).get();
+      final doc = await _firestore
+          .collection(FirestoreCollections.users)
+          .doc(uid)
+          .get();
       if (doc.exists) {
         final data = doc.data();
         if (data != null && data.containsKey('streak_count')) {
@@ -24,7 +27,11 @@ class StreakService {
 
           if (lastStudyTimestamp != null) {
             final lastStudyTime = lastStudyTimestamp.toDate();
-            final lastStudyDay = DateTime(lastStudyTime.year, lastStudyTime.month, lastStudyTime.day);
+            final lastStudyDay = DateTime(
+              lastStudyTime.year,
+              lastStudyTime.month,
+              lastStudyTime.day,
+            );
             final difference = today.difference(lastStudyDay).inDays;
 
             if (difference > 1) {
@@ -45,7 +52,9 @@ class StreakService {
   /// Trả về số streak mới sau khi cập nhật
   Future<int> updateStreak(String uid) async {
     try {
-      final userDocRef = _firestore.collection(FirestoreCollections.users).doc(uid);
+      final userDocRef = _firestore
+          .collection(FirestoreCollections.users)
+          .doc(uid);
       int newStreak = 0;
 
       await _firestore.runTransaction((transaction) async {
@@ -57,15 +66,20 @@ class StreakService {
 
         final data = snapshot.data();
         int currentStreak = data?['streak_count'] as int? ?? 0;
-        final Timestamp? lastStudyTimestamp = data?['last_study_date'] as Timestamp?;
+        final Timestamp? lastStudyTimestamp =
+            data?['last_study_date'] as Timestamp?;
 
         final now = DateTime.now();
         final today = DateTime(now.year, now.month, now.day);
 
         if (lastStudyTimestamp != null) {
           final lastStudyTime = lastStudyTimestamp.toDate();
-          final lastStudyDay = DateTime(lastStudyTime.year, lastStudyTime.month, lastStudyTime.day);
-          
+          final lastStudyDay = DateTime(
+            lastStudyTime.year,
+            lastStudyTime.month,
+            lastStudyTime.day,
+          );
+
           final difference = today.difference(lastStudyDay).inDays;
 
           if (difference == 0) {
@@ -90,10 +104,12 @@ class StreakService {
           'last_study_date': FieldValue.serverTimestamp(),
         });
       });
-      
+
       // Thành công cập nhật streak (tức là đã học hôm nay),
       // Dời lịch nhắc nhở sang 20:00 ngày mai.
-      await NotificationService().scheduleDailyStreakReminder(startFromTomorrow: true);
+      await NotificationService().scheduleDailyStreakReminder(
+        startFromTomorrow: true,
+      );
 
       return newStreak;
     } catch (e) {

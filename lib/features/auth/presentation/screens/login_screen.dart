@@ -19,7 +19,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool isLogin = true;
   bool isLoading = false; // Trạng thái chờ xử lý backend
-  
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController(); // Dùng cho form đăng ký
@@ -56,7 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         // Gọi hàm đăng ký tài khoản mới
         await authRepo.signUpEmail(email, password, name);
       }
-      // Lưu ý: Không cần context.go('/home') ở đây vì routerProvider 
+      // Lưu ý: Không cần context.go('/home') ở đây vì routerProvider
       // sẽ tự động nhận diện trạng thái User != null và redirect.
     } catch (e) {
       _showError(e);
@@ -66,7 +66,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showError(dynamic error) {
-    final message = AppExceptionHandler.handleException(error, 'Đã xảy ra lỗi').message;
+    final message = AppExceptionHandler.handleException(
+      error,
+      'Đã xảy ra lỗi',
+    ).message;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -81,74 +84,78 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
-        child: isLoading 
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-          : SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-          child: Column(
-            children: [
-              _buildHeader(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
+            : SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
                 child: Column(
                   children: [
-                    AuthTabSwitcher(
-                      isLoginActive: isLogin,
-                      onTabChanged: () => setState(() => isLogin = !isLogin),
-                    ),
-                    const SizedBox(height: 32),
-
-                    Stack(
-                      alignment: Alignment.topCenter,
-                      children: [
-                        // Giữ khung layout ổn định
-                        Opacity(
-                          opacity: 0,
-                          child: IgnorePointer(child: _buildLoginForm()),
-                        ),
-
-                        // FORM LOGIN
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 250),
-                          opacity: isLogin ? 1.0 : 0.0,
-                          child: IgnorePointer(
-                            ignoring: !isLogin,
-                            child: _buildLoginForm(),
+                    _buildHeader(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          AuthTabSwitcher(
+                            isLoginActive: isLogin,
+                            onTabChanged: () =>
+                                setState(() => isLogin = !isLogin),
                           ),
-                        ),
+                          const SizedBox(height: 32),
 
-                        // FORM REGISTER
-                        // FORM REGISTER
-                        AnimatedOpacity(
-                          duration: const Duration(milliseconds: 250),
-                          opacity: isLogin ? 0.0 : 1.0,
-                          child: IgnorePointer(
-                            ignoring: isLogin,
-                            child: RegisterForm(
-                              nameController: _nameController, // <--- THÊM DÒNG NÀY
-                              emailController: _emailController,
-                              passwordController: _passwordController,
-                              submitButton: _buildSubmitButton(
-                                "Sign Up Now\nĐăng ký ngay",
-                                _handleEmailAuth,
+                          Stack(
+                            alignment: Alignment.topCenter,
+                            children: [
+                              // Giữ khung layout ổn định
+                              Opacity(
+                                opacity: 0,
+                                child: IgnorePointer(child: _buildLoginForm()),
                               ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
 
-                    const SizedBox(height: 0),
-                    _buildSocialSection(),
-                    const SizedBox(height: 20),
-                    _buildFooter(),
-                    const SizedBox(height: 24),
+                              // FORM LOGIN
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 250),
+                                opacity: isLogin ? 1.0 : 0.0,
+                                child: IgnorePointer(
+                                  ignoring: !isLogin,
+                                  child: _buildLoginForm(),
+                                ),
+                              ),
+
+                              // FORM REGISTER
+                              // FORM REGISTER
+                              AnimatedOpacity(
+                                duration: const Duration(milliseconds: 250),
+                                opacity: isLogin ? 0.0 : 1.0,
+                                child: IgnorePointer(
+                                  ignoring: isLogin,
+                                  child: RegisterForm(
+                                    nameController:
+                                        _nameController, // <--- THÊM DÒNG NÀY
+                                    emailController: _emailController,
+                                    passwordController: _passwordController,
+                                    submitButton: _buildSubmitButton(
+                                      "Sign Up Now\nĐăng ký ngay",
+                                      _handleEmailAuth,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 0),
+                          _buildSocialSection(),
+                          const SizedBox(height: 20),
+                          _buildFooter(),
+                          const SizedBox(height: 24),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -197,10 +204,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
 
         const SizedBox(height: 8),
-        _buildSubmitButton(
-          "Login Now\nĐăng nhập ngay",
-          _handleEmailAuth,
-        ),
+        _buildSubmitButton("Login Now\nĐăng nhập ngay", _handleEmailAuth),
       ],
     );
   }
@@ -320,9 +324,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                icon, 
-                size: 28, 
-                color: label == "Facebook" ? Colors.blue : Colors.redAccent
+                icon,
+                size: 28,
+                color: label == "Facebook" ? Colors.blue : Colors.redAccent,
               ),
               const SizedBox(width: 10),
               Text(

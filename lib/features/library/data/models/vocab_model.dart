@@ -9,13 +9,13 @@ class VocabModel extends Equatable {
   final String? example;
   final String? imageUrl;
   final String? audioUrl;
-  
+
   // SRS Fields
   final double easinessFactor;
   final int interval;
   final int repetition;
   final Timestamp nextReview;
-  
+
   // Metadata
   final Timestamp createdAt;
   final Timestamp updatedAt;
@@ -106,18 +106,18 @@ class VocabModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        deckId,
-        word,
-        meaning,
-        example,
-        imageUrl,
-        audioUrl,
-        easinessFactor,
-        interval,
-        repetition,
-        nextReview,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    deckId,
+    word,
+    meaning,
+    example,
+    imageUrl,
+    audioUrl,
+    easinessFactor,
+    interval,
+    repetition,
+    nextReview,
+    createdAt,
+    updatedAt,
+  ];
 }

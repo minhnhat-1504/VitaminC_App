@@ -40,11 +40,12 @@ class RouterNotifier extends ChangeNotifier {
 
     final bool loggedIn = authState.value != null;
     final String location = state.matchedLocation;
-    
+
     // Các đường dẫn thuộc nhóm xác thực
-    final bool isAuthPath = location == '/login' || 
-                            location == '/splash' || 
-                            location == '/onboarding';
+    final bool isAuthPath =
+        location == '/login' ||
+        location == '/splash' ||
+        location == '/onboarding';
 
     // 1. Nếu chưa đăng nhập: Buộc quay về màn Login (trừ khi đang ở Splash/Onboarding)
     if (!loggedIn) {
@@ -74,10 +75,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: notifier.redirect,
     routes: [
       // Các màn hình độc lập
-      GoRoute(path: '/splash', builder: (context, state) => const SplashScreen()),
-      GoRoute(path: '/onboarding', builder: (context, state) => const OnboardingScreen()),
+      GoRoute(
+        path: '/splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      
+
       // Cấu hình ShellRoute cho các màn hình có BottomNavigationBar
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
@@ -88,23 +95,35 @@ final routerProvider = Provider<GoRouter>((ref) {
           );
         },
         routes: [
-          GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
-          GoRoute(path: '/library', builder: (context, state) => const DeckListScreen()),
-          GoRoute(path: '/social', builder: (context, state) => const LeaderboardScreen()),
-          GoRoute(path: '/settings', builder: (context, state) => const SettingsScreen()),
+          GoRoute(
+            path: '/home',
+            builder: (context, state) => const HomeScreen(),
+          ),
+          GoRoute(
+            path: '/library',
+            builder: (context, state) => const DeckListScreen(),
+          ),
+          GoRoute(
+            path: '/social',
+            builder: (context, state) => const LeaderboardScreen(),
+          ),
+          GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsScreen(),
+          ),
         ],
       ),
 
       // Các màn hình chức năng sâu (Full screen)
       GoRoute(
-        path: '/deck-detail', 
+        path: '/deck-detail',
         builder: (context, state) {
           final deckId = state.extra as String;
           return DeckDetailScreen(deckId: deckId);
-        }
+        },
       ),
       GoRoute(
-        path: '/add-vocab', 
+        path: '/add-vocab',
         builder: (context, state) {
           // Hỗ trợ cả 2 kiểu: String (tương thích ngược) và Map (từ OCR)
           if (state.extra is Map<String, String>) {
@@ -116,20 +135,32 @@ final routerProvider = Provider<GoRouter>((ref) {
           }
           final deckId = state.extra as String;
           return AddVocabScreen(deckId: deckId);
-        }
+        },
       ),
       GoRoute(
         path: '/study',
         builder: (context, state) {
           // Ép kiểu extra thành String để lấy deckId
-          final deckId = state.extra as String?; 
+          final deckId = state.extra as String?;
           return FlashcardScreen(deckId: deckId);
         },
       ),
-      GoRoute(path: '/study-summary', builder: (context, state) => const StudySummaryScreen()),
-      GoRoute(path: '/pronunciation', builder: (context, state) => const PronunciationScreen()),
-      GoRoute(path: '/chatbot', builder: (context, state) => const ChatbotScreen()),
-      GoRoute(path: '/ocr', builder: (context, state) => const OcrScannerScreen()),
+      GoRoute(
+        path: '/study-summary',
+        builder: (context, state) => const StudySummaryScreen(),
+      ),
+      GoRoute(
+        path: '/pronunciation',
+        builder: (context, state) => const PronunciationScreen(),
+      ),
+      GoRoute(
+        path: '/chatbot',
+        builder: (context, state) => const ChatbotScreen(),
+      ),
+      GoRoute(
+        path: '/ocr',
+        builder: (context, state) => const OcrScannerScreen(),
+      ),
     ],
   );
 });

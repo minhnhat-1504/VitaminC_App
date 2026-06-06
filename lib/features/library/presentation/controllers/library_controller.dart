@@ -55,7 +55,7 @@ class LibraryController extends StateNotifier<LibraryState> {
 
       final libraryService = _ref.read(libraryServiceProvider);
       final decks = await libraryService.getDecks();
-      
+
       // Load due counts and total counts for each deck
       final Map<String, int> dueCounts = {};
       final Map<String, int> totalCounts = {};
@@ -63,21 +63,29 @@ class LibraryController extends StateNotifier<LibraryState> {
         dueCounts[deck.id] = await libraryService.getDueCount(deck.id);
         totalCounts[deck.id] = await libraryService.getTotalCount(deck.id);
       }
-      
+
       if (mounted) {
-        state = state.copyWith(isLoading: false, decks: decks, dueCardsCount: dueCounts, totalCardsCount: totalCounts);
+        state = state.copyWith(
+          isLoading: false,
+          decks: decks,
+          dueCardsCount: dueCounts,
+          totalCardsCount: totalCounts,
+        );
       }
     } catch (e) {
-      if (mounted) state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted)
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 
   Future<DeckModel?> addDeck(String title, String desc) async {
     try {
       final libraryService = _ref.read(libraryServiceProvider);
-      
+
       // Kiểm tra trùng tên (Case-insensitive)
-      final isDuplicate = state.decks.any((d) => d.title.toLowerCase().trim() == title.toLowerCase().trim());
+      final isDuplicate = state.decks.any(
+        (d) => d.title.toLowerCase().trim() == title.toLowerCase().trim(),
+      );
       if (isDuplicate) {
         throw AppException('Tên bộ thẻ "$title" đã tồn tại!');
       }
@@ -99,7 +107,8 @@ class LibraryController extends StateNotifier<LibraryState> {
       await loadDecks(); // Tải lại danh sách Deck vì file Excel tự tạo Deck mới
       return newDeck;
     } catch (e) {
-      if (mounted) state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      if (mounted)
+        state = state.copyWith(isLoading: false, errorMessage: e.toString());
       return null;
     }
   }
@@ -107,11 +116,12 @@ class LibraryController extends StateNotifier<LibraryState> {
   Future<void> updateDeck(DeckModel deck) async {
     try {
       final libraryService = _ref.read(libraryServiceProvider);
-      
+
       // Kiểm tra trùng tên (loại trừ chính nó)
-      final isDuplicate = state.decks.any((d) => 
-          d.id != deck.id && 
-          d.title.toLowerCase().trim() == deck.title.toLowerCase().trim()
+      final isDuplicate = state.decks.any(
+        (d) =>
+            d.id != deck.id &&
+            d.title.toLowerCase().trim() == deck.title.toLowerCase().trim(),
       );
       if (isDuplicate) {
         throw AppException('Tên bộ thẻ "${deck.title}" đã tồn tại!');
@@ -124,7 +134,6 @@ class LibraryController extends StateNotifier<LibraryState> {
     }
   }
 
-
   Future<void> deleteDeck(String deckId) async {
     try {
       final libraryService = _ref.read(libraryServiceProvider);
@@ -136,6 +145,7 @@ class LibraryController extends StateNotifier<LibraryState> {
   }
 }
 
-final libraryControllerProvider = StateNotifierProvider<LibraryController, LibraryState>((ref) {
-  return LibraryController(ref);
-});
+final libraryControllerProvider =
+    StateNotifierProvider<LibraryController, LibraryState>((ref) {
+      return LibraryController(ref);
+    });

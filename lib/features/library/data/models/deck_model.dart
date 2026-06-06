@@ -60,11 +60,11 @@ class DeckModel extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        description,
-        coverImageUrl,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    title,
+    description,
+    coverImageUrl,
+    createdAt,
+    updatedAt,
+  ];
 }

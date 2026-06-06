@@ -14,7 +14,7 @@ class LocalDbService {
   static const String _lastSyncTimeKey = 'lastSyncTime';
 
   LocalDbService({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Future<void> init() async {
     await Hive.openBox<VocabLocal>(_vocabsBoxName);
@@ -23,7 +23,8 @@ class LocalDbService {
   }
 
   Box<VocabLocal> get _vocabsBox => Hive.box<VocabLocal>(_vocabsBoxName);
-  Box<SyncQueueItem> get _syncQueueBox => Hive.box<SyncQueueItem>(_syncQueueBoxName);
+  Box<SyncQueueItem> get _syncQueueBox =>
+      Hive.box<SyncQueueItem>(_syncQueueBoxName);
   Box get _metaBox => Hive.box(_metaBoxName);
 
   DateTime? getLastSyncTime() {
@@ -41,7 +42,9 @@ class LocalDbService {
   /// Đồng bộ từ vựng từ Firestore về Local DB
   Future<void> syncVocabsFromFirestore(String uid) async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+    final isOffline = !connectivityResult.any(
+      (r) => r != ConnectivityResult.none,
+    );
     if (isOffline) {
       return; // Không có mạng
     }
@@ -54,7 +57,7 @@ class LocalDbService {
           .collection(FirestoreCollections.vocabs);
 
       QuerySnapshot snapshot;
-      
+
       if (lastSyncTime == null) {
         // Full Sync
         snapshot = await collectionRef.get();
@@ -70,17 +73,16 @@ class LocalDbService {
         final data = doc.data() as Map<String, dynamic>;
         final vocabModel = VocabModel.fromMap(data, doc.id);
         final vocabLocal = VocabLocal.fromVocabModel(vocabModel);
-        
+
         // Cập nhật hoặc thêm mới
         await _vocabsBox.put(vocabLocal.id, vocabLocal);
       }
 
       // Lưu lại thời điểm sync
       await setLastSyncTime(DateTime.now());
-      
+
       // Xử lý đẩy hàng đợi local lên Firestore sau khi sync về máy xong
       await processSyncQueue(uid);
-      
     } catch (e) {
       print('Lỗi đồng bộ từ vựng: $e');
     }
@@ -89,9 +91,12 @@ class LocalDbService {
   /// Lấy danh sách thẻ cần ôn tập trực tiếp từ Local DB
   List<VocabLocal> getLocalDueCards({String? deckId, bool forceStudy = false}) {
     final now = DateTime.now();
-    
+
     var dueCards = _vocabsBox.values.where((vocab) {
-      bool isDue = forceStudy || vocab.nextReview.isBefore(now) || vocab.nextReview.isAtSameMomentAs(now);
+      bool isDue =
+          forceStudy ||
+          vocab.nextReview.isBefore(now) ||
+          vocab.nextReview.isAtSameMomentAs(now);
       if (deckId != null) {
         return isDue && vocab.deckId == deckId;
       }
@@ -107,7 +112,7 @@ class LocalDbService {
   Future<void> updateLocalVocab(VocabModel updatedVocab) async {
     final vocabLocal = VocabLocal.fromVocabModel(updatedVocab);
     await _vocabsBox.put(vocabLocal.id, vocabLocal);
-    
+
     // Thêm vào queue để đồng bộ
     await addToSyncQueue(vocabLocal.id, 'update');
   }
@@ -115,14 +120,16 @@ class LocalDbService {
   /// Thêm tác vụ vào hàng đợi đồng bộ
   Future<void> addToSyncQueue(String vocabId, String action) async {
     // Nếu trong queue đã có tác vụ cho vocabId này thì cập nhật
-    final existingIndex = _syncQueueBox.values.toList().indexWhere((item) => item.vocabId == vocabId);
-    
+    final existingIndex = _syncQueueBox.values.toList().indexWhere(
+      (item) => item.vocabId == vocabId,
+    );
+
     final item = SyncQueueItem(
       vocabId: vocabId,
       action: action,
       createdAt: DateTime.now(),
     );
-    
+
     if (existingIndex >= 0) {
       await _syncQueueBox.putAt(existingIndex, item);
     } else {
@@ -133,7 +140,9 @@ class LocalDbService {
   /// Xử lý đẩy hàng đợi đồng bộ lên Firestore
   Future<void> processSyncQueue(String uid) async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    final isOffline = !connectivityResult.any((r) => r != ConnectivityResult.none);
+    final isOffline = !connectivityResult.any(
+      (r) => r != ConnectivityResult.none,
+    );
     if (isOffline) {
       return; // Không có mạng
     }
@@ -158,12 +167,16 @@ class LocalDbService {
         if (item.action == 'update') {
           final vocabLocal = _vocabsBox.get(item.vocabId);
           if (vocabLocal != null) {
-            batch.set(docRef, vocabLocal.toVocabModel().toMap(), SetOptions(merge: true));
+            batch.set(
+              docRef,
+              vocabLocal.toVocabModel().toMap(),
+              SetOptions(merge: true),
+            );
           }
         } else if (item.action == 'delete') {
           batch.delete(docRef);
         }
-        
+
         keysToDelete.add(key);
       }
 

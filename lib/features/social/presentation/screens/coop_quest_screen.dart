@@ -28,7 +28,9 @@ class CoopQuestScreen extends ConsumerWidget {
             }
           }
 
-          final percentage = target > 0 ? (totalFlipped / target).clamp(0.0, 1.0) : 0.0;
+          final percentage = target > 0
+              ? (totalFlipped / target).clamp(0.0, 1.0)
+              : 0.0;
           final isCompleted = totalFlipped >= target;
 
           return SingleChildScrollView(
@@ -69,7 +71,7 @@ class CoopQuestScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
+
                       // Tiêu đề
                       Text(
                         'WEEKLY CO-OP QUEST',
@@ -90,7 +92,7 @@ class CoopQuestScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      
+
                       // Mô tả
                       Text(
                         'Tất cả học viên trong hệ thống cùng lật thẻ từ vựng để đạt mục tiêu chung!',
@@ -144,7 +146,10 @@ class CoopQuestScreen extends ConsumerWidget {
                                     height: 16,
                                     decoration: BoxDecoration(
                                       gradient: const LinearGradient(
-                                        colors: [AppColors.primary, Color(0xFF38BDF8)],
+                                        colors: [
+                                          AppColors.primary,
+                                          Color(0xFF38BDF8),
+                                        ],
                                         begin: Alignment.centerLeft,
                                         end: Alignment.centerRight,
                                       ),
@@ -187,10 +192,14 @@ class CoopQuestScreen extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isCompleted ? AppColors.success.withValues(alpha: 0.08) : Colors.white,
+                    color: isCompleted
+                        ? AppColors.success.withValues(alpha: 0.08)
+                        : Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: isCompleted ? AppColors.success.withValues(alpha: 0.3) : AppColors.slate200,
+                      color: isCompleted
+                          ? AppColors.success.withValues(alpha: 0.3)
+                          : AppColors.slate200,
                     ),
                   ),
                   child: Row(
@@ -205,7 +214,9 @@ class CoopQuestScreen extends ConsumerWidget {
                         ),
                         child: Icon(
                           Icons.emoji_events_rounded,
-                          color: isCompleted ? AppColors.success : AppColors.slate400,
+                          color: isCompleted
+                              ? AppColors.success
+                              : AppColors.slate400,
                           size: 24,
                         ),
                       ),
@@ -215,11 +226,15 @@ class CoopQuestScreen extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isCompleted ? 'Nhiệm vụ đã hoàn thành!' : 'Đang thực hiện',
+                              isCompleted
+                                  ? 'Nhiệm vụ đã hoàn thành!'
+                                  : 'Đang thực hiện',
                               style: GoogleFonts.lexend(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: isCompleted ? AppColors.success : AppColors.slate800,
+                                color: isCompleted
+                                    ? AppColors.success
+                                    : AppColors.slate800,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -250,12 +265,14 @@ class CoopQuestScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _buildInstructionRow(
                   icon: Icons.flash_on_rounded,
-                  text: 'Học thẻ từ vựng hàng ngày giúp cộng dồn điểm lật thẻ của bạn vào hệ thống chung.',
+                  text:
+                      'Học thẻ từ vựng hàng ngày giúp cộng dồn điểm lật thẻ của bạn vào hệ thống chung.',
                 ),
                 const SizedBox(height: 10),
                 _buildInstructionRow(
                   icon: Icons.people_outline_rounded,
-                  text: 'Mỗi lượt đánh giá (Hard, Good, Easy) được tính là một lượt lật thẻ hợp lệ.',
+                  text:
+                      'Mỗi lượt đánh giá (Hard, Good, Easy) được tính là một lượt lật thẻ hợp lệ.',
                 ),
                 const SizedBox(height: 10),
                 _buildInstructionRow(

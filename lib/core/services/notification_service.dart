@@ -17,7 +17,8 @@ class NotificationService {
   NotificationService._internal();
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   bool _isInitialized = false;
 
@@ -37,18 +38,19 @@ class NotificationService {
     // 2. Configure Local Notifications
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    
+
     const DarwinInitializationSettings initializationSettingsDarwin =
         DarwinInitializationSettings(
-      requestSoundPermission: false,
-      requestBadgePermission: false,
-      requestAlertPermission: false,
-    );
+          requestSoundPermission: false,
+          requestBadgePermission: false,
+          requestAlertPermission: false,
+        );
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsDarwin,
-    );
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+          android: initializationSettingsAndroid,
+          iOS: initializationSettingsDarwin,
+        );
 
     // v21.0.0: all parameters are now named
     await _localNotifications.initialize(
@@ -60,14 +62,16 @@ class NotificationService {
 
     // Channel for Android 8.0+
     const AndroidNotificationChannel channel = AndroidNotificationChannel(
-      'streak_reminders', 
-      'Streak Reminders', 
+      'streak_reminders',
+      'Streak Reminders',
       description: 'Nhắc nhở học tập hàng ngày',
       importance: Importance.max,
     );
 
     await _localNotifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
 
     // 3. Handle Firebase Messaging
@@ -110,21 +114,31 @@ class NotificationService {
   }
 
   /// Đặt lịch thông báo hàng ngày lúc 20:00
-  Future<void> scheduleDailyStreakReminder({bool startFromTomorrow = false}) async {
+  Future<void> scheduleDailyStreakReminder({
+    bool startFromTomorrow = false,
+  }) async {
     tz.TZDateTime scheduledDate = _nextInstanceOfTime(20, 0);
-    
+
     if (startFromTomorrow) {
       final now = tz.TZDateTime.now(tz.local);
-      final todayAt20 = tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 0);
+      final todayAt20 = tz.TZDateTime(
+        tz.local,
+        now.year,
+        now.month,
+        now.day,
+        20,
+        0,
+      );
       // Nếu scheduleDate trùng với 20:00 hôm nay, dời sang ngày mai
-      if (scheduledDate.isAtSameMomentAs(todayAt20) || scheduledDate.isBefore(now)) {
+      if (scheduledDate.isAtSameMomentAs(todayAt20) ||
+          scheduledDate.isBefore(now)) {
         scheduledDate = scheduledDate.add(const Duration(days: 1));
       }
     }
 
     // v21.0.0: all parameters are now named; UILocalNotificationDateInterpretation removed
     await _localNotifications.zonedSchedule(
-      id: 0, 
+      id: 0,
       title: 'VitaminC - Đừng bỏ lỡ mục tiêu!',
       body: 'Streak của bạn đang gặp nguy hiểm! Học ngay 5 thẻ nhé!',
       scheduledDate: scheduledDate,
@@ -138,9 +152,11 @@ class NotificationService {
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time, 
+      matchDateTimeComponents: DateTimeComponents.time,
     );
-    debugPrint('Đã lên lịch nhắc nhở Streak vào 20:00 hàng ngày (bắt đầu: $scheduledDate)');
+    debugPrint(
+      'Đã lên lịch nhắc nhở Streak vào 20:00 hàng ngày (bắt đầu: $scheduledDate)',
+    );
   }
 
   /// Hủy thông báo Streak
@@ -194,8 +210,14 @@ class NotificationService {
 
   tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate =
-        tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
+    tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }

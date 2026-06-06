@@ -18,12 +18,18 @@ class AuthRepository {
 
   // Đăng nhập Email/Password
   Future<UserCredential> signInEmail(String email, String password) async {
-    return await auth.signInWithEmailAndPassword(email: email, password: password);
+    return await auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
   }
 
   // Đăng ký Email/Password (Mặc định role là user)
   Future<void> signUpEmail(String email, String password, String name) async {
-    UserCredential credential = await auth.createUserWithEmailAndPassword(email: email, password: password);
+    UserCredential credential = await auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     UserModel newUser = UserModel(
       uid: credential.user!.uid,
       email: email,
@@ -34,12 +40,13 @@ class AuthRepository {
     await _firestore.collection('users').doc(newUser.uid).set(newUser.toMap());
   }
 
-    // Cập nhật hàm Đăng nhập Google
+  // Cập nhật hàm Đăng nhập Google
   Future<void> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     if (googleUser == null) return;
-    
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
     final OAuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -59,10 +66,14 @@ class AuthRepository {
   Future<void> signInWithFacebook() async {
     final LoginResult result = await FacebookAuth.instance.login();
     if (result.status == LoginStatus.success) {
-      final OAuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.tokenString);
-      
+      final OAuthCredential credential = FacebookAuthProvider.credential(
+        result.accessToken!.tokenString,
+      );
+
       // 1. Thực hiện đăng nhập
-      UserCredential userCredential = await auth.signInWithCredential(credential);
+      UserCredential userCredential = await auth.signInWithCredential(
+        credential,
+      );
       User? user = userCredential.user;
 
       if (user != null) {
@@ -72,10 +83,10 @@ class AuthRepository {
     }
   }
 
-    // Hàm phụ trợ để xử lý việc lưu dữ liệu vào Firestore
+  // Hàm phụ trợ để xử lý việc lưu dữ liệu vào Firestore
   Future<void> _updateUserInFirestore(User user) async {
     final doc = await _firestore.collection('users').doc(user.uid).get();
-    
+
     // Nếu user chưa tồn tại trong Firestore thì mới tạo mới (để tránh ghi đè Role)
     if (!doc.exists) {
       UserModel newUser = UserModel(

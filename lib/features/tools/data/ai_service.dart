@@ -26,7 +26,7 @@ class AiService {
         "1. Phạm vi: Chỉ giải đáp các câu hỏi liên quan đến tiếng Anh. Nếu người dùng hỏi chủ đề khác, hãy từ chối lịch sự và lái câu chuyện về việc học tiếng Anh. "
         "2. Xử lý Từ vựng: Nếu người dùng hỏi về một hoặc nhiều từ vựng cụ thể, BẮT BUỘC cung cấp nghĩa tiếng Việt, từ loại, và ít nhất 2 câu ví dụ minh họa bằng tiếng Anh (kèm dịch nghĩa). "
         "3. Xử lý Ngữ pháp/Chủ đề khác: Trả lời đúng trọng tâm, giải thích bằng ngôn ngữ đơn giản, dễ hiểu. "
-        "4. Hình thức: Trả lời chủ yếu bằng tiếng Việt. Trình bày súc tích, chia ý rõ ràng (dùng gạch đầu dòng) để tối ưu trải nghiệm đọc trên thiết bị di động."
+        "4. Hình thức: Trả lời chủ yếu bằng tiếng Việt. Trình bày súc tích, chia ý rõ ràng (dùng gạch đầu dòng) để tối ưu trải nghiệm đọc trên thiết bị di động.",
       ),
     );
   }
@@ -65,11 +65,11 @@ class AiService {
     final List<Map<String, dynamic>> historyToSave = [];
 
     for (var content in _chat!.history) {
-      final text = content.parts.whereType<TextPart>().map((p) => p.text).join('\n');
-      historyToSave.add({
-        'role': content.role,
-        'text': text,
-      });
+      final text = content.parts
+          .whereType<TextPart>()
+          .map((p) => p.text)
+          .join('\n');
+      historyToSave.add({'role': content.role, 'text': text});
     }
 
     await FirebaseFirestore.instance
@@ -98,11 +98,11 @@ class AiService {
     await initSession();
     final uiMessages = <Map<String, dynamic>>[];
     for (var content in _chat!.history) {
-      final text = content.parts.whereType<TextPart>().map((p) => p.text).join('\n');
-      uiMessages.add({
-        'isUser': content.role == 'user',
-        'text': text,
-      });
+      final text = content.parts
+          .whereType<TextPart>()
+          .map((p) => p.text)
+          .join('\n');
+      uiMessages.add({'isUser': content.role == 'user', 'text': text});
     }
     return uiMessages;
   }
