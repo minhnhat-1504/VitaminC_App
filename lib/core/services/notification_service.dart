@@ -1,8 +1,10 @@
+import 'dart:math';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/foundation.dart';
+import 'package:vitaminc/core/services/local_db_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -141,11 +143,53 @@ class NotificationService {
     debugPrint('Đã lên lịch nhắc nhở Streak vào 20:00 hàng ngày (bắt đầu: $scheduledDate)');
   }
 
-  /// Hủy thông báo
+  /// Hủy thông báo Streak
   Future<void> cancelStreakReminder() async {
     // v21.0.0: cancel() now uses named parameter
     await _localNotifications.cancel(id: 0);
     debugPrint('Đã hủy nhắc nhở Streak');
+  }
+
+  /// Lên lịch thông báo từ vựng ngẫu nhiên lúc 12:00 trưa mỗi ngày (Học bị động)
+  /// Lấy 1 từ ngẫu nhiên từ Local DB để hiển thị trên màn hình khóa
+  Future<void> scheduleVocabReminder(LocalDbService localDb) async {
+    String title = '📚 VitaminC - Từ vựng hôm nay';
+    String body = 'Mở app để học từ mới nhé!';
+
+    try {
+      final allCards = localDb.getLocalDueCards();
+      if (allCards.isNotEmpty) {
+        final randomCard = allCards[Random().nextInt(allCards.length)];
+        title = '📚 Từ vựng: ${randomCard.word}';
+        body = randomCard.meaning;
+        if (randomCard.example != null && randomCard.example!.isNotEmpty) {
+          body += ' — VD: ${randomCard.example}';
+        }
+      }
+    } catch (e) {
+      debugPrint('Lỗi lấy vocab cho notification: $e');
+    }
+
+    final scheduledDate = _nextInstanceOfTime(12, 0);
+
+    await _localNotifications.zonedSchedule(
+      id: 1, // ID = 1 (khác ID = 0 của Streak reminder)
+      title: title,
+      body: body,
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'vocab_reminders',
+          'Vocab Reminders',
+          channelDescription: 'Nhắc nhở từ vựng hàng ngày',
+          importance: Importance.high,
+          priority: Priority.defaultPriority,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+    debugPrint('Đã lên lịch nhắc từ vựng lúc 12:00 (từ: $title)');
   }
 
   tz.TZDateTime _nextInstanceOfTime(int hour, int minute) {
