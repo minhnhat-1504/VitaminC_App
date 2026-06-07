@@ -182,7 +182,21 @@ class BadgesScreen extends ConsumerWidget {
             ),
             itemCount: earnedList.length,
             itemBuilder: (context, index) {
-              return _earnedBadgeCard(earnedList[index]);
+              return TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: Duration(milliseconds: 300 + (index * 80)),
+                curve: Curves.easeOutBack,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _earnedBadgeCard(earnedList[index]),
+              );
             },
           ),
           const SizedBox(height: 32),
@@ -211,7 +225,21 @@ class BadgesScreen extends ConsumerWidget {
             ),
             itemCount: lockedList.length,
             itemBuilder: (context, index) {
-              return _lockedBadgeCard(lockedList[index]);
+              return TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: Duration(milliseconds: 300 + (index * 80)),
+                curve: Curves.easeOutBack,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _lockedBadgeCard(lockedList[index]),
+              );
             },
           ),
         ],

@@ -34,19 +34,19 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       barrierDismissible: true,
       barrierLabel: 'Streak popup',
       barrierColor: Colors.black.withOpacity(0.35),
-      transitionDuration: const Duration(milliseconds: 250),
+      transitionDuration: const Duration(milliseconds: 350),
       pageBuilder: (context, animation, secondaryAnimation) {
         return const StreakPopup();
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         final curved = CurvedAnimation(
           parent: animation,
-          curve: Curves.easeOutCubic,
+          curve: Curves.easeOutBack,
         );
         return FadeTransition(
           opacity: curved,
           child: ScaleTransition(
-            scale: Tween<double>(begin: 0.98, end: 1).animate(curved),
+            scale: Tween<double>(begin: 0.85, end: 1.0).animate(curved),
             child: child,
           ),
         );
@@ -81,10 +81,18 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
               ),
             ),
             Expanded(
-              child: _buildTabContent(
-                leaderboardAsync: leaderboardAsync,
-                currentUser: currentUser,
-                currentStreak: currentStreak,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: KeyedSubtree(
+                  key: ValueKey(_selectedTab),
+                  child: _buildTabContent(
+                    leaderboardAsync: leaderboardAsync,
+                    currentUser: currentUser,
+                    currentStreak: currentStreak,
+                  ),
+                ),
               ),
             ),
           ],
@@ -308,52 +316,94 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: _podiumPlayer(
-                  user: second,
-                  rank: 2,
-                  avatarSize: 64,
-                  ringColor: AppColors.slate300,
-                  badgeColor: AppColors.slate300,
-                  badgeTextColor: AppColors.slate800,
-                  pedestalColors: [AppColors.slate100, AppColors.slate200],
-                  pedestalHeight: 96,
-                  avatarBgColor: const Color(0xFF8B5CF6),
+                child: TweenAnimationBuilder<Offset>(
+                  tween: Tween(begin: const Offset(0, 0.4), end: Offset.zero),
+                  duration: const Duration(milliseconds: 600),
+                  curve: Curves.easeOutBack,
+                  builder: (context, offset, child) {
+                    return FractionalTranslation(
+                      translation: offset,
+                      child: Opacity(
+                        opacity: (1 - offset.dy * 2.5).clamp(0.0, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _podiumPlayer(
+                    user: second,
+                    rank: 2,
+                    avatarSize: 64,
+                    ringColor: AppColors.slate300,
+                    badgeColor: AppColors.slate300,
+                    badgeTextColor: AppColors.slate800,
+                    pedestalColors: [AppColors.slate100, AppColors.slate200],
+                    pedestalHeight: 96,
+                    avatarBgColor: const Color(0xFF8B5CF6),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _podiumPlayer(
-                  user: first,
-                  rank: 1,
-                  avatarSize: 80,
-                  ringColor: AppColors.gold,
-                  badgeColor: AppColors.gold,
-                  badgeTextColor: AppColors.slate900,
-                  pedestalColors: [
-                    Colors.white,
-                    AppColors.gold.withOpacity(0.25),
-                  ],
-                  pedestalHeight: 128,
-                  avatarBgColor: AppColors.primary,
-                  showCrown: true,
-                  isFirst: true,
+                child: TweenAnimationBuilder<Offset>(
+                  tween: Tween(begin: const Offset(0, 0.5), end: Offset.zero),
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.easeOutBack,
+                  builder: (context, offset, child) {
+                    return FractionalTranslation(
+                      translation: offset,
+                      child: Opacity(
+                        opacity: (1 - offset.dy * 2).clamp(0.0, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _podiumPlayer(
+                    user: first,
+                    rank: 1,
+                    avatarSize: 80,
+                    ringColor: AppColors.gold,
+                    badgeColor: AppColors.gold,
+                    badgeTextColor: AppColors.slate900,
+                    pedestalColors: [
+                      Colors.white,
+                      AppColors.gold.withOpacity(0.25),
+                    ],
+                    pedestalHeight: 128,
+                    avatarBgColor: AppColors.primary,
+                    showCrown: true,
+                    isFirst: true,
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: _podiumPlayer(
-                  user: third,
-                  rank: 3,
-                  avatarSize: 64,
-                  ringColor: AppColors.bronze,
-                  badgeColor: AppColors.bronze,
-                  badgeTextColor: AppColors.slate900,
-                  pedestalColors: [
-                    AppColors.backgroundLight,
-                    AppColors.bronze.withOpacity(0.25),
-                  ],
-                  pedestalHeight: 80,
-                  avatarBgColor: AppColors.streakOrange,
+                child: TweenAnimationBuilder<Offset>(
+                  tween: Tween(begin: const Offset(0, 0.3), end: Offset.zero),
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeOutBack,
+                  builder: (context, offset, child) {
+                    return FractionalTranslation(
+                      translation: offset,
+                      child: Opacity(
+                        opacity: (1 - offset.dy * 3.3).clamp(0.0, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _podiumPlayer(
+                    user: third,
+                    rank: 3,
+                    avatarSize: 64,
+                    ringColor: AppColors.bronze,
+                    badgeColor: AppColors.bronze,
+                    badgeTextColor: AppColors.slate900,
+                    pedestalColors: [
+                      AppColors.backgroundLight,
+                      AppColors.bronze.withOpacity(0.25),
+                    ],
+                    pedestalHeight: 80,
+                    avatarBgColor: AppColors.streakOrange,
+                  ),
                 ),
               ),
             ],

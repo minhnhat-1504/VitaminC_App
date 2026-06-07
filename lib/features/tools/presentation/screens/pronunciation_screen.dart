@@ -19,7 +19,7 @@ class PronunciationScreen extends ConsumerStatefulWidget {
 }
 
 class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   // ─── Dữ liệu mẫu cho các bài luyện tập ───
   static const List<Map<String, String>> _exercises = [
     {
@@ -45,6 +45,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   int _currentExercise = 0;
 
   late final AnimationController _waveController;
+  late final AnimationController _idleController;
 
   bool _isRecording = false;
   double _score = 0;
@@ -59,12 +60,17 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     );
+    _idleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat();
   }
 
   @override
   void dispose() {
     _silenceTimer?.cancel();
     _waveController.dispose();
+    _idleController.dispose();
     super.dispose();
   }
 
@@ -353,15 +359,22 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
 
         // Gạch chân lượn sóng cho từ sai
         if (!isCorrect) {
-          content = CustomPaint(
-            foregroundPainter: _WavyUnderlinePainter(
-              color: const Color(0xFFEF4444),
-              strokeWidth: _s(2.0, uiScale),
-            ),
-            child: Padding(
-              padding: EdgeInsets.only(bottom: _s(2, uiScale)),
-              child: content,
-            ),
+          final originalContent = content;
+          content = AnimatedBuilder(
+            animation: _idleController,
+            builder: (context, child) {
+              return CustomPaint(
+                foregroundPainter: _WavyUnderlinePainter(
+                  color: const Color(0xFFEF4444),
+                  strokeWidth: _s(2.0, uiScale),
+                  phase: _idleController.value,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: _s(2, uiScale)),
+                  child: originalContent,
+                ),
+              );
+            },
           );
         }
 
@@ -490,19 +503,11 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
                   alignment: Alignment.center,
                   children: [
                     if (percent > 0) ...[
-                      _buildSmallStar(-math.pi / 2, value / percent, uiScale),
-                      _buildSmallStar(-math.pi / 6, value / percent, uiScale),
-                      _buildSmallStar(
-                        -5 * math.pi / 6,
-                        value / percent,
-                        uiScale,
-                      ),
-                      _buildSmallStar(math.pi / 5, value / percent, uiScale),
-                      _buildSmallStar(
-                        4 * math.pi / 5,
-                        value / percent,
-                        uiScale,
-                      ),
+                      _buildSmallStar(-math.pi / 2, value / percent, uiScale, delay: 0.0),
+                      _buildSmallStar(-math.pi / 8, value / percent, uiScale, delay: 0.05),
+                      _buildSmallStar(-7 * math.pi / 8, value / percent, uiScale, delay: 0.1),
+                      _buildSmallStar(math.pi / 5, value / percent, uiScale, delay: 0.15),
+                      _buildSmallStar(4 * math.pi / 5, value / percent, uiScale, delay: 0.2),
                     ],
                     Transform.scale(
                       scale: percent > 0
@@ -526,8 +531,11 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
     );
   }
 
-  Widget _buildSmallStar(double angle, double progress, double uiScale) {
-    final p = progress.clamp(0.0, 1.0);
+  Widget _buildSmallStar(double angle, double progress, double uiScale, {double delay = 0.0}) {
+    // Thêm stagger delay cho mỗi ngôi sao
+    final p = (progress - delay).clamp(0.0, 1.0) / (1.0 - delay);
+    if (p <= 0.0) return const SizedBox.shrink();
+
     // Ngôi sao nhỏ văng ra xa một đoạn 32px nhanh rồi chậm dần
     final double distance = _s(32, uiScale) * Curves.easeOutQuint.transform(p);
     // Nhỏ dần và mờ dần khi càng ra xa
@@ -640,7 +648,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
         borderRadius: BorderRadius.circular(_s(20, uiScale)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: _s(18, uiScale),
             offset: Offset(0, _s(8, uiScale)),
           ),
@@ -727,16 +735,23 @@ class _WaveformPainter extends CustomPainter {
   final double progress;
   final bool isRecording;
 
+  // Lưu trữ độ cao của frame trước đó để lerp
+  static List<double> _previousHeights = List.filled(32, 0.0);
+
   _WaveformPainter({required this.progress, required this.isRecording});
 
   @override
   void paint(Canvas canvas, Size size) {
-    const barCount = 26;
-    const spacing = 4.0;
+    const barCount = 32; // Tăng từ 26 lên 32 để mịn hơn trên 120Hz
+    const spacing = 3.0;
     const totalSpacing = spacing * (barCount - 1);
     final barWidth = (size.width - totalSpacing) / barCount;
     final centerY = size.height / 2;
     const mid = (barCount - 1) / 2;
+
+    if (_previousHeights.length != barCount) {
+      _previousHeights = List.filled(barCount, 0.0);
+    }
 
     for (int i = 0; i < barCount; i++) {
       final x = i * (barWidth + spacing);
@@ -747,13 +762,24 @@ class _WaveformPainter extends CustomPainter {
       final intensity = isRecording
           ? (0.25 + base * 0.75) * (0.4 + (centerBoost * 0.6))
           : 0.16 + (centerBoost * 0.22);
-      final barHeight = size.height * (0.2 + intensity * 0.8);
+      final targetHeight = size.height * (0.2 + intensity * 0.8);
+      
+      // Lerp 15% giữa chiều cao cũ và mới để tạo hiệu ứng mượt mà (không bị giật frame)
+      final barHeight = _previousHeights[i] + (targetHeight - _previousHeights[i]) * 0.15;
+      _previousHeights[i] = barHeight;
+      
       final top = centerY - (barHeight / 2);
 
       final isRight = i > (barCount / 2);
-      final color = isRight ? const Color(0xFFEF4444) : const Color(0xFF60A5FA);
+      
       final paint = Paint()
-        ..color = color.withValues(alpha: isRecording ? 0.9 : 0.45);
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: isRight
+              ? [const Color(0xFFEF4444).withValues(alpha: isRecording ? 0.9 : 0.45), const Color(0xFFFCA5A5).withValues(alpha: isRecording ? 0.9 : 0.45)]
+              : [const Color(0xFF60A5FA).withValues(alpha: isRecording ? 0.9 : 0.45), const Color(0xFF93C5FD).withValues(alpha: isRecording ? 0.9 : 0.45)],
+        ).createShader(Rect.fromLTWH(x, top, barWidth, barHeight));
 
       final rect = RRect.fromRectAndRadius(
         Rect.fromLTWH(x, top, barWidth, barHeight),
@@ -765,16 +791,20 @@ class _WaveformPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WaveformPainter oldDelegate) {
-    return oldDelegate.progress != progress ||
-        oldDelegate.isRecording != isRecording;
+    return true; // Luôn repaint để lerp mượt
   }
 }
 
 class _WavyUnderlinePainter extends CustomPainter {
   final Color color;
   final double strokeWidth;
+  final double phase; // Thêm phase offset để lượn sóng dịch chuyển
 
-  _WavyUnderlinePainter({required this.color, required this.strokeWidth});
+  _WavyUnderlinePainter({
+    required this.color,
+    required this.strokeWidth,
+    this.phase = 0.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -787,13 +817,14 @@ class _WavyUnderlinePainter extends CustomPainter {
     final path = Path();
     final amplitude = strokeWidth * 1.6;
     final waveLength = strokeWidth * 4.2;
-    // Bắt đầu vẽ từ cạnh trái, nhích lên một chút so với viền dưới
     final y = size.height - strokeWidth * 2.0;
+    
+    // Dịch chuyển điểm bắt đầu sang trái một chút theo phase (cuộn mượt)
+    final dxOffset = -(phase * waveLength) % waveLength;
 
-    path.moveTo(0, y);
+    path.moveTo(dxOffset, y);
 
-    for (double x = 0; x <= size.width; x += waveLength) {
-      // Vẽ đường lượn sóng
+    for (double x = dxOffset; x <= size.width + waveLength; x += waveLength) {
       path.quadraticBezierTo(
         x + waveLength / 2,
         y + amplitude,
@@ -802,11 +833,17 @@ class _WavyUnderlinePainter extends CustomPainter {
       );
     }
 
+    // Clip path để không vẽ dư ra ngoài bounds
+    canvas.save();
+    canvas.clipRect(Offset.zero & size);
     canvas.drawPath(path, paint);
+    canvas.restore();
   }
 
   @override
   bool shouldRepaint(covariant _WavyUnderlinePainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
+    return oldDelegate.color != color || 
+           oldDelegate.strokeWidth != strokeWidth ||
+           oldDelegate.phase != phase;
   }
 }

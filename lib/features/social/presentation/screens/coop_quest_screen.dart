@@ -24,11 +24,34 @@ const List<CoopTier> coopTiers = [
   CoopTier(target: 10000, xpReward: 1000, title: 'Huyền thoại server'),
 ];
 
-class CoopQuestScreen extends ConsumerWidget {
+class CoopQuestScreen extends ConsumerStatefulWidget {
   const CoopQuestScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CoopQuestScreen> createState() => _CoopQuestScreenState();
+}
+
+class _CoopQuestScreenState extends ConsumerState<CoopQuestScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: StreamBuilder<DocumentSnapshot>(
@@ -160,35 +183,55 @@ class CoopQuestScreen extends ConsumerWidget {
                       const SizedBox(height: 10),
 
                       // Thanh tiến độ Custom
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          height: 16,
-                          width: double.infinity,
-                          color: AppColors.slate100,
-                          child: Stack(
-                            children: [
-                              LayoutBuilder(
-                                builder: (context, constraints) {
-                                  return AnimatedContainer(
-                                    duration: const Duration(milliseconds: 500),
-                                    width: constraints.maxWidth * percentage,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          AppColors.primary,
-                                          Color(0xFF38BDF8),
-                                        ],
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(
+                                    0.2 + 0.3 * _pulseController.value,
+                                  ),
+                                  blurRadius: 12 + 8 * _pulseController.value,
+                                  spreadRadius: 2 * _pulseController.value,
+                                ),
+                              ],
+                            ),
+                            child: child,
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            height: 16,
+                            width: double.infinity,
+                            color: AppColors.slate100,
+                            child: Stack(
+                              children: [
+                                LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return AnimatedContainer(
+                                      duration: const Duration(milliseconds: 500),
+                                      width: constraints.maxWidth * percentage,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            AppColors.primary,
+                                            Color(0xFF38BDF8),
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
                                       ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -219,10 +262,25 @@ class CoopQuestScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
 
-                ...coopTiers.map((tier) {
+                ...coopTiers.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final tier = entry.value;
                   final isTierCompleted = totalFlipped >= tier.target;
 
-                  return Container(
+                  return TweenAnimationBuilder<double>(
+                    tween: Tween(begin: 0.0, end: 1.0),
+                    duration: Duration(milliseconds: 300 + (index * 100)),
+                    curve: Curves.easeOutCubic,
+                    builder: (context, value, child) {
+                      return Transform.translate(
+                        offset: Offset(0, 20 * (1 - value)),
+                        child: Opacity(
+                          opacity: value,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -302,7 +360,7 @@ class CoopQuestScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Mục tiêu: Đạt ${tier.target} thẻ',
+                                'Mục tiêu: ${tier.target} thẻ',
                                 style: GoogleFonts.lexend(
                                   fontSize: 12,
                                   color: AppColors.slate500,
@@ -313,6 +371,7 @@ class CoopQuestScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
+                  ),
                   );
                 }),
                 const SizedBox(height: 24),

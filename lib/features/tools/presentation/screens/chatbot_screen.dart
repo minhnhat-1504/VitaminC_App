@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -153,13 +154,29 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                   return const Align(
                     alignment: Alignment.centerLeft,
                     child: Padding(
-                      padding: EdgeInsets.only(left: 16, bottom: 16),
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      padding: EdgeInsets.only(left: 0, bottom: 16),
+                      child: _TypingIndicator(),
                     ),
                   );
                 }
                 final message = _messages[index];
-                return _buildMessageBubble(message['text'], message['isUser']);
+                final isUser = message['isUser'] as bool;
+                return TweenAnimationBuilder<Offset>(
+                  key: ValueKey('${index}_${message['text'].hashCode}'),
+                  tween: Tween(begin: Offset(isUser ? 0.2 : -0.2, 0), end: Offset.zero),
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeOutQuart,
+                  builder: (context, offset, child) {
+                    return FractionalTranslation(
+                      translation: offset,
+                      child: Opacity(
+                        opacity: (1 - offset.dx.abs() * 5).clamp(0.0, 1.0),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: _buildMessageBubble(message['text'], isUser),
+                );
               },
             ),
           ),
@@ -278,6 +295,79 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _TypingIndicator extends StatefulWidget {
+  const _TypingIndicator();
+
+  @override
+  State<_TypingIndicator> createState() => _TypingIndicatorState();
+}
+
+class _TypingIndicatorState extends State<_TypingIndicator> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(16),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withValues(alpha: 0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(3, (index) {
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final delay = index * 0.2;
+              final t = (_controller.value - delay).clamp(0.0, 1.0);
+              final y = math.sin(t * math.pi * 2) * -4;
+              return Transform.translate(
+                offset: Offset(0, y),
+                child: child,
+              );
+            },
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              width: 6,
+              height: 6,
+              decoration: const BoxDecoration(
+                color: AppColors.slate400,
+                shape: BoxShape.circle,
+              ),
+            ),
+          );
+        }),
       ),
     );
   }

@@ -351,28 +351,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundColor: const Color(0xFFBAE6FD),
-            child: Icon(
-              isLogin ? Icons.school : Icons.person_add_alt_1_rounded,
-              size: 40,
-              color: AppColors.primary,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.85, end: 1.0).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: CircleAvatar(
+              key: ValueKey<bool>(isLogin),
+              radius: 30,
+              backgroundColor: const Color(0xFFBAE6FD),
+              child: Icon(
+                isLogin ? Icons.school : Icons.person_add_alt_1_rounded,
+                size: 40,
+                color: AppColors.primary,
+              ),
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản',
-            style: const TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textLight,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản',
+              key: ValueKey<String>(isLogin ? 'login_title' : 'register_title'),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textLight,
+              ),
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            isLogin ? 'Đăng nhập để tiếp tục' : 'Bắt đầu hành trình của bạn',
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(
+              isLogin ? 'Đăng nhập để tiếp tục' : 'Bắt đầu hành trình của bạn',
+              key: ValueKey<String>(isLogin ? 'login_sub' : 'register_sub'),
+              style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
+            ),
           ),
         ],
       ),

@@ -59,6 +59,8 @@ class SrsEngine {
     if (rep == 1) return 1; // Lần lặp đầu tiên -> mai học lại
     if (rep == 2) return 6; // Lần lặp thứ 2 -> 6 ngày sau học lại
     // Từ lần lặp > 2 -> Nhân khoảng cách trước đó với Hệ số dễ (EF)
-    return (currentInterval * ef).round();
+    final nextInterval = (currentInterval * ef).round();
+    // Giới hạn tối đa khoảng cách là 365 ngày (1 năm) để tránh lỗi tràn bộ nhớ ngày tháng (Timestamp out of range)
+    return nextInterval.clamp(1, 365);
   }
 }
