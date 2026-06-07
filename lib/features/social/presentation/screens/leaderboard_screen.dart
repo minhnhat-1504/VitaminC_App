@@ -63,7 +63,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: const CustomAppBar(title: 'Leaderboard', showBackButton: false),
+      appBar: const CustomAppBar(title: 'Xếp hạng', showBackButton: false),
       body: SafeArea(
         top: false,
         child: Column(
@@ -210,10 +210,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       ),
       child: Row(
         children: [
-          _tabItem('Ranking', 0),
-          _tabItem('Badges', 1),
-          _tabItem('Chat', 2),
-          _tabItem('Co-op', 3),
+          _tabItem('Xếp hạng', 0),
+          _tabItem('Huy hiệu', 1),
+          _tabItem('Trò chuyện', 2),
+          _tabItem('Đồng đội', 3),
         ],
       ),
     );

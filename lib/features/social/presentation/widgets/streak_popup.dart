@@ -81,7 +81,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     final now = DateTime.now();
     final currentDayOfWeek = now.weekday; // 1 (Mon) -> 7 (Sun)
 
-    final labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final labels = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
     final List<_WeekDay> result = [];
 
     for (int i = 1; i <= 7; i++) {
@@ -223,7 +223,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
             onTap: () => Navigator.of(context).pop(),
           ),
           Text(
-            'STREAK / CHUỖI NGÀY',
+            'CHUỖI NGÀY',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -373,7 +373,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
             border: Border.all(color: AppColors.streakOrange.withOpacity(0.2)),
           ),
           child: Text(
-            'Don\'t give up! / Đừng bỏ cuộc!',
+            'Đừng bỏ cuộc!',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -416,9 +416,9 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
                     color: AppColors.slate900,
                   ),
                   children: [
-                    const TextSpan(text: 'This Week '),
+                    const TextSpan(text: 'Tuần này '),
                     TextSpan(
-                      text: '/ Tuần này',
+                      text: '',
                       style: GoogleFonts.lexend(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -435,7 +435,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  'Week ${((DateTime.now().day - 1) ~/ 7) + 1}',
+                  'Tuần ${((DateTime.now().day - 1) ~/ 7) + 1}',
                   style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -545,7 +545,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
       children: [
         Expanded(
           child: _statCard(
-            title: 'Total XP',
+            title: 'Tổng XP',
             value: '${user?.xp ?? 0} XP',
             icon: Icons.auto_awesome_rounded,
             background: AppColors.streakOrange.withOpacity(0.05),
@@ -556,7 +556,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
         const SizedBox(width: 16),
         Expanded(
           child: _statCard(
-            title: 'Daily XP',
+            title: 'XP hôm nay',
             value: '${user?.dailyXp ?? 0} XP',
             icon: Icons.local_fire_department_rounded,
             background: AppColors.primary.withOpacity(0.08),
@@ -669,20 +669,11 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Share your progress',
+                        'Chia sẻ thành tích',
                         style: GoogleFonts.lexend(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Chia sẻ thành tích',
-                        style: GoogleFonts.lexend(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.9),
                         ),
                       ),
                     ],
@@ -695,7 +686,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(
-              'Continue / Tiếp tục',
+              'Tiếp tục',
               style: GoogleFonts.lexend(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

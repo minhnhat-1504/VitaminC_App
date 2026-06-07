@@ -104,7 +104,7 @@ class CoopQuestScreen extends ConsumerWidget {
 
                       // Tiêu đề
                       Text(
-                        'WEEKLY CO-OP QUEST',
+                        'SỰ KIỆN CHUNG',
                         style: GoogleFonts.lexend(
                           fontSize: 12,
                           fontWeight: FontWeight.w800,

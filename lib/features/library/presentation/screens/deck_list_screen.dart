@@ -25,18 +25,18 @@ class DeckListScreen extends ConsumerWidget {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        title: Text(isNew ? 'New Deck Created' : 'Edit Deck'),
+        title: Text(isNew ? 'Bộ thẻ mới' : 'Chỉnh sửa bộ thẻ'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Deck Name'),
+              decoration: const InputDecoration(labelText: 'Tên bộ thẻ'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Mô tả'),
             ),
           ],
         ),
@@ -44,7 +44,7 @@ class DeckListScreen extends ConsumerWidget {
           if (!isNew)
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel'),
+              child: const Text('Hủy'),
             ),
           ElevatedButton(
             onPressed: () {
@@ -71,7 +71,7 @@ class DeckListScreen extends ConsumerWidget {
                     }
                   });
             },
-            child: const Text('Save'),
+            child: const Text('Lưu'),
           ),
         ],
       ),
@@ -85,25 +85,25 @@ class DeckListScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Create New Deck'),
+        title: const Text('Tạo bộ thẻ mới'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: titleController,
-              decoration: const InputDecoration(labelText: 'Deck Name'),
+              decoration: const InputDecoration(labelText: 'Tên bộ thẻ'),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
+              decoration: const InputDecoration(labelText: 'Mô tả'),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const Text('Hủy'),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -129,7 +129,7 @@ class DeckListScreen extends ConsumerWidget {
                 }
               }
             },
-            child: const Text('Create'),
+            child: const Text('Tạo'),
           ),
         ],
       ),

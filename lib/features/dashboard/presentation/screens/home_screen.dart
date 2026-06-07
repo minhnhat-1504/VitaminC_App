@@ -32,9 +32,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 25),
               _buildDailyQuests(ref),
               const SizedBox(height: 25),
-              _buildContinueLearning(context, ref),
-              const SizedBox(height: 20),
-              _buildCommonPhrases(),
+              _buildTools(context),
             ],
           ),
         ),
@@ -581,214 +579,80 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildContinueLearning(BuildContext context, WidgetRef ref) {
-    final totalVocabAsync = ref.watch(totalVocabCountProvider);
-    final totalVocab = totalVocabAsync.value ?? 0;
-
+  Widget _buildTools(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        const Text(
+          "Công cụ học tập",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 15),
+        Row(
           children: [
-            Text(
-              "Tiếp tục học",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              "Xem tất cả",
-              style: TextStyle(
+            Expanded(
+              child: _toolCard(
+                context,
+                title: "Quét từ vựng",
+                subtitle: "OCR AI",
+                icon: Icons.document_scanner_rounded,
                 color: AppColors.primary,
-                fontWeight: FontWeight.bold,
+                route: '/ocr-scanner',
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: _toolCard(
+                context,
+                title: "Luyện phát âm",
+                subtitle: "AI chấm điểm",
+                icon: Icons.mic_rounded,
+                color: AppColors.secondary,
+                route: '/pronunciation',
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 15),
-        totalVocabAsync.when(
-          data: (totalVocab) {
-            if (totalVocab == 0) {
-              return _cardWrapper(
-                padding: const EdgeInsets.all(8),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1499750310107-5fef28a66643?q=80&w=1000&auto=format&fit=crop', // Một lựa chọn ảnh bàn học trắng đen khác
-                        height: 160,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text(
-                      "Bạn chưa có từ vựng nào",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textLight,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      "Hãy thêm từ vựng mới để bắt đầu hành trình chinh phục tiếng Anh của bạn!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.slate500, fontSize: 13),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => context.push('/library'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: const Text(
-                          "Bắt đầu thêm từ vựng ngay!",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            } else {
-              return _cardWrapper(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=500',
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(15),
-                      child: Row(
-                        children: [
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "3000 từ vựng Oxford",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Text(
-                                  "🎴 Còn 25 thẻ",
-                                  style: TextStyle(
-                                    color: AppColors.slate500,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              final user = ref.read(authStateProvider).value;
-                              if (user != null) {
-                                await ref
-                                    .read(streakServiceProvider)
-                                    .updateStreak(user.uid);
-                                // Refresh lại streak count sau khi học
-                                ref.invalidate(streakCountProvider);
-
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        "Tuyệt vời! Streak của bạn đã được cập nhật.",
-                                      ),
-                                      backgroundColor: AppColors.success,
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: const Text(
-                              "Học ▶",
-                              style: TextStyle(color: AppColors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-          },
-          loading: () => _cardWrapper(
-            child: const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          ),
-          error: (err, _) =>
-              _cardWrapper(child: Center(child: Text("Lỗi tải dữ liệu: $err"))),
         ),
       ],
     );
   }
 
-  Widget _buildCommonPhrases() {
-    return _cardWrapper(
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.purple.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
+  Widget _toolCard(
+    BuildContext context, {
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required String route,
+  }) {
+    return GestureDetector(
+      onTap: () => context.push(route),
+      child: _cardWrapper(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 28),
             ),
-            child: const Icon(Icons.translate, color: Colors.purple),
-          ),
-          const SizedBox(width: 15),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Mẫu câu thông dụng",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "120 từ • 15 phút",
-                  style: TextStyle(color: AppColors.slate500, fontSize: 12),
-                ),
-              ],
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const Icon(Icons.lock_outline, color: AppColors.slate400),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: const TextStyle(color: AppColors.slate500, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

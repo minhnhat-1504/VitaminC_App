@@ -47,18 +47,21 @@ class MainBottomNavBar extends ConsumerWidget {
       selectedItemColor: AppColors.primary,
       unselectedItemColor: const Color(0xFF94A3B8),
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home_rounded),
+          label: 'Trang chủ',
+        ),
         BottomNavigationBarItem(
           icon: Icon(Icons.grid_view_rounded),
-          label: 'Library',
+          label: 'Thư viện',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.groups_rounded),
-          label: 'Social',
+          label: 'Cộng đồng',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_rounded),
-          label: 'Profile',
+          label: 'Cá nhân',
         ),
       ],
     );
