@@ -47,16 +47,8 @@ class AuthTabSwitcher extends StatelessWidget {
           ),
           Row(
             children: [
-              _buildTabButton(
-                "Đăng nhập",
-                isLoginActive,
-                onTabChanged,
-              ),
-              _buildTabButton(
-                "Đăng ký",
-                !isLoginActive,
-                onTabChanged,
-              ),
+              _buildTabButton("Đăng nhập", isLoginActive, onTabChanged),
+              _buildTabButton("Đăng ký", !isLoginActive, onTabChanged),
             ],
           ),
         ],
@@ -64,11 +56,7 @@ class AuthTabSwitcher extends StatelessWidget {
     );
   }
 
-  Widget _buildTabButton(
-    String label,
-    bool active,
-    VoidCallback onTap,
-  ) {
+  Widget _buildTabButton(String label, bool active, VoidCallback onTap) {
     return Expanded(
       child: GestureDetector(
         onTap: active ? null : onTap,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -49,6 +50,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   double _score = 0;
   String _recognizedText = '';
   PronunciationResult? _result;
+  Timer? _silenceTimer;
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
 
   @override
   void dispose() {
+    _silenceTimer?.cancel();
     _waveController.dispose();
     super.dispose();
   }
@@ -84,6 +87,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
 
     if (_isRecording) {
       // === DỪNG GHI ÂM ===
+      _silenceTimer?.cancel();
       final text = await speechService.stopListening();
       _waveController.stop();
 
@@ -132,9 +136,23 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
       });
       _waveController.repeat();
 
+      _silenceTimer?.cancel();
+      _silenceTimer = Timer(const Duration(seconds: 5), () {
+        if (_isRecording && mounted) {
+          _toggleRecording();
+        }
+      });
+
       await speechService.startListening(
         onResult: (text, isFinal) {
           if (mounted) {
+            _silenceTimer?.cancel();
+            _silenceTimer = Timer(const Duration(seconds: 5), () {
+              if (_isRecording && mounted) {
+                _toggleRecording();
+              }
+            });
+
             setState(() {
               _recognizedText = text;
             });
@@ -175,6 +193,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   }
 
   void _reset() {
+    _silenceTimer?.cancel();
     final speechService = ref.read(speechServiceProvider);
     speechService.cancelListening();
 

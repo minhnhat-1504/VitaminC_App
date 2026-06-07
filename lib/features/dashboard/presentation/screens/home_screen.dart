@@ -69,118 +69,118 @@ class HomeScreen extends ConsumerWidget {
           child: Row(
             children: [
               Stack(
-              alignment: Alignment.bottomRight,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(2.5),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: ringColor, width: 3),
-                  ),
-                  child: CircleAvatar(
-                    radius: 22,
-                    backgroundImage: NetworkImage(
-                      user?.photoUrl.isNotEmpty == true
-                          ? user!.photoUrl
-                          : 'https://i.pravatar.cc/150?img=11',
+                alignment: Alignment.bottomRight,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(2.5),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: ringColor, width: 3),
+                    ),
+                    child: CircleAvatar(
+                      radius: 22,
+                      backgroundImage: NetworkImage(
+                        user?.photoUrl.isNotEmpty == true
+                            ? user!.photoUrl
+                            : 'https://i.pravatar.cc/150?img=11',
+                      ),
                     ),
                   ),
-                ),
-                streakAsync.when(
-                  data: (streak) => streak > 0
-                      ? Positioned(
-                          right: -2,
-                          bottom: -2,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: AppColors.white,
-                              shape: BoxShape.circle,
-                            ),
+                  streakAsync.when(
+                    data: (streak) => streak > 0
+                        ? Positioned(
+                            right: -2,
+                            bottom: -2,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: AppColors.white,
+                                shape: BoxShape.circle,
                               ),
-                              decoration: BoxDecoration(
-                                color: ringColor,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    "🔥",
-                                    style: TextStyle(fontSize: 8),
-                                  ),
-                                  Text(
-                                    "$streak",
-                                    style: const TextStyle(
-                                      color: AppColors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 4,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: ringColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "🔥",
+                                      style: TextStyle(fontSize: 8),
                                     ),
-                                  ),
-                                ],
+                                    Text(
+                                      "$streak",
+                                      style: const TextStyle(
+                                        color: AppColors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        )
-                      : const SizedBox.shrink(),
-                  loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Chào mừng trở lại",
-                    style: TextStyle(color: AppColors.slate500, fontSize: 12),
+                          )
+                        : const SizedBox.shrink(),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
                   ),
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          user?.displayName ?? 'Người dùng',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Chào mừng trở lại",
+                      style: TextStyle(color: AppColors.slate500, fontSize: 12),
+                    ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            user?.displayName ?? 'Người dùng',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        "${user?.xp ?? 0} XP",
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            "${user?.xp ?? 0} XP",
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    ),
-    Row(
+        ),
+        Row(
           children: [
             // [DEV ONLY] Nút ép thẻ đến hạn để test vòng quay
             IconButton(
@@ -574,7 +574,8 @@ class HomeScreen extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => const Center(child: Text("Lỗi tải nhiệm vụ: \$err")),
+          error: (err, stack) =>
+              const Center(child: Text("Lỗi tải nhiệm vụ: \$err")),
         ),
       ],
     );

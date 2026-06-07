@@ -112,12 +112,17 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       const SizedBox(height: 60),
                       const EmptyStateWidget(
                         title: 'Bảng xếp hạng trống',
-                        message: 'Chưa có ai ở đây cả.\nHãy là người đầu tiên học bài để đạt Top 1 nhé!',
+                        message:
+                            'Chưa có ai ở đây cả.\nHãy là người đầu tiên học bài để đạt Top 1 nhé!',
                         icon: Icons.emoji_events_outlined,
-                      )
+                      ),
                     ];
                   }
-                  return _buildRankingContent(users, currentUser, currentStreak);
+                  return _buildRankingContent(
+                    users,
+                    currentUser,
+                    currentStreak,
+                  );
                 },
                 loading: () => [
                   const SizedBox(height: 20),

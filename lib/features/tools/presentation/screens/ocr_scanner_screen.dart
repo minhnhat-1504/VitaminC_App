@@ -82,6 +82,16 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
               'Không tìm thấy chữ nào trong ảnh.\nThử chụp lại rõ hơn nhé!';
         }
       });
+      if (allElements.isEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Không tìm thấy chữ tiếng Anh nào trong ảnh, vui lòng chụp lại!',
+            ),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Không thể chụp ảnh. Kiểm tra quyền Camera.';
@@ -134,6 +144,16 @@ class _OcrScannerScreenState extends ConsumerState<OcrScannerScreen> {
               'Không tìm thấy chữ nào trong ảnh.\nThử chọn ảnh khác nhé!';
         }
       });
+      if (allElements.isEmpty && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Không tìm thấy chữ tiếng Anh nào trong ảnh, vui lòng chọn lại!',
+            ),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Không thể mở thư viện ảnh.';

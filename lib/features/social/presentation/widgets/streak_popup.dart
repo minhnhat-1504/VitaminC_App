@@ -80,13 +80,13 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
   List<_WeekDay> _getDynamicWeekDays(int currentStreak) {
     final now = DateTime.now();
     final currentDayOfWeek = now.weekday; // 1 (Mon) -> 7 (Sun)
-    
+
     final labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
     final List<_WeekDay> result = [];
-    
+
     for (int i = 1; i <= 7; i++) {
       final label = labels[i - 1];
-      
+
       if (i > currentDayOfWeek) {
         result.add(_WeekDay(label, _DayState.future));
       } else if (i == currentDayOfWeek) {
@@ -540,7 +540,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
 
   Widget _buildStatsCards() {
     final user = ref.watch(currentUserProvider).value;
-    
+
     return Row(
       children: [
         Expanded(

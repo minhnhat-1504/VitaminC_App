@@ -98,7 +98,12 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
         showBackButton: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, MediaQuery.of(context).viewInsets.bottom + 16.0),
+        padding: EdgeInsets.fromLTRB(
+          16.0,
+          16.0,
+          16.0,
+          MediaQuery.of(context).viewInsets.bottom + 16.0,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

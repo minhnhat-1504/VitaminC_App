@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class SrsButton extends StatelessWidget {
   final String label;
   final Color color;

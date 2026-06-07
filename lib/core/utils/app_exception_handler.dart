@@ -20,7 +20,7 @@ class AppExceptionHandler {
   /// Xử lý ngoại lệ không bắt được (Uncaught Error) toàn cục
   static void handleUncaughtError(Object error, StackTrace stackTrace) {
     final errorString = error.toString();
-    
+
     // Lọc bỏ các lỗi "ồn ào" (không cần hiện SnackBar làm phiền user)
     if (errorString.contains('RenderFlex overflowed') ||
         errorString.contains("looking up a deactivated widget's ancestor")) {
@@ -81,16 +81,24 @@ class AppExceptionHandler {
         case 'cancelled':
           return AppException('Thao tác đã bị hủy.');
         case 'deadline-exceeded':
-          return AppException('Máy chủ phản hồi quá chậm. Vui lòng thử lại sau.');
+          return AppException(
+            'Máy chủ phản hồi quá chậm. Vui lòng thử lại sau.',
+          );
         case 'already-exists':
           return AppException('Dữ liệu đã tồn tại, không thể tạo trùng.');
         case 'resource-exhausted':
         case 'quota-exceeded':
-          return AppException('Hệ thống đang quá tải. Vui lòng thử lại sau ít phút.');
+          return AppException(
+            'Hệ thống đang quá tải. Vui lòng thử lại sau ít phút.',
+          );
         case 'data-loss':
-          return AppException('Dữ liệu bị hỏng hoặc mất. Vui lòng liên hệ hỗ trợ.');
+          return AppException(
+            'Dữ liệu bị hỏng hoặc mất. Vui lòng liên hệ hỗ trợ.',
+          );
         case 'unauthenticated':
-          return AppException('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+          return AppException(
+            'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+          );
         default:
           return AppException('$defaultMessage (${error.code})');
       }
@@ -114,7 +122,9 @@ class AppExceptionHandler {
         case 'invalid-email':
           return AppException('Địa chỉ Email không hợp lệ.');
         case 'account-exists-with-different-credential':
-          return AppException('Email này đã được đăng ký bằng phương thức khác (Google/Facebook).');
+          return AppException(
+            'Email này đã được đăng ký bằng phương thức khác (Google/Facebook).',
+          );
         case 'operation-not-allowed':
           return AppException('Phương thức đăng nhập này chưa được kích hoạt.');
         case 'expired-action-code':
@@ -134,7 +144,9 @@ class AppExceptionHandler {
 
     // 4. Lỗi Hive (Local DB)
     if (error is HiveError) {
-      return AppException('Lỗi cơ sở dữ liệu cục bộ. Vui lòng khởi động lại ứng dụng.');
+      return AppException(
+        'Lỗi cơ sở dữ liệu cục bộ. Vui lòng khởi động lại ứng dụng.',
+      );
     }
 
     // 5. Lỗi Platform (như Google Sign In)

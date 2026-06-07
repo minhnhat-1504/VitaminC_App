@@ -222,7 +222,8 @@ class DeckListScreen extends ConsumerWidget {
           : state.decks.isEmpty
           ? EmptyStateWidget(
               title: 'Thư viện rỗng',
-              message: 'Bạn chưa có Bộ thẻ nào.\nBấm dấu + hoặc Import Excel nhé!',
+              message:
+                  'Bạn chưa có Bộ thẻ nào.\nBấm dấu + hoặc Import Excel nhé!',
               icon: Icons.style_outlined,
               buttonText: 'Tạo bộ thẻ ngay',
               onButtonPressed: () => _showAddDeckDialog(context, ref),
@@ -496,7 +497,8 @@ class DeckListScreen extends ConsumerWidget {
         if (decks.isEmpty) {
           return const EmptyStateWidget(
             title: 'Chưa có bộ thẻ mẫu',
-            message: 'Hiện tại chưa có bộ thẻ mẫu nào từ hệ thống.\nHãy quay lại sau nhé!',
+            message:
+                'Hiện tại chưa có bộ thẻ mẫu nào từ hệ thống.\nHãy quay lại sau nhé!',
             icon: Icons.cloud_off,
           );
         }

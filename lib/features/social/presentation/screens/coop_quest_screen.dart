@@ -9,7 +9,11 @@ class CoopTier {
   final int xpReward;
   final String title;
 
-  const CoopTier({required this.target, required this.xpReward, required this.title});
+  const CoopTier({
+    required this.target,
+    required this.xpReward,
+    required this.title,
+  });
 }
 
 const List<CoopTier> coopTiers = [
@@ -50,11 +54,13 @@ class CoopQuestScreen extends ConsumerWidget {
               break;
             }
           }
-          
+
           final displayTier = currentTier ?? coopTiers.last;
           final target = displayTier.target;
 
-          final percentage = target > 0 ? (totalFlipped / target).clamp(0.0, 1.0) : 0.0;
+          final percentage = target > 0
+              ? (totalFlipped / target).clamp(0.0, 1.0)
+              : 0.0;
           final isAllCompleted = currentTier == null;
 
           return SingleChildScrollView(
@@ -212,18 +218,22 @@ class CoopQuestScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 ...coopTiers.map((tier) {
                   final isTierCompleted = totalFlipped >= tier.target;
-                  
+
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: isTierCompleted ? AppColors.success.withValues(alpha: 0.08) : Colors.white,
+                      color: isTierCompleted
+                          ? AppColors.success.withValues(alpha: 0.08)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isTierCompleted ? AppColors.success.withValues(alpha: 0.3) : AppColors.slate200,
+                        color: isTierCompleted
+                            ? AppColors.success.withValues(alpha: 0.3)
+                            : AppColors.slate200,
                       ),
                     ),
                     child: Row(
@@ -237,8 +247,12 @@ class CoopQuestScreen extends ConsumerWidget {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            isTierCompleted ? Icons.emoji_events_rounded : Icons.lock_outline_rounded,
-                            color: isTierCompleted ? AppColors.success : AppColors.slate400,
+                            isTierCompleted
+                                ? Icons.emoji_events_rounded
+                                : Icons.lock_outline_rounded,
+                            color: isTierCompleted
+                                ? AppColors.success
+                                : AppColors.slate400,
                             size: 24,
                           ),
                         ),
@@ -248,7 +262,8 @@ class CoopQuestScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Expanded(
                                     child: Text(
@@ -256,15 +271,22 @@ class CoopQuestScreen extends ConsumerWidget {
                                       style: GoogleFonts.lexend(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
-                                        color: isTierCompleted ? AppColors.success : AppColors.slate800,
+                                        color: isTierCompleted
+                                            ? AppColors.success
+                                            : AppColors.slate800,
                                       ),
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(alpha: 0.1),
+                                      color: AppColors.primary.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(
