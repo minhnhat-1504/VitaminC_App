@@ -5,6 +5,7 @@ import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart
 import 'package:vitaminc/features/auth/presentation/screens/login_screen.dart';
 import 'package:vitaminc/features/auth/presentation/screens/onboarding_screen.dart';
 import 'package:vitaminc/features/auth/presentation/screens/splash_screen.dart';
+import 'package:vitaminc/features/auth/presentation/screens/verify_email_screen.dart';
 import 'package:vitaminc/features/dashboard/presentation/screens/home_screen.dart';
 import '../features/social/presentation/screens/leaderboard_screen.dart';
 import '../features/social/presentation/screens/chat_room_screen.dart';
@@ -40,6 +41,7 @@ class RouterNotifier extends ChangeNotifier {
     if (authState.isLoading || userModel.isLoading) return null;
 
     final bool loggedIn = authState.value != null;
+    final bool isEmailVerified = authState.value?.emailVerified ?? false;
     final String location = state.matchedLocation;
 
     // Các đường dẫn thuộc nhóm xác thực
@@ -54,8 +56,18 @@ class RouterNotifier extends ChangeNotifier {
     }
 
     // 2. Nếu đã đăng nhập thành công:
-    if (isAuthPath) {
+    // Chặn người dùng chưa xác minh email (chỉ cho phép ở màn hình verify-email)
+    if (!isEmailVerified && location != '/verify-email') {
+      return '/verify-email';
+    }
+
+    // Nếu đã xác minh xong nhưng đang ở màn hình verify-email -> cho vào Home
+    if (isEmailVerified && location == '/verify-email') {
       return '/home';
+    }
+
+    if (isAuthPath) {
+      return isEmailVerified ? '/home' : '/verify-email';
     }
 
     return null;
@@ -85,6 +97,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/verify-email',
+        builder: (context, state) => const VerifyEmailScreen(),
+      ),
 
       // Cấu hình ShellRoute cho các màn hình có BottomNavigationBar
       ShellRoute(
