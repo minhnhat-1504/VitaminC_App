@@ -250,14 +250,17 @@ class CoopQuestScreen extends ConsumerWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    tier.title,
-                                    style: GoogleFonts.lexend(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: isTierCompleted ? AppColors.success : AppColors.slate800,
+                                  Expanded(
+                                    child: Text(
+                                      tier.title,
+                                      style: GoogleFonts.lexend(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: isTierCompleted ? AppColors.success : AppColors.slate800,
+                                      ),
                                     ),
                                   ),
+                                  const SizedBox(width: 8),
                                   Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
