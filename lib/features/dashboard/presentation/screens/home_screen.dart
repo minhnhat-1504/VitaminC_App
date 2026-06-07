@@ -7,6 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../providers/dashboard_providers.dart';
 import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vitaminc/features/social/presentation/providers/quest_provider.dart';
+import 'package:vitaminc/core/services/local_db_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -21,7 +22,7 @@ class HomeScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildTopBar(ref),
+              _buildTopBar(context, ref),
               const SizedBox(height: 25),
               _buildSearchBar(context),
               const SizedBox(height: 20),
@@ -41,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildTopBar(WidgetRef ref) {
+  Widget _buildTopBar(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
 
