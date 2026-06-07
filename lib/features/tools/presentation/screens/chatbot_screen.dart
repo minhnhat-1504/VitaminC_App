@@ -43,7 +43,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
           _messages.add({
             'isUser': false,
             'text':
-                'Chào bạn! Mình là giáo viên tiếng Anh AI của bạn đây. Hôm nay bạn muốn học từ vựng gì nào? 👋',
+                'Chào bạn! Mình là Gemini. Hôm nay bạn muốn học gì nào? 👋',
           });
         }
         _isLoading = false;
@@ -61,7 +61,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
         _messages.add({
           'isUser': false,
           'text':
-              'Đã xóa lịch sử trò chuyện. Mình là giáo viên tiếng Anh AI của bạn đây, bạn cần giúp gì nào? 👋',
+              'Đã xóa lịch sử trò chuyện. Mình là Gemini, bạn cần giúp gì nào? 👋',
         });
       });
     }
@@ -119,7 +119,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: CustomAppBar(
-        title: 'AI Teacher',
+        title: 'Gemini',
         showBackButton: true,
         actions: [
           IconButton(
@@ -234,7 +234,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _sendMessage(),
               decoration: InputDecoration(
-                hintText: 'Type your message...',
+                hintText: 'Nhập tin nhắn...',
                 hintStyle: const TextStyle(color: AppColors.slate400),
                 filled: true,
                 fillColor: AppColors.slate100,
