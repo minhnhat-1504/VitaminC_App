@@ -7,6 +7,8 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../social/presentation/providers/social_providers.dart';
 import '../../../social/presentation/screens/lucky_spin_screen.dart';
+import '../../../social/presentation/providers/quest_provider.dart';
+import '../../../social/presentation/widgets/streak_popup.dart';
 import '../../data/srs_engine.dart';
 import '../controllers/study_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,7 +36,8 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
   Future<void> _updateStatsAndXP() async {
     final studyState = ref.read(studyControllerProvider);
 
-    int wordsReviewed = 0;
+    int totalWordsReviewed = 0;
+    int validWordsReviewed = 0;
     int xp = 0;
 
     // Cơ chế chống spam điểm XP vô tận: không cộng điểm trong chế độ học ép (forceStudy)
@@ -42,7 +45,8 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
       for (final card in studyState.dueCards) {
         final quality = studyState.reviewedQualities[card.id];
         if (quality != null) {
-          wordsReviewed++;
+          totalWordsReviewed++;
+          validWordsReviewed++;
 
           // Từ mới (repetition == 0 trước phiên học) -> không được tính điểm XP (0 XP)
           if (card.repetition == 0) {
@@ -62,16 +66,16 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         }
       }
     } else {
-      // Trong chế độ học ép, vẫn đếm số từ đã học nhưng không cộng XP
+      // Trong chế độ học ép, vẫn đếm số từ đã học nhưng không cộng XP và không tính vào tiến trình nhiệm vụ
       for (final card in studyState.dueCards) {
         if (studyState.reviewedQualities[card.id] != null) {
-          wordsReviewed++;
+          totalWordsReviewed++;
         }
       }
     }
 
     setState(() {
-      _wordsReviewed = wordsReviewed;
+      _wordsReviewed = totalWordsReviewed;
       _xpEarned = xp;
     });
 
@@ -89,10 +93,42 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
             .updateStreak(user.uid);
         ref.invalidate(streakCountProvider);
 
+        // Kiểm tra và hiển thị Popup chúc mừng Streak (1 lần/ngày)
+        final prefs = await SharedPreferences.getInstance();
+        final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+        final lastStreakPopupDate = prefs.getString(
+          'last_streak_popup_${user.uid}',
+        );
+
+        bool willShowStreakPopup = false;
+        if (lastStreakPopupDate != todayStr && newStreak > 0) {
+          await prefs.setString('last_streak_popup_${user.uid}', todayStr);
+          willShowStreakPopup = true;
+          if (mounted) {
+            Future.microtask(() {
+              showGeneralDialog(
+                context: context,
+                barrierDismissible: true,
+                barrierLabel: "StreakPopup",
+                barrierColor: Colors.black.withOpacity(0.5),
+                transitionDuration: const Duration(milliseconds: 300),
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return const StreakPopup();
+                },
+              );
+            });
+          }
+        }
+
         // 3. Lấy số từ vựng đã học thực tế để làm căn cứ trao huy hiệu
         final learnedVocabCount = await ref
             .read(dashboardServiceProvider)
             .getLearnedVocabCount(user.uid);
+
+        // Cập nhật nhiệm vụ ngày: Học 20 từ (tăng theo số từ vừa học hợp lệ)
+        if (validWordsReviewed > 0) {
+          await ref.read(questServiceProvider).updateQuestProgress(user.uid, 'daily_study_20', validWordsReviewed);
+        }
 
         // 4. Kiểm tra và trao huy hiệu tự động
         await ref
@@ -107,39 +143,44 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         ref.invalidate(currentUserProvider);
 
         // 6. Kích hoạt vòng quay may mắn (Daily Gacha) nếu đủ điều kiện
-        if (wordsReviewed >= 5) {
-          final prefs = await SharedPreferences.getInstance();
+        if (validWordsReviewed >= 5) {
           final lastSpinDateStr = prefs.getString('last_spin_date_${user.uid}');
-          final todayStr = DateTime.now().toIso8601String().substring(0, 10);
 
           if (lastSpinDateStr != todayStr) {
             await prefs.setString('last_spin_date_${user.uid}', todayStr);
             if (mounted) {
-              // Future.delayed to ensure dialog shows after build is stable
-              Future.microtask(() {
-                showGeneralDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  barrierColor: Colors.black.withOpacity(0.5),
-                  transitionDuration: const Duration(milliseconds: 400),
-                  pageBuilder: (context, animation, secondaryAnimation) {
-                    return const LuckySpinScreen();
-                  },
-                  transitionBuilder: (context, animation, secondaryAnimation, child) {
-                    final curvedAnimation = CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
+              // Delay vòng quay một chút nếu Streak popup cũng được hiện, để tránh đè chéo đột ngột
+              Future.delayed(
+                Duration(milliseconds: willShowStreakPopup ? 800 : 100),
+                () {
+                  if (mounted) {
+                    showGeneralDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      barrierColor: Colors.black.withOpacity(0.5),
+                      transitionDuration: const Duration(milliseconds: 400),
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return const LuckySpinScreen();
+                      },
+                      transitionBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                            final curvedAnimation = CurvedAnimation(
+                              parent: animation,
+                              curve: Curves
+                                  .easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
+                            );
+                            return ScaleTransition(
+                              scale: curvedAnimation,
+                              child: FadeTransition(
+                                opacity: animation,
+                                child: child,
+                              ),
+                            );
+                          },
                     );
-                    return ScaleTransition(
-                      scale: curvedAnimation,
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                    );
-                  },
-                );
-              });
+                  }
+                },
+              );
             }
           }
         }

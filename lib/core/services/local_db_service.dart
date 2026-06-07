@@ -189,6 +189,17 @@ class LocalDbService {
     }
   }
 
+  /// [DEV ONLY] Đưa tất cả thẻ về trạng thái cần ôn tập ngay lập tức
+  Future<void> mockAllCardsDue() async {
+    final now = DateTime.now().subtract(const Duration(days: 1));
+    for (var vocab in _vocabsBox.values) {
+      vocab.nextReview = now;
+      vocab.repetition = 1; // Giả sử đã học ít nhất 1 lần để được tính XP
+      await _vocabsBox.put(vocab.id, vocab);
+      await addToSyncQueue(vocab.id, 'update');
+    }
+  }
+
   /// Xóa sạch dữ liệu (khi người dùng đăng xuất)
   Future<void> clearAllData() async {
     await _vocabsBox.clear();

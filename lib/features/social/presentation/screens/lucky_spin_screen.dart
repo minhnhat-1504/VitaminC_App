@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vitaminc/core/constants/app_colors.dart';
 import 'package:vitaminc/core/shared_widgets/custom_button.dart';
 import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vitaminc/features/social/presentation/providers/quest_provider.dart';
 
 class LuckySpinScreen extends ConsumerStatefulWidget {
   const LuckySpinScreen({super.key});
@@ -42,8 +43,8 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
   final List<int> _weights = [
     40, // +10 XP (40%)
     10, // +50 XP (10%)
-    4,  // +100 XP (4%)
-    1,  // Lucky Badge (1%)
+    4, // +100 XP (4%)
+    1, // Lucky Badge (1%)
     20, // +20 XP (20%)
     25, // Try Again (25%)
   ];
@@ -58,7 +59,7 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
     int totalWeight = _weights.fold(0, (sum, weight) => sum + weight);
     int randomValue = Random().nextInt(totalWeight);
     int currentWeight = 0;
-    
+
     for (int i = 0; i < _weights.length; i++) {
       currentWeight += _weights[i];
       if (randomValue < currentWeight) {
@@ -94,6 +95,12 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
     if (xpToAdd > 0 && user != null) {
       try {
         await ref.read(userServiceProvider).addXP(user.uid, xpToAdd);
+
+        // Cập nhật nhiệm vụ hàng ngày (Quay vòng quay)
+        await ref
+            .read(questServiceProvider)
+            .updateQuestProgress(user.uid, 'daily_spin', 1);
+
         if (mounted) {
           // Buộc refresh lại provider để đảm bảo UI nhận XP mới nhất
           ref.invalidate(currentUserProvider);
@@ -115,6 +122,12 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
         }
       }
     } else {
+      // Cập nhật nhiệm vụ hàng ngày ngay cả khi không trúng XP (Try again / Badge)
+      if (user != null) {
+        await ref
+            .read(questServiceProvider)
+            .updateQuestProgress(user.uid, 'daily_spin', 1);
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
