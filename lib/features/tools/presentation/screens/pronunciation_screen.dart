@@ -714,10 +714,10 @@ class _WaveformPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const barCount = 26;
     const spacing = 4.0;
-    final totalSpacing = spacing * (barCount - 1);
+    const totalSpacing = spacing * (barCount - 1);
     final barWidth = (size.width - totalSpacing) / barCount;
     final centerY = size.height / 2;
-    final mid = (barCount - 1) / 2;
+    const mid = (barCount - 1) / 2;
 
     for (int i = 0; i < barCount; i++) {
       final x = i * (barWidth + spacing);

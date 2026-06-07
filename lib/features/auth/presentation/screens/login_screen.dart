@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../providers/auth_provider.dart';
@@ -422,13 +421,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget _buildFooter() {
-    return Column(
+    return const Column(
       children: [
-        const Text(
+        Text(
           "Bằng cách tiếp tục, bạn đồng ý với",
           style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
         ),
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(

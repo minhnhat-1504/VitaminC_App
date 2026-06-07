@@ -47,8 +47,9 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
 
       final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ImageByteFormat.png);
-      if (byteData == null)
+      if (byteData == null) {
         throw Exception('Cannot convert image to byte data');
+      }
       final bytes = byteData.buffer.asUint8List();
 
       final tempDir = await getTemporaryDirectory();

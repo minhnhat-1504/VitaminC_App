@@ -47,7 +47,7 @@ void main() {
 
       // 6. Xác nhận đang ở trang thư viện (ví dụ tìm AppBar có chữ 'Global Decks' hoặc icon Add)
       // Tùy theo thiết kế, ta tìm chữ 'Thư viện' hoặc icon thêm từ
-      expect(find.byType(FloatingActionButton).or(find.byIcon(Icons.add)), findsWidgets);
+      expect(find.byType(FloatingActionButton), findsWidgets);
     });
   });
 }

@@ -145,7 +145,7 @@ class HomeScreen extends ConsumerWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          "${user?.displayName ?? 'Người dùng'}",
+                          user?.displayName ?? 'Người dùng',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -574,7 +574,7 @@ class HomeScreen extends ConsumerWidget {
             );
           },
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, stack) => Center(child: Text("Lỗi tải nhiệm vụ: \$err")),
+          error: (err, stack) => const Center(child: Text("Lỗi tải nhiệm vụ: \$err")),
         ),
       ],
     );
@@ -587,9 +587,9 @@ class HomeScreen extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
+          children: [
             Text(
               "Tiếp tục học",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -679,10 +679,10 @@ class HomeScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(15),
                       child: Row(
                         children: [
-                          Expanded(
+                          const Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
+                              children: [
                                 Text(
                                   "3000 từ vựng Oxford",
                                   style: TextStyle(
@@ -771,10 +771,10 @@ class HomeScreen extends ConsumerWidget {
             child: const Icon(Icons.translate, color: Colors.purple),
           ),
           const SizedBox(width: 15),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   "Mẫu câu thông dụng",
                   style: TextStyle(fontWeight: FontWeight.bold),

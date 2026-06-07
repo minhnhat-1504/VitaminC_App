@@ -155,7 +155,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
                 'Allow others to find this word',
                 style: TextStyle(color: AppColors.textLight),
               ),
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
               value: isPublic,
               onChanged: (val) => setState(() => isPublic = val),
             ),

@@ -7,7 +7,7 @@ final questServiceProvider = Provider<QuestService>((ref) {
   return QuestService();
 });
 
-final dailyQuestsProvider = StreamProvider<List<QuestModel>>((ref) {
+final dailyQuestsProvider = StreamProvider.autoDispose<List<QuestModel>>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) {
     return Stream.value([]);

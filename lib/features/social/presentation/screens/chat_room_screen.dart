@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
@@ -231,7 +230,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.chat_bubble_outline_rounded,
                           size: 48,
                           color: AppColors.slate400,
@@ -279,7 +278,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
           // Thanh nhập liệu
           Container(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(
                 top: BorderSide(color: AppColors.slate200, width: 1),

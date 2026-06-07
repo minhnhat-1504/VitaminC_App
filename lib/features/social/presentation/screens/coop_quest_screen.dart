@@ -88,7 +88,7 @@ class CoopQuestScreen extends ConsumerWidget {
                           color: AppColors.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.diversity_3_rounded,
                           color: AppColors.primary,
                           size: 48,
