@@ -45,7 +45,8 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
     // Gọi reload() để cập nhật trạng thái mới nhất từ Firebase
     await FirebaseAuth.instance.currentUser?.reload();
     setState(() {
-      isEmailVerified = FirebaseAuth.instance.currentUser?.emailVerified ?? false;
+      isEmailVerified =
+          FirebaseAuth.instance.currentUser?.emailVerified ?? false;
     });
 
     if (isEmailVerified) {
@@ -86,7 +87,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
       if (mounted) {
         final error = AppExceptionHandler.handleException(e);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message), backgroundColor: Colors.redAccent),
+          SnackBar(
+            content: Text(error.message),
+            backgroundColor: Colors.redAccent,
+          ),
         );
       }
     }
@@ -96,20 +100,26 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: AppBar(
-        title: const Text('Xác minh Email'),
-      ),
+      appBar: AppBar(title: const Text('Xác minh Email')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.mark_email_unread_outlined, size: 80, color: AppColors.primary),
+            const Icon(
+              Icons.mark_email_unread_outlined,
+              size: 80,
+              color: AppColors.primary,
+            ),
             const SizedBox(height: 24),
             const Text(
               'Chúng tôi đã gửi một email xác minh đến địa chỉ của bạn.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppColors.textDark),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textDark,
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -125,14 +135,19 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                 minimumSize: const Size(double.infinity, 50),
               ),
               child: Text(
-                canResendEmail ? 'Gửi lại Email xác minh' : 'Gửi lại sau ${countdown}s',
+                canResendEmail
+                    ? 'Gửi lại Email xác minh'
+                    : 'Gửi lại sau ${countdown}s',
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => FirebaseAuth.instance.signOut(),
-              child: const Text('Hủy và Quay lại Đăng nhập', style: TextStyle(color: AppColors.textLight, fontSize: 16)),
+              child: const Text(
+                'Hủy và Quay lại Đăng nhập',
+                style: TextStyle(color: AppColors.textLight, fontSize: 16),
+              ),
             ),
           ],
         ),

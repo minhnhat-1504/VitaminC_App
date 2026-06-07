@@ -255,7 +255,10 @@ class SettingsScreen extends ConsumerWidget {
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.notifications_active, color: Colors.orange),
+                  leading: const Icon(
+                    Icons.notifications_active,
+                    color: Colors.orange,
+                  ),
                   title: const Text(
                     'Test Thông báo Deep Link (15s)',
                     style: TextStyle(color: Colors.orange),
@@ -268,7 +271,9 @@ class SettingsScreen extends ConsumerWidget {
                   onTap: () async {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Đã hẹn giờ! Hãy bấm nút Home thoát app ngay, đợi 15 giây!'),
+                        content: Text(
+                          'Đã hẹn giờ! Hãy bấm nút Home thoát app ngay, đợi 15 giây!',
+                        ),
                         duration: Duration(seconds: 5),
                       ),
                     );

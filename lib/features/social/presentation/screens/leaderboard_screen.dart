@@ -63,7 +63,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: const CustomAppBar(title: 'Leaderboard', showBackButton: false),
+      appBar: const CustomAppBar(title: 'Xếp hạng', showBackButton: false),
       body: SafeArea(
         top: false,
         child: Column(
@@ -112,12 +112,17 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                       const SizedBox(height: 60),
                       const EmptyStateWidget(
                         title: 'Bảng xếp hạng trống',
-                        message: 'Chưa có ai ở đây cả.\nHãy là người đầu tiên học bài để đạt Top 1 nhé!',
+                        message:
+                            'Chưa có ai ở đây cả.\nHãy là người đầu tiên học bài để đạt Top 1 nhé!',
                         icon: Icons.emoji_events_outlined,
-                      )
+                      ),
                     ];
                   }
-                  return _buildRankingContent(users, currentUser, currentStreak);
+                  return _buildRankingContent(
+                    users,
+                    currentUser,
+                    currentStreak,
+                  );
                 },
                 loading: () => [
                   const SizedBox(height: 20),
@@ -205,10 +210,10 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       ),
       child: Row(
         children: [
-          _tabItem('Ranking', 0),
-          _tabItem('Badges', 1),
-          _tabItem('Chat', 2),
-          _tabItem('Co-op', 3),
+          _tabItem('Xếp hạng', 0),
+          _tabItem('Huy hiệu', 1),
+          _tabItem('Trò chuyện', 2),
+          _tabItem('Đồng đội', 3),
         ],
       ),
     );
@@ -238,8 +243,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           alignment: Alignment.center,
           child: Text(
             label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.lexend(
-              fontSize: 14,
+              fontSize: 11,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
               color: isActive ? AppColors.slate900 : AppColors.slate500,
             ),

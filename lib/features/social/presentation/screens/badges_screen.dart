@@ -114,7 +114,7 @@ class BadgesScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'All Achievements',
+              'Tất cả huy hiệu',
               style: GoogleFonts.lexend(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -153,7 +153,7 @@ class BadgesScreen extends ConsumerWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Text(
-            '${(progress * 100).toInt()}% completed',
+            '${(progress * 100).toInt()}% hoàn thành',
             style: GoogleFonts.lexend(fontSize: 11, color: _slate500),
           ),
         ),
@@ -162,7 +162,7 @@ class BadgesScreen extends ConsumerWidget {
         // ─── EARNED SECTION ───
         if (earnedList.isNotEmpty) ...[
           Text(
-            'EARNED',
+            'ĐÃ NHẬN',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -191,7 +191,7 @@ class BadgesScreen extends ConsumerWidget {
         // ─── LOCKED SECTION ───
         if (lockedList.isNotEmpty) ...[
           Text(
-            'LOCKED',
+            'CHƯA NHẬN',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,

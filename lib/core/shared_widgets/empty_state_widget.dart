@@ -31,11 +31,7 @@ class EmptyStateWidget extends StatelessWidget {
                 color: AppColors.primary.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 80,
-                color: AppColors.primary,
-              ),
+              child: Icon(icon, size: 80, color: AppColors.primary),
             ),
             const SizedBox(height: 24),
             Text(
@@ -50,10 +46,7 @@ class EmptyStateWidget extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               message,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppColors.textLight,
-              ),
+              style: const TextStyle(fontSize: 15, color: AppColors.textLight),
               textAlign: TextAlign.center,
             ),
             if (buttonText != null && onButtonPressed != null) ...[
@@ -62,7 +55,10 @@ class EmptyStateWidget extends StatelessWidget {
                 onPressed: onButtonPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30),
                   ),
@@ -76,7 +72,7 @@ class EmptyStateWidget extends StatelessWidget {
                   ),
                 ),
               ),
-            ]
+            ],
           ],
         ),
       ),

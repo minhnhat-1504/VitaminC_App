@@ -50,9 +50,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _showError("Mật khẩu phải có ít nhất 8 ký tự");
         return;
       }
-      final passwordRegex = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).*$');
+      final passwordRegex = RegExp(
+        r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).*$',
+      );
       if (!passwordRegex.hasMatch(password)) {
-        _showError("Mật khẩu phải gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
+        _showError(
+          "Mật khẩu phải gồm chữ hoa, chữ thường, số và ký tự đặc biệt",
+        );
         return;
       }
     }
@@ -93,7 +97,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showForgotPasswordDialog() {
-    final resetEmailController = TextEditingController(text: _emailController.text);
+    final resetEmailController = TextEditingController(
+      text: _emailController.text,
+    );
     bool isSending = false;
 
     showDialog(
@@ -103,11 +109,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: Colors.white,
-              title: const Text('Quên mật khẩu?', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text(
+                'Quên mật khẩu?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Nhập email của bạn để nhận link đặt lại mật khẩu.', style: TextStyle(fontSize: 14)),
+                  const Text(
+                    'Nhập email của bạn để nhận link đặt lại mật khẩu.',
+                    style: TextStyle(fontSize: 14),
+                  ),
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: resetEmailController,
@@ -119,8 +131,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: isSending ? null : () => Navigator.pop(dialogContext),
-                  child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                  onPressed: isSending
+                      ? null
+                      : () => Navigator.pop(dialogContext),
+                  child: const Text(
+                    'Hủy',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
                 ElevatedButton(
                   onPressed: isSending
@@ -135,12 +152,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           setDialogState(() => isSending = true);
 
                           try {
-                            await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                            await FirebaseAuth.instance.sendPasswordResetEmail(
+                              email: email,
+                            );
                             if (mounted) {
                               Navigator.pop(dialogContext);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Link đặt lại mật khẩu đã được gửi đến email của bạn. Hãy kiểm tra hộp thư (kể cả Spam).'),
+                                  content: Text(
+                                    'Link đặt lại mật khẩu đã được gửi đến email của bạn. Hãy kiểm tra hộp thư (kể cả Spam).',
+                                  ),
                                   backgroundColor: AppColors.success,
                                   behavior: SnackBarBehavior.floating,
                                 ),
@@ -156,11 +177,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                   child: isSending
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Gửi link', style: TextStyle(color: Colors.white)),
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Gửi link',
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ],
             );
@@ -338,9 +371,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           const SizedBox(height: 2),
           Text(
-            isLogin
-                ? 'Đăng nhập để tiếp tục'
-                : 'Bắt đầu hành trình của bạn',
+            isLogin ? 'Đăng nhập để tiếp tục' : 'Bắt đầu hành trình của bạn',
             style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
           ),
         ],
@@ -455,6 +486,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ],
     );
   }
+
   Widget _buildLabel(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6, left: 4),

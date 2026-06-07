@@ -127,7 +127,13 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
 
         // Cập nhật nhiệm vụ ngày: Học 20 từ (tăng theo số từ vừa học hợp lệ)
         if (validWordsReviewed > 0) {
-          await ref.read(questServiceProvider).updateQuestProgress(user.uid, 'daily_study_20', validWordsReviewed);
+          await ref
+              .read(questServiceProvider)
+              .updateQuestProgress(
+                user.uid,
+                'daily_study_20',
+                validWordsReviewed,
+              );
         }
 
         // 4. Kiểm tra và trao huy hiệu tự động

@@ -25,7 +25,10 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Tạo phòng mới', style: GoogleFonts.lexend(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Tạo phòng mới',
+          style: GoogleFonts.lexend(fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: _roomNameController,
           decoration: const InputDecoration(
@@ -41,20 +44,26 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
             onPressed: () async {
               final name = _roomNameController.text.trim();
               if (name.isEmpty) return;
-              
+
               final uid = ref.read(currentUserProvider).value?.uid;
               if (uid == null) return;
-              
+
               Navigator.pop(dialogContext); // Đóng popup tạo phòng
-              
+
               try {
-                final roomId = await ref.read(chatServiceProvider).createGroupRoom(name, uid);
+                final roomId = await ref
+                    .read(chatServiceProvider)
+                    .createGroupRoom(name, uid);
                 if (mounted) {
-                  context.push('/social/chat/$roomId?name=${Uri.encodeComponent(name)}');
+                  context.push(
+                    '/social/chat/$roomId?name=${Uri.encodeComponent(name)}',
+                  );
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
@@ -69,7 +78,10 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Tham gia phòng', style: GoogleFonts.lexend(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Tham gia phòng',
+          style: GoogleFonts.lexend(fontWeight: FontWeight.bold),
+        ),
         content: TextField(
           controller: _joinCodeController,
           decoration: const InputDecoration(
@@ -86,14 +98,16 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
             onPressed: () async {
               final code = _joinCodeController.text.trim().toUpperCase();
               if (code.isEmpty) return;
-              
+
               final uid = ref.read(currentUserProvider).value?.uid;
               if (uid == null) return;
-              
+
               Navigator.pop(dialogContext);
-              
+
               try {
-                final roomId = await ref.read(chatServiceProvider).joinRoomByCode(code, uid);
+                final roomId = await ref
+                    .read(chatServiceProvider)
+                    .joinRoomByCode(code, uid);
                 if (mounted) {
                   // Gọi ra ngoài danh sách, nó sẽ tự update nhờ StreamBuilder
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +116,9 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
                 }
               }
             },
@@ -133,7 +149,7 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
           }
 
           final rooms = snapshot.data ?? [];
-          
+
           return Column(
             children: [
               Padding(
@@ -150,33 +166,57 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.help_outline_rounded, color: AppColors.primary),
+                      icon: const Icon(
+                        Icons.help_outline_rounded,
+                        color: AppColors.primary,
+                      ),
                       onPressed: () {
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Row(
                               children: [
-                                const Icon(Icons.info_outline_rounded, color: AppColors.primary),
+                                const Icon(
+                                  Icons.info_outline_rounded,
+                                  color: AppColors.primary,
+                                ),
                                 const SizedBox(width: 8),
-                                Text('Hướng dẫn', style: GoogleFonts.lexend(fontWeight: FontWeight.bold, fontSize: 18)),
+                                Text(
+                                  'Hướng dẫn',
+                                  style: GoogleFonts.lexend(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
                               ],
                             ),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('• Rời phòng: Vuốt khung phòng chat từ phải sang trái.', style: GoogleFonts.lexend(height: 1.5)),
+                                Text(
+                                  '• Rời phòng: Vuốt khung phòng chat từ phải sang trái.',
+                                  style: GoogleFonts.lexend(height: 1.5),
+                                ),
                                 const SizedBox(height: 12),
-                                Text('• Lấy mã phòng: Chạm trực tiếp vào nút mã (VD: Mã: B7X2) để tự động copy mã, sau đó gửi cho bạn bè.', style: GoogleFonts.lexend(height: 1.5)),
+                                Text(
+                                  '• Lấy mã phòng: Chạm trực tiếp vào nút mã (VD: Mã: B7X2) để tự động copy mã, sau đó gửi cho bạn bè.',
+                                  style: GoogleFonts.lexend(height: 1.5),
+                                ),
                                 const SizedBox(height: 12),
-                                Text('• Nhấn nút (+) ở góc dưới để tạo phòng, hoặc nút mũi tên để nhập mã tham gia phòng có sẵn.', style: GoogleFonts.lexend(height: 1.5)),
+                                Text(
+                                  '• Nhấn nút (+) ở góc dưới để tạo phòng, hoặc nút mũi tên để nhập mã tham gia phòng có sẵn.',
+                                  style: GoogleFonts.lexend(height: 1.5),
+                                ),
                               ],
                             ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: Text('Đã hiểu', style: GoogleFonts.lexend()),
+                                child: Text(
+                                  'Đã hiểu',
+                                  style: GoogleFonts.lexend(),
+                                ),
                               ),
                             ],
                           ),
@@ -190,7 +230,8 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
                 child: rooms.isEmpty
                     ? const EmptyStateWidget(
                         title: 'Chưa tham gia phòng nào',
-                        message: 'Hãy bấm dấu (+) để tạo phòng mới\nhoặc dùng mũi tên để nhập mã phòng nhé!',
+                        message:
+                            'Hãy bấm dấu (+) để tạo phòng mới\nhoặc dùng mũi tên để nhập mã phòng nhé!',
                         icon: Icons.forum_outlined,
                       )
                     : ListView.builder(
@@ -198,125 +239,174 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
                         itemCount: rooms.length,
                         itemBuilder: (context, index) {
                           final room = rooms[index];
-              return Dismissible(
-                key: ValueKey(room.id),
-                direction: DismissDirection.endToStart,
-                background: Container(
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  decoration: BoxDecoration(
-                    color: AppColors.error,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.logout_rounded, color: Colors.white),
-                ),
-                confirmDismiss: (direction) async {
-                  return await showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('Rời phòng?', style: GoogleFonts.lexend(fontWeight: FontWeight.bold)),
-                      content: Text('Bạn có chắc chắn muốn rời khỏi phòng "${room.name}" không?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Hủy'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
-                          child: const Text('Rời đi', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-                onDismissed: (direction) async {
-                  try {
-                    await ref.read(chatServiceProvider).leaveRoom(room.id, currentUser.uid);
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Đã rời khỏi phòng ${room.name}')),
-                      );
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-                    }
-                  }
-                },
-                child: Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: const BorderSide(color: AppColors.slate200),
-                  ),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  child: ListTile(
-                  contentPadding: const EdgeInsets.all(16),
-                  leading: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.groups_rounded, color: AppColors.primary),
-                  ),
-                  title: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          room.name,
-                          style: GoogleFonts.lexend(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: room.joinCode));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Đã copy mã phòng!')),
+                          return Dismissible(
+                            key: ValueKey(room.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: AppColors.error,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Icon(
+                                Icons.logout_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                            confirmDismiss: (direction) async {
+                              return await showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: Text(
+                                    'Rời phòng?',
+                                    style: GoogleFonts.lexend(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  content: Text(
+                                    'Bạn có chắc chắn muốn rời khỏi phòng "${room.name}" không?',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, false),
+                                      child: const Text('Hủy'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.error,
+                                      ),
+                                      child: const Text(
+                                        'Rời đi',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            onDismissed: (direction) async {
+                              try {
+                                await ref
+                                    .read(chatServiceProvider)
+                                    .leaveRoom(room.id, currentUser.uid);
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Đã rời khỏi phòng ${room.name}',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(e.toString())),
+                                  );
+                                }
+                              }
+                            },
+                            child: Card(
+                              elevation: 0,
+                              color: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                side: const BorderSide(
+                                  color: AppColors.slate200,
+                                ),
+                              ),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.all(16),
+                                leading: Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.groups_rounded,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                                title: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        room.name,
+                                        style: GoogleFonts.lexend(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Clipboard.setData(
+                                          ClipboardData(text: room.joinCode),
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text('Đã copy mã phòng!'),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.slate100,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          'Mã: ${room.joinCode}',
+                                          style: GoogleFonts.lexend(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: AppColors.slate600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: Text(
+                                    room.lastMessage.isEmpty
+                                        ? 'Chưa có tin nhắn'
+                                        : room.lastMessage,
+                                    style: GoogleFonts.lexend(
+                                      color: AppColors.slate500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                onTap: () {
+                                  context.push(
+                                    '/social/chat/${room.id}?name=${Uri.encodeComponent(room.name)}',
+                                  );
+                                },
+                              ),
+                            ),
                           );
                         },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: AppColors.slate100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            'Mã: ${room.joinCode}',
-                            style: GoogleFonts.lexend(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.slate600,
-                            ),
-                          ),
-                        ),
                       ),
-                    ],
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      room.lastMessage.isEmpty ? 'Chưa có tin nhắn' : room.lastMessage,
-                      style: GoogleFonts.lexend(color: AppColors.slate500),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  onTap: () {
-                    context.push('/social/chat/${room.id}?name=${Uri.encodeComponent(room.name)}');
-                  },
-                ),
-              ));
-            },
-          ),
               ),
             ],
           );

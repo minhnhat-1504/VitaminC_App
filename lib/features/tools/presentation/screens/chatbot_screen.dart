@@ -42,8 +42,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
         } else {
           _messages.add({
             'isUser': false,
-            'text':
-                'Chào bạn! Mình là Gemini. Hôm nay bạn muốn học gì nào? 👋',
+            'text': 'Chào bạn! Mình là Gemini. Hôm nay bạn muốn học gì nào? 👋',
           });
         }
         _isLoading = false;
@@ -81,17 +80,30 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
 
     // Gọi API từ AiService
     final aiService = ref.read(aiServiceProvider);
-    final response = await aiService.askTeacher(text);
+    try {
+      final response = await aiService.askTeacher(text);
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-        _messages.add({
-          'isUser': false,
-          'text': response ?? 'Đã có lỗi xảy ra, không nhận được phản hồi.',
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _messages.add({
+            'isUser': false,
+            'text': response ?? 'Máy chủ AI đang bận, xin thử lại sau.',
+          });
         });
-      });
-      _scrollToBottom();
+        _scrollToBottom();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _messages.add({
+            'isUser': false,
+            'text': 'Máy chủ AI đang bận, xin thử lại sau.',
+          });
+        });
+        _scrollToBottom();
+      }
     }
   }
 

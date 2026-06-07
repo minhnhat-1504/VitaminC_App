@@ -79,21 +79,28 @@ class ChatService {
     // Đã loại bỏ các ký tự dễ gây nhầm lẫn khi đọc bằng mắt: O, 0, I, 1, L
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
     final random = Random();
-    return String.fromCharCodes(Iterable.generate(6, (_) => chars.codeUnitAt(random.nextInt(chars.length))));
+    return String.fromCharCodes(
+      Iterable.generate(
+        6,
+        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+      ),
+    );
   }
 
   /// Tạo một phòng chat mới
   Future<String> createGroupRoom(String name, String creatorUid) async {
     try {
       final code = _generateJoinCode();
-      final docRef = await _firestore.collection(FirestoreCollections.chatRooms).add({
-        'name': name,
-        'joinCode': code,
-        'members': [creatorUid],
-        'lastMessage': 'Phòng đã được tạo',
-        'lastMessageTime': FieldValue.serverTimestamp(),
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      final docRef = await _firestore
+          .collection(FirestoreCollections.chatRooms)
+          .add({
+            'name': name,
+            'joinCode': code,
+            'members': [creatorUid],
+            'lastMessage': 'Phòng đã được tạo',
+            'lastMessageTime': FieldValue.serverTimestamp(),
+            'createdAt': FieldValue.serverTimestamp(),
+          });
       return docRef.id;
     } catch (e) {
       throw AppExceptionHandler.handleException(e, 'Lỗi tạo phòng chat');
@@ -103,24 +110,30 @@ class ChatService {
   /// Tham gia phòng chat bằng mã (Join Code)
   Future<String> joinRoomByCode(String code, String uid) async {
     try {
-      final query = await _firestore.collection(FirestoreCollections.chatRooms)
+      final query = await _firestore
+          .collection(FirestoreCollections.chatRooms)
           .where('joinCode', isEqualTo: code.toUpperCase())
           .limit(1)
           .get();
-          
+
       if (query.docs.isEmpty) {
         throw Exception('Không tìm thấy phòng với mã này');
       }
-      
+
       final roomId = query.docs.first.id;
-      final members = List<String>.from(query.docs.first.data()['members'] ?? []);
-      
+      final members = List<String>.from(
+        query.docs.first.data()['members'] ?? [],
+      );
+
       if (!members.contains(uid)) {
-        await _firestore.collection(FirestoreCollections.chatRooms).doc(roomId).update({
-          'members': FieldValue.arrayUnion([uid])
-        });
+        await _firestore
+            .collection(FirestoreCollections.chatRooms)
+            .doc(roomId)
+            .update({
+              'members': FieldValue.arrayUnion([uid]),
+            });
       }
-      
+
       return roomId;
     } catch (e) {
       throw AppExceptionHandler.handleException(e, 'Lỗi tham gia phòng');
@@ -129,16 +142,21 @@ class ChatService {
 
   /// Lắng nghe danh sách phòng mà User đang tham gia
   Stream<List<ChatRoom>> getUserRooms(String uid) {
-    return _firestore.collection(FirestoreCollections.chatRooms)
+    return _firestore
+        .collection(FirestoreCollections.chatRooms)
         .where('members', arrayContains: uid)
         // Bỏ .orderBy('lastMessageTime') để tránh lỗi Composite Index
         .snapshots()
         .map((snapshot) {
-          final rooms = snapshot.docs.map((doc) => ChatRoom.fromDoc(doc)).toList();
+          final rooms = snapshot.docs
+              .map((doc) => ChatRoom.fromDoc(doc))
+              .toList();
           // Sắp xếp danh sách ngay trên máy client (mới nhất lên đầu)
           rooms.sort((a, b) {
-            final timeA = a.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
-            final timeB = b.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final timeA =
+                a.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+            final timeB =
+                b.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
             return timeB.compareTo(timeA); // descending
           });
           return rooms;
@@ -155,13 +173,14 @@ class ChatService {
   }) async {
     try {
       final batch = _firestore.batch();
-      
+
       // 1. Thêm tin nhắn vào sub-collection `messages`
-      final messageRef = _firestore.collection(FirestoreCollections.chatRooms)
+      final messageRef = _firestore
+          .collection(FirestoreCollections.chatRooms)
           .doc(roomId)
           .collection('messages')
           .doc();
-          
+
       batch.set(messageRef, {
         'senderId': uid,
         'senderName': displayName,
@@ -169,14 +188,16 @@ class ChatService {
         'message': text,
         'timestamp': FieldValue.serverTimestamp(),
       });
-      
+
       // 2. Cập nhật lastMessage cho phòng
-      final roomRef = _firestore.collection(FirestoreCollections.chatRooms).doc(roomId);
+      final roomRef = _firestore
+          .collection(FirestoreCollections.chatRooms)
+          .doc(roomId);
       batch.update(roomRef, {
         'lastMessage': '$displayName: $text',
         'lastMessageTime': FieldValue.serverTimestamp(),
       });
-      
+
       await batch.commit();
     } catch (e) {
       throw AppExceptionHandler.handleException(e, 'Lỗi gửi tin nhắn');
@@ -192,23 +213,28 @@ class ChatService {
         .orderBy('timestamp', descending: true)
         .limit(limit)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => ChatMessage.fromDoc(doc)).toList());
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => ChatMessage.fromDoc(doc)).toList(),
+        );
   }
 
   /// Rời phòng chat (Nếu phòng không còn ai thì xóa luôn phòng đó)
   Future<void> leaveRoom(String roomId, String uid) async {
     try {
-      final roomRef = _firestore.collection(FirestoreCollections.chatRooms).doc(roomId);
+      final roomRef = _firestore
+          .collection(FirestoreCollections.chatRooms)
+          .doc(roomId);
       final doc = await roomRef.get();
-      
+
       if (!doc.exists) return;
-      
+
       final members = List<String>.from(doc.data()?['members'] ?? []);
       members.remove(uid);
-      
+
       if (members.isEmpty) {
         // Không còn ai trong phòng -> Xóa phòng
-        // Lưu ý: Đáng lẽ cần xóa cả sub-collection 'messages' nhưng Firestore client không hỗ trợ xóa đệ quy. 
+        // Lưu ý: Đáng lẽ cần xóa cả sub-collection 'messages' nhưng Firestore client không hỗ trợ xóa đệ quy.
         // Tuy nhiên xóa doc cha thì doc cha sẽ biến mất khỏi query.
         await roomRef.delete();
       } else {

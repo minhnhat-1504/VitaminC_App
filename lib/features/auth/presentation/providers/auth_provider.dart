@@ -33,7 +33,9 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) {
         ref.read(authRepositoryProvider).signOut();
         AppExceptionHandler.rootScaffoldMessengerKey.currentState?.showSnackBar(
           const SnackBar(
-            content: Text('Phiên đăng nhập đã hết hạn hoặc tài khoản bị khóa. Vui lòng đăng nhập lại.'),
+            content: Text(
+              'Phiên đăng nhập đã hết hạn hoặc tài khoản bị khóa. Vui lòng đăng nhập lại.',
+            ),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -55,13 +57,16 @@ final currentUserProvider = StreamProvider<UserModel?>((ref) {
         .handleError((error) {
           if (error is FirebaseException && error.code == 'permission-denied') {
             ref.read(authRepositoryProvider).signOut();
-            AppExceptionHandler.rootScaffoldMessengerKey.currentState?.showSnackBar(
-              const SnackBar(
-                content: Text('Phiên đăng nhập không hợp lệ hoặc đã hết hạn.'),
-                backgroundColor: Colors.redAccent,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
+            AppExceptionHandler.rootScaffoldMessengerKey.currentState
+                ?.showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.',
+                    ),
+                    backgroundColor: Colors.redAccent,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
           }
         });
   }

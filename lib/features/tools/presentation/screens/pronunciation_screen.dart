@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -24,20 +25,20 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
     {
       'phrase': 'Hello, how are you?',
       'translation': '"Xin chào, bạn có khỏe không?"',
-      'tip': "Emphasize the 'h' sound",
-      'unit': 'UNIT 1 - GREETINGS',
+      'tip': 'Nhấn mạnh âm "h"',
+      'unit': 'BÀI 1 - GIAO TIẾP CƠ BẢN',
     },
     {
       'phrase': 'The check, please',
       'translation': '"Cho tôi hóa đơn"',
-      'tip': "Emphasize the 'ch' sound",
-      'unit': 'UNIT 3 - DINING',
+      'tip': 'Nhấn mạnh âm "ch"',
+      'unit': 'BÀI 3 - ĂN UỐNG',
     },
     {
       'phrase': 'Where is the nearest station?',
       'translation': '"Ga gần nhất ở đâu?"',
-      'tip': "Focus on 'nearest' pronunciation",
-      'unit': 'UNIT 5 - TRAVEL',
+      'tip': 'Chú ý phát âm từ "nearest"',
+      'unit': 'BÀI 5 - DU LỊCH',
     },
   ];
 
@@ -49,6 +50,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   double _score = 0;
   String _recognizedText = '';
   PronunciationResult? _result;
+  Timer? _silenceTimer;
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
 
   @override
   void dispose() {
+    _silenceTimer?.cancel();
     _waveController.dispose();
     super.dispose();
   }
@@ -84,6 +87,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
 
     if (_isRecording) {
       // === DỪNG GHI ÂM ===
+      _silenceTimer?.cancel();
       final text = await speechService.stopListening();
       _waveController.stop();
 
@@ -132,9 +136,23 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
       });
       _waveController.repeat();
 
+      _silenceTimer?.cancel();
+      _silenceTimer = Timer(const Duration(seconds: 5), () {
+        if (_isRecording && mounted) {
+          _toggleRecording();
+        }
+      });
+
       await speechService.startListening(
         onResult: (text, isFinal) {
           if (mounted) {
+            _silenceTimer?.cancel();
+            _silenceTimer = Timer(const Duration(seconds: 5), () {
+              if (_isRecording && mounted) {
+                _toggleRecording();
+              }
+            });
+
             setState(() {
               _recognizedText = text;
             });
@@ -175,6 +193,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   }
 
   void _reset() {
+    _silenceTimer?.cancel();
     final speechService = ref.read(speechServiceProvider);
     speechService.cancelListening();
 
@@ -200,10 +219,10 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   }
 
   String get _scoreLabel {
-    if (_isRecording) return 'RECORDING';
-    if (_score == 0 && _recognizedText.isEmpty) return 'READY';
-    if (_score == 0 && _recognizedText.isNotEmpty) return 'NO MATCH';
-    return _score >= 80 ? 'GOOD JOB!' : 'TRY AGAIN';
+    if (_isRecording) return 'ĐANG THU';
+    if (_score == 0 && _recognizedText.isEmpty) return 'SẴN SÀNG';
+    if (_score == 0 && _recognizedText.isNotEmpty) return 'KHÔNG KHỚP';
+    return _score >= 80 ? 'RẤT TỐT!' : 'THỬ LẠI';
   }
 
   // ──────────────────────────────────────────────
@@ -547,7 +566,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
       child: Column(
         children: [
           Text(
-            'You said:',
+            'Bạn đã nói:',
             style: GoogleFonts.lexend(
               fontSize: _s(11, uiScale),
               fontWeight: FontWeight.w600,
@@ -600,8 +619,8 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
           SizedBox(height: _s(6, uiScale)),
           Text(
             _isRecording
-                ? 'Recording... tap to stop'
-                : 'Tap waveform to record',
+                ? 'Đang thu... chạm để dừng'
+                : 'Chạm vào sóng âm để thu',
             style: GoogleFonts.lexend(
               fontSize: _s(12, uiScale),
               fontWeight: FontWeight.w600,
@@ -635,7 +654,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
             },
             icon: Icon(Icons.volume_up_rounded, size: _s(20, uiScale)),
             label: Text(
-              'Listen to Native',
+              'Nghe người bản xứ',
               style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
             ),
             style: OutlinedButton.styleFrom(
@@ -656,7 +675,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
                   onPressed: _reset,
                   icon: Icon(Icons.refresh_rounded, size: _s(20, uiScale)),
                   label: Text(
-                    'Retry',
+                    'Thử lại',
                     style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -678,7 +697,7 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
                     size: _s(20, uiScale),
                   ),
                   label: Text(
-                    'Next',
+                    'Tiếp theo',
                     style: GoogleFonts.lexend(fontWeight: FontWeight.w700),
                   ),
                   style: ElevatedButton.styleFrom(

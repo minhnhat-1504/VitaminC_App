@@ -16,6 +16,8 @@ final globalDeckServiceProvider = Provider<GlobalDeckService>((ref) {
   return GlobalDeckService();
 });
 
-final globalDecksProvider = FutureProvider.autoDispose<List<DeckModel>>((ref) async {
+final globalDecksProvider = FutureProvider.autoDispose<List<DeckModel>>((
+  ref,
+) async {
   return ref.watch(globalDeckServiceProvider).getGlobalDecks();
 });
