@@ -21,6 +21,7 @@ import '../features/tools/presentation/screens/pronunciation_screen.dart';
 import '../features/tools/presentation/screens/chatbot_screen.dart';
 import '../features/tools/presentation/screens/ocr_scanner_screen.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
 // Notifier để lắng nghe các thay đổi trạng thái và thông báo cho GoRouter
@@ -83,6 +84,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: notifier,
     redirect: notifier.redirect,

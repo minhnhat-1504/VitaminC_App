@@ -11,6 +11,8 @@ import 'badges_screen.dart';
 import '../widgets/streak_popup.dart';
 import 'chat_room_list_screen.dart';
 import 'coop_quest_screen.dart';
+import '../../../../core/shared_widgets/empty_state_widget.dart';
+import '../../../../core/shared_widgets/shimmer_loading.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
   const LeaderboardScreen({super.key});
@@ -104,11 +106,22 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...leaderboardAsync.when(
-                data: (users) =>
-                    _buildRankingContent(users, currentUser, currentStreak),
+                data: (users) {
+                  if (users.isEmpty) {
+                    return [
+                      const SizedBox(height: 60),
+                      const EmptyStateWidget(
+                        title: 'Bảng xếp hạng trống',
+                        message: 'Chưa có ai ở đây cả.\nHãy là người đầu tiên học bài để đạt Top 1 nhé!',
+                        icon: Icons.emoji_events_outlined,
+                      )
+                    ];
+                  }
+                  return _buildRankingContent(users, currentUser, currentStreak);
+                },
                 loading: () => [
-                  const SizedBox(height: 120),
-                  const Center(child: CircularProgressIndicator()),
+                  const SizedBox(height: 20),
+                  const SizedBox(height: 400, child: ShimmerLoadingList()),
                 ],
                 error: (err, stack) => [
                   const SizedBox(height: 120),

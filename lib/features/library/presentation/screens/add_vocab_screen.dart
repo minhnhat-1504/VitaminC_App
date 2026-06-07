@@ -92,12 +92,13 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: const CustomAppBar(
         title: 'Add new vocabulary',
         showBackButton: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.fromLTRB(16.0, 16.0, 16.0, MediaQuery.of(context).viewInsets.bottom + 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

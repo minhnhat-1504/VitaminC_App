@@ -6,6 +6,8 @@ import '../controllers/library_controller.dart';
 import '../library_providers.dart';
 import '../../data/models/deck_model.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/shared_widgets/empty_state_widget.dart';
+import '../../../../core/shared_widgets/shimmer_loading.dart';
 
 class DeckListScreen extends ConsumerWidget {
   const DeckListScreen({super.key});
@@ -216,12 +218,14 @@ class DeckListScreen extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => controller.loadDecks(),
       child: state.isLoading && state.decks.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+          ? const ShimmerGrid()
           : state.decks.isEmpty
-          ? const Center(
-              child: Text(
-                'Bạn chưa có Bộ thẻ nào. Bấm dấu + hoặc Import Excel nhé!',
-              ),
+          ? EmptyStateWidget(
+              title: 'Thư viện rỗng',
+              message: 'Bạn chưa có Bộ thẻ nào.\nBấm dấu + hoặc Import Excel nhé!',
+              icon: Icons.style_outlined,
+              buttonText: 'Tạo bộ thẻ ngay',
+              onButtonPressed: () => _showAddDeckDialog(context, ref),
             )
           : Padding(
               padding: const EdgeInsets.all(16.0),
@@ -486,11 +490,15 @@ class DeckListScreen extends ConsumerWidget {
     final globalDecksAsync = ref.watch(globalDecksProvider);
 
     return globalDecksAsync.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const ShimmerLoadingList(),
       error: (e, st) => Center(child: Text('Lỗi tải bộ thẻ mẫu: $e')),
       data: (decks) {
         if (decks.isEmpty) {
-          return const Center(child: Text('Chưa có bộ thẻ mẫu nào từ Admin.'));
+          return const EmptyStateWidget(
+            title: 'Chưa có bộ thẻ mẫu',
+            message: 'Hiện tại chưa có bộ thẻ mẫu nào từ hệ thống.\nHãy quay lại sau nhé!',
+            icon: Icons.cloud_off,
+          );
         }
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(globalDecksProvider),
