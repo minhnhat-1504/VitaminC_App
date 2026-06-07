@@ -11,4 +11,9 @@ class FirestoreCollections {
   // --- SUB-COLLECTIONS (Thư mục con bên trong Document của User) ---
   static const String userDecks = 'decks'; // Các bộ thẻ cá nhân của người dùng
   static const String vocabs = 'vocabs'; // Các từ vựng nằm trong bộ thẻ
+  static const String quests =
+      'quests'; // Các nhiệm vụ hàng ngày của người dùng
+
+  // --- SUB-COLLECTIONS / ROOT cho Chat ---
+  static const String chatRooms = 'chat_rooms'; // Danh sách phòng chat
 }

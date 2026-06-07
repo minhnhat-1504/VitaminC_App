@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../providers/dashboard_providers.dart';
 import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
+import 'package:vitaminc/features/social/presentation/providers/quest_provider.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -27,6 +28,8 @@ class HomeScreen extends ConsumerWidget {
               _buildStatsCards(ref),
               const SizedBox(height: 25),
               _buildDailyGoal(ref),
+              const SizedBox(height: 25),
+              _buildDailyQuests(ref),
               const SizedBox(height: 25),
               _buildContinueLearning(context, ref),
               const SizedBox(height: 20),
@@ -341,10 +344,12 @@ class HomeScreen extends ConsumerWidget {
   Widget _buildDailyGoal(WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
-    
+
     final int dailyXp = user?.dailyXp ?? 0;
     final int dailyGoal = user?.dailyGoal ?? 50;
-    final double percent = dailyGoal > 0 ? (dailyXp / dailyGoal).clamp(0.0, 1.0) : 0.0;
+    final double percent = dailyGoal > 0
+        ? (dailyXp / dailyGoal).clamp(0.0, 1.0)
+        : 0.0;
     final int percentInt = (percent * 100).toInt();
 
     return _cardWrapper(
@@ -381,7 +386,10 @@ class HomeScreen extends ConsumerWidget {
             children: [
               Text(
                 "$dailyXp",
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               Text(
                 " / $dailyGoal XP",
@@ -411,6 +419,137 @@ class HomeScreen extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDailyQuests(WidgetRef ref) {
+    final questsAsync = ref.watch(dailyQuestsProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Nhiệm vụ cá nhân",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 15),
+        questsAsync.when(
+          data: (quests) {
+            if (quests.isEmpty) {
+              return _cardWrapper(
+                child: const Center(
+                  child: Text(
+                    "Hôm nay chưa có nhiệm vụ nào.",
+                    style: TextStyle(color: AppColors.slate500),
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: quests.map((quest) {
+                final progress = quest.target > 0
+                    ? (quest.current / quest.target).clamp(0.0, 1.0)
+                    : 0.0;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: _cardWrapper(
+                    padding: const EdgeInsets.all(15),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                quest.title,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              LinearPercentIndicator(
+                                lineHeight: 8.0,
+                                percent: progress,
+                                padding: EdgeInsets.zero,
+                                backgroundColor: AppColors.primary.withOpacity(
+                                  0.1,
+                                ),
+                                progressColor: AppColors.primary,
+                                barRadius: const Radius.circular(4),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                "${quest.current}/${quest.target} • Thưởng: ${quest.rewardXp} XP",
+                                style: const TextStyle(
+                                  color: AppColors.slate500,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 15),
+                        if (quest.isClaimed)
+                          const Icon(
+                            Icons.check_circle,
+                            color: AppColors.success,
+                            size: 30,
+                          )
+                        else if (quest.isCompleted)
+                          ElevatedButton(
+                            onPressed: () async {
+                              final user = ref.read(authStateProvider).value;
+                              if (user != null) {
+                                try {
+                                  await ref
+                                      .read(questServiceProvider)
+                                      .claimQuestReward(user.uid, quest.id);
+                                  await ref
+                                      .read(userServiceProvider)
+                                      .addXP(user.uid, quest.rewardXp);
+                                  ref.invalidate(currentUserProvider);
+                                } catch (e) {
+                                  debugPrint("Lỗi nhận thưởng: \$e");
+                                }
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.gold,
+                              minimumSize: const Size(60, 36),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              "Nhận",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          )
+                        else
+                          const Icon(
+                            Icons.lock_outline,
+                            color: AppColors.slate300,
+                            size: 28,
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(child: Text("Lỗi tải nhiệm vụ: \$err")),
+        ),
+      ],
     );
   }
 

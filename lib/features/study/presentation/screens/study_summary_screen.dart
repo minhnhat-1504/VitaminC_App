@@ -7,6 +7,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../../../social/presentation/providers/social_providers.dart';
 import '../../../social/presentation/screens/lucky_spin_screen.dart';
+import '../../../social/presentation/providers/quest_provider.dart';
 import '../../data/srs_engine.dart';
 import '../controllers/study_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -94,6 +95,13 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
             .read(dashboardServiceProvider)
             .getLearnedVocabCount(user.uid);
 
+        // Cập nhật nhiệm vụ ngày: Học 20 từ (tăng theo số từ vừa học)
+        if (wordsReviewed > 0) {
+          await ref
+              .read(questServiceProvider)
+              .updateQuestProgress(user.uid, 'daily_study_20', wordsReviewed);
+        }
+
         // 4. Kiểm tra và trao huy hiệu tự động
         await ref
             .read(badgeServiceProvider)
@@ -125,19 +133,21 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
                   pageBuilder: (context, animation, secondaryAnimation) {
                     return const LuckySpinScreen();
                   },
-                  transitionBuilder: (context, animation, secondaryAnimation, child) {
-                    final curvedAnimation = CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
-                    );
-                    return ScaleTransition(
-                      scale: curvedAnimation,
-                      child: FadeTransition(
-                        opacity: animation,
-                        child: child,
-                      ),
-                    );
-                  },
+                  transitionBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                        final curvedAnimation = CurvedAnimation(
+                          parent: animation,
+                          curve:
+                              Curves.easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
+                        );
+                        return ScaleTransition(
+                          scale: curvedAnimation,
+                          child: FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          ),
+                        );
+                      },
                 );
               });
             }
