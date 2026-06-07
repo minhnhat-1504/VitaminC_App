@@ -15,7 +15,9 @@ class VerifyEmailScreen extends ConsumerStatefulWidget {
 class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   bool isEmailVerified = false;
   bool canResendEmail = false;
+  int countdown = 30;
   Timer? timer;
+  Timer? countdownTimer;
 
   @override
   void initState() {
@@ -35,6 +37,7 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
   @override
   void dispose() {
     timer?.cancel();
+    countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -59,9 +62,26 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
       final user = FirebaseAuth.instance.currentUser;
       await user?.sendEmailVerification();
 
-      setState(() => canResendEmail = false);
-      await Future.delayed(const Duration(seconds: 30)); // Delay 30s trước khi cho gửi lại
-      if (mounted) setState(() => canResendEmail = true);
+      setState(() {
+        canResendEmail = false;
+        countdown = 30;
+      });
+
+      countdownTimer?.cancel();
+      countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+        if (!mounted) {
+          t.cancel();
+          return;
+        }
+        setState(() {
+          if (countdown > 0) {
+            countdown--;
+          } else {
+            canResendEmail = true;
+            t.cancel();
+          }
+        });
+      });
     } catch (e) {
       if (mounted) {
         final error = AppExceptionHandler.handleException(e);
@@ -104,7 +124,10 @@ class _VerifyEmailScreenState extends ConsumerState<VerifyEmailScreen> {
                 backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 50),
               ),
-              child: const Text('Gửi lại Email xác minh', style: TextStyle(color: Colors.white, fontSize: 16)),
+              child: Text(
+                canResendEmail ? 'Gửi lại Email xác minh' : 'Gửi lại sau ${countdown}s',
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
             ),
             const SizedBox(height: 16),
             TextButton(
