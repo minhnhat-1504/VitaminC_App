@@ -243,8 +243,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           alignment: Alignment.center,
           child: Text(
             label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.lexend(
-              fontSize: 14,
+              fontSize: 11,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
               color: isActive ? AppColors.slate900 : AppColors.slate500,
             ),

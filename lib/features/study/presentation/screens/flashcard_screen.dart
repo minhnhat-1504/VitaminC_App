@@ -22,8 +22,8 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   /// Controller điều khiển CardSwiper từ bên ngoài
   final CardSwiperController _swiperController = CardSwiperController();
 
-  /// Theo dõi trạng thái lật (flip) của thẻ hiện tại trên đầu stack
-  bool _isCurrentCardFlipped = false;
+  /// Theo dõi trạng thái lật (flip) của từng thẻ theo index
+  final Set<int> _flippedIndices = {};
 
   /// Theo dõi xem thẻ trên cùng đã lật xem nghĩa ít nhất 1 lần chưa (mở khóa vuốt)
   bool _hasFlippedOnce = false;
@@ -52,9 +52,8 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
   /// Chỉ thay đổi cách trigger (từ nút bấm → sự kiện vuốt)
   void _reviewCard(ReviewQuality quality) {
     ref.read(studyControllerProvider.notifier).processReview(quality);
-    // Reset trạng thái flip cho thẻ tiếp theo
+    // Reset trạng thái flip cho thẻ tiếp theo (không reset _flippedIndices để thẻ cũ giữ nguyên mặt)
     setState(() {
-      _isCurrentCardFlipped = false;
       _hasFlippedOnce = false;
     });
   }
@@ -308,12 +307,17 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     // Chỉ thẻ đầu tiên (top card) mới hiện overlay và cho phép flip
     final isTopCard =
         (index == (ref.read(studyControllerProvider).currentIndex));
+    final isFlipped = _flippedIndices.contains(index);
 
     return GestureDetector(
       onTap: isTopCard
           ? () {
               setState(() {
-                _isCurrentCardFlipped = !_isCurrentCardFlipped;
+                if (isFlipped) {
+                  _flippedIndices.remove(index);
+                } else {
+                  _flippedIndices.add(index);
+                }
                 _hasFlippedOnce = true; // Đã lật ít nhất 1 lần -> Mở khóa vuốt
               });
             }
@@ -329,8 +333,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 animation: rotateAnim,
                 child: child,
                 builder: (context, widget) {
-                  final isUnder =
-                      (ValueKey(_isCurrentCardFlipped) != widget!.key);
+                  final isUnder = (ValueKey(isFlipped) != widget!.key);
                   var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
                   tilt *= isUnder ? -1.0 : 1.0;
                   final value = isUnder
@@ -344,7 +347,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 },
               );
             },
-            child: (_isCurrentCardFlipped && isTopCard)
+            child: isFlipped
                 ? _buildCardContent(
                     key: const ValueKey(true),
                     text: card.meaning,

@@ -597,7 +597,7 @@ class HomeScreen extends ConsumerWidget {
                 subtitle: "OCR AI",
                 icon: Icons.document_scanner_rounded,
                 color: AppColors.primary,
-                route: '/ocr-scanner',
+                route: '/ocr',
               ),
             ),
             const SizedBox(width: 15),
