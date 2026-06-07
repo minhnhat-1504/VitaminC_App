@@ -9,7 +9,7 @@ import '../../../dashboard/presentation/providers/dashboard_providers.dart';
 import '../providers/social_providers.dart';
 import 'badges_screen.dart';
 import '../widgets/streak_popup.dart';
-import 'group_chat_screen.dart';
+import 'chat_room_list_screen.dart';
 import 'coop_quest_screen.dart';
 
 class LeaderboardScreen extends ConsumerStatefulWidget {
@@ -130,7 +130,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
           child: Column(children: [BadgesScreen(), SizedBox(height: 24)]),
         );
       case 2:
-        return const GroupChatScreen();
+        return const ChatRoomListScreen();
       case 3:
         return const CoopQuestScreen();
       default:

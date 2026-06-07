@@ -107,7 +107,7 @@ class StudyController extends StateNotifier<StudyState> {
             .doc('weekly_coop');
         final doc = await docRef.get();
         if (!doc.exists) {
-          await docRef.set({'totalFlipped': 1, 'target': 500});
+          await docRef.set({'totalFlipped': 1});
         } else {
           await docRef.update({'totalFlipped': FieldValue.increment(1)});
         }

@@ -66,6 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _showError(dynamic error) {
+    if (!mounted) return;
     final message = AppExceptionHandler.handleException(
       error,
       'Đã xảy ra lỗi',

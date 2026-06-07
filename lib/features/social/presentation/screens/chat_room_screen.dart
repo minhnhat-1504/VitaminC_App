@@ -1,20 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/language_validator.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/chat_service.dart';
 import '../providers/social_providers.dart';
 
-class GroupChatScreen extends ConsumerStatefulWidget {
-  const GroupChatScreen({super.key});
+class ChatRoomScreen extends ConsumerStatefulWidget {
+  final String roomId;
+  final String roomName;
+
+  const ChatRoomScreen({
+    super.key,
+    required this.roomId,
+    required this.roomName,
+  });
 
   @override
-  ConsumerState<GroupChatScreen> createState() => _GroupChatScreenState();
+  ConsumerState<ChatRoomScreen> createState() => _ChatRoomScreenState();
 }
 
-class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
+class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
@@ -27,13 +36,11 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     super.dispose();
   }
 
-  // Logic kiểm tra tiếng Việt đã được tách ra LanguageValidator (core/utils)
-
   void _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    // Cảnh sát ngôn ngữ (Client-side validation)
+    // Cảnh sát ngôn ngữ
     if (LanguageValidator.isVietnamese(text)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -69,6 +76,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     try {
       final chatService = ref.read(chatServiceProvider);
       await chatService.sendMessage(
+        roomId: widget.roomId,
         uid: currentUser.uid,
         displayName: currentUser.displayName,
         photoUrl: currentUser.photoUrl,
@@ -79,12 +87,61 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
     }
   }
 
+  void _copyRoomCode() {
+    // Chúng ta cần lấy joinCode từ database, nhưng tạm thời người dùng có thể copy roomId hoặc lấy joinCode từ RoomList.
+    // Thực tế có thể truy vấn joinCode từ get() nhưng để tối ưu ta chỉ copy dòng thông báo.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Đây là phòng chat riêng biệt. Bạn có thể copy mã phòng ở ngoài danh sách.',
+          style: GoogleFonts.lexend(),
+        ),
+        backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(currentUserProvider).value;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.slate900),
+          onPressed: () => context.pop(),
+        ),
+        title: Column(
+          children: [
+            Text(
+              widget.roomName,
+              style: GoogleFonts.lexend(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.slate900,
+              ),
+            ),
+            Text(
+              'Phòng trò chuyện',
+              style: GoogleFonts.lexend(
+                fontSize: 12,
+                color: AppColors.slate500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline_rounded, color: AppColors.primary),
+            onPressed: _copyRoomCode,
+          ),
+        ],
+      ),
       body: Column(
         children: [
           // Banner cảnh báo English-Only
@@ -101,7 +158,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.2),
+                  color: AppColors.primary.withOpacity(0.2),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -153,7 +210,7 @@ class _GroupChatScreenState extends ConsumerState<GroupChatScreen> {
           // Danh sách tin nhắn
           Expanded(
             child: StreamBuilder<List<ChatMessage>>(
-              stream: ref.read(chatServiceProvider).getMessages(),
+              stream: ref.read(chatServiceProvider).getMessages(widget.roomId),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(

@@ -4,6 +4,22 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/constants/app_colors.dart';
 
+class CoopTier {
+  final int target;
+  final int xpReward;
+  final String title;
+
+  const CoopTier({required this.target, required this.xpReward, required this.title});
+}
+
+const List<CoopTier> coopTiers = [
+  CoopTier(target: 100, xpReward: 20, title: 'Khởi động nhẹ nhàng'),
+  CoopTier(target: 500, xpReward: 50, title: 'Tăng tốc cùng đồng đội'),
+  CoopTier(target: 1000, xpReward: 100, title: 'Cột mốc đáng nhớ'),
+  CoopTier(target: 3000, xpReward: 300, title: 'Siêu sao chăm chỉ'),
+  CoopTier(target: 10000, xpReward: 1000, title: 'Huyền thoại server'),
+];
+
 class CoopQuestScreen extends ConsumerWidget {
   const CoopQuestScreen({super.key});
 
@@ -18,20 +34,28 @@ class CoopQuestScreen extends ConsumerWidget {
             .snapshots(),
         builder: (context, snapshot) {
           int totalFlipped = 0;
-          int target = 500;
 
           if (snapshot.hasData && snapshot.data!.exists) {
             final data = snapshot.data!.data() as Map<String, dynamic>?;
             if (data != null) {
               totalFlipped = data['totalFlipped'] ?? 0;
-              target = data['target'] ?? 500;
             }
           }
 
-          final percentage = target > 0
-              ? (totalFlipped / target).clamp(0.0, 1.0)
-              : 0.0;
-          final isCompleted = totalFlipped >= target;
+          // Xác định mốc tiếp theo đang hướng tới
+          CoopTier? currentTier;
+          for (var tier in coopTiers) {
+            if (totalFlipped < tier.target) {
+              currentTier = tier;
+              break;
+            }
+          }
+          
+          final displayTier = currentTier ?? coopTiers.last;
+          final target = displayTier.target;
+
+          final percentage = target > 0 ? (totalFlipped / target).clamp(0.0, 1.0) : 0.0;
+          final isAllCompleted = currentTier == null;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -178,9 +202,9 @@ class CoopQuestScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Trạng thái / Phần thưởng
+                // Trạng thái / Phần thưởng (Danh sách các Tiers)
                 Text(
-                  'Quest Reward / Phần thưởng',
+                  'Milestones / Các Cột Mốc',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -188,69 +212,84 @@ class CoopQuestScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isCompleted
-                        ? AppColors.success.withValues(alpha: 0.08)
-                        : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isCompleted
-                          ? AppColors.success.withValues(alpha: 0.3)
-                          : AppColors.slate200,
+                
+                ...coopTiers.map((tier) {
+                  final isTierCompleted = totalFlipped >= tier.target;
+                  
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isTierCompleted ? AppColors.success.withValues(alpha: 0.08) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isTierCompleted ? AppColors.success.withValues(alpha: 0.3) : AppColors.slate200,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isCompleted
-                              ? AppColors.success.withValues(alpha: 0.12)
-                              : AppColors.slate100,
-                          shape: BoxShape.circle,
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isTierCompleted
+                                ? AppColors.success.withValues(alpha: 0.12)
+                                : AppColors.slate100,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isTierCompleted ? Icons.emoji_events_rounded : Icons.lock_outline_rounded,
+                            color: isTierCompleted ? AppColors.success : AppColors.slate400,
+                            size: 24,
+                          ),
                         ),
-                        child: Icon(
-                          Icons.emoji_events_rounded,
-                          color: isCompleted
-                              ? AppColors.success
-                              : AppColors.slate400,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isCompleted
-                                  ? 'Nhiệm vụ đã hoàn thành!'
-                                  : 'Đang thực hiện',
-                              style: GoogleFonts.lexend(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: isCompleted
-                                    ? AppColors.success
-                                    : AppColors.slate800,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    tier.title,
+                                    style: GoogleFonts.lexend(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: isTierCompleted ? AppColors.success : AppColors.slate800,
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '+${tier.xpReward} XP',
+                                      style: GoogleFonts.lexend(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '+100 XP cho toàn bộ học viên khi kết thúc tuần.',
-                              style: GoogleFonts.lexend(
-                                fontSize: 12,
-                                color: AppColors.slate500,
+                              const SizedBox(height: 4),
+                              Text(
+                                'Mục tiêu: Đạt ${tier.target} thẻ',
+                                style: GoogleFonts.lexend(
+                                  fontSize: 12,
+                                  color: AppColors.slate500,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
+                      ],
+                    ),
+                  );
+                }),
                 const SizedBox(height: 24),
 
                 // Luật chơi
