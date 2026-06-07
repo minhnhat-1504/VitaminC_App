@@ -4,7 +4,7 @@
 
 ### Thông tin cơ bản
 * **Tên dự án**: VitaminC - Ứng dụng học tiếng Anh thông minh
-* **Trạng thái dự án**: Đã hoàn thành 100% Sprint 1, Sprint 2, Sprint 3 và Sprint 4. Đang trong giai đoạn triển khai **Sprint 4 Nâng cao** (Social, Gamification nâng cấp & Hệ thống nhiệm vụ).
+* **Trạng thái dự án**: Đã hoàn thành 100% Sprint 1, Sprint 2, Sprint 3, Sprint 4 và Sprint 4 Nâng cao. Đang trong giai đoạn triển khai **Sprint 5** (Hoàn thiện, Tối ưu Hiệu năng & Trải nghiệm Người dùng).
 
 ### Chức năng chính
 * **Danh sách chức năng cốt lõi**:
@@ -16,9 +16,12 @@
   * Đọc phát âm tự động (Text-to-Speech).
   * Trợ lý ảo AI giáo viên tiếng Anh (Gemini).
   * Kiểm tra phát âm qua Micro (Speech-to-Text & Levenshtein).
-  * Gamification (Theo dõi chuỗi ngày học - Streak, Bảng xếp hạng Real-time, Hệ thống Huy hiệu).
+  * Gamification (Theo dõi chuỗi ngày học - Streak, Bảng xếp hạng Real-time, Hệ thống Huy hiệu, Vòng quay Lucky Spin).
   * Quét từ vựng qua Camera/Ảnh (OCR).
-* **Chức năng tương lai (Sprint 4 Nâng cao & Sprint 5)**: Nâng cấp hệ thống Chat đa phòng (Tạo phòng, Join bằng Code), tối ưu hóa trải nghiệm Chat độc lập. Hoàn thiện các cơ chế đồng bộ RAM và bộ nhớ cuối cùng.
+  * Hệ thống Chat đa phòng (Tạo phòng, Tham gia bằng Join Code, Rời phòng/Xóa phòng tự động).
+  * Hệ thống Nhiệm vụ đồng đội Co-op Quest (Nhiều cột mốc phần thưởng Milestones/Tiers).
+  * Hệ thống XP kép (XP tổng + XP ngày) với tự động reset mỗi ngày.
+* **Chức năng tương lai (Sprint 5)**: Quên mật khẩu, Auto-sign-out khi token hết hạn, Empty states & Shimmer loading, Deep link từ FCM, Memory leak prevention (dispose), Force sync, Đóng gói APK.
 
 ---
 
@@ -94,10 +97,10 @@ lib/
 │   ├── dashboard/       # Màn hình chính, Thống kê, Streak
 │   ├── library/         # Thư viện thẻ, CRUD, Import Excel, Global Decks
 │   ├── settings/        # Cài đặt, Cập nhật thông tin User
-│   ├── social/          # Bảng xếp hạng, Hệ thống Huy hiệu
+│   ├── social/          # Bảng xếp hạng, Huy hiệu, Chat đa phòng, Co-op Quest, Lucky Spin
 │   ├── study/           # Giao diện ôn tập lật thẻ, Thuật toán SRS
 │   └── tools/           # Chatbot AI, Kiểm tra phát âm, OCR
-├── routing/             # Cấu hình GoRouter + Guard Redirect
+├── routing/             # Cấu hình GoRouter + Guard Redirect + Dynamic route /social/chat/:roomId
 └── main.dart            # Entry point, khởi tạo dịch vụ
 ```
 
@@ -144,11 +147,14 @@ Vai trò: Phân tách rõ ràng giữa Core (Tái sử dụng) và Features (Đ�
 
 | Class | Vai trò |
 | --- | --- |
-| `UserModel` | Lưu thông tin User, XP, Rank, Streak, Danh sách Huy hiệu. |
+| `UserModel` | Lưu thông tin User, XP, dailyXp, dailyGoal, lastActiveDate, Rank, Streak, Danh sách Huy hiệu. |
 | `DeckModel` | Chứa Metadata bộ thẻ (Title, Desc, Date). |
 | `VocabModel` | Chứa từ vựng và chỉ số SM-2 (easinessFactor, interval, repetition). |
 | `VocabLocal` | Wrapper của VocabModel để lưu xuống Hive (tuân thủ TypeAdapter). |
 | `SyncQueueItem` | Lưu lại tác vụ chưa đồng bộ (`action`: update/delete, `vocabId`). |
+| `ChatRoom` | Chứa thông tin phòng chat (id, name, joinCode, members, lastMessage). |
+| `ChatMessage` | Chứa tin nhắn trong phòng chat (text, senderId, senderName, timestamp). |
+| `CoopTier` | Định nghĩa cột mốc nhiệm vụ đồng đội (target, xpReward, title). |
 | `AppExceptionHandler` | Wrapper bắt lỗi tập trung (Firestore, Socket, Auth) thành Tiếng Việt. |
 
 ### Quan hệ giữa các lớp
@@ -177,7 +183,7 @@ Vai trò: Phân tách rõ ràng giữa Core (Tái sử dụng) và Features (Đ�
 ```text
 Collection: users
  └── Document: {uid}
-      (Fields: email, displayName, role, xp, streak_count...)
+      (Fields: email, displayName, role, xp, dailyXp, dailyGoal, lastActiveDate, streak_count, rank, earnedBadges...)
       ├── Sub-collection: decks
       │    └── Document: {deckId} (title, description, coverImageUrl...)
       ├── Sub-collection: vocabs
@@ -188,6 +194,15 @@ Collection: users
 Collection: global_decks (Sử dụng cho Mẫu cộng đồng)
  └── Document: {globalDeckId}
       └── Sub-collection: vocabs
+
+Collection: chat_rooms (Hệ thống Chat đa phòng)
+ └── Document: {roomId}
+      (Fields: name, joinCode, members[], lastMessage, lastMessageTime, createdAt)
+      └── Sub-collection: messages
+           └── Document: {messageId} (text, senderId, senderName, timestamp)
+
+Collection: quests (Nhiệm vụ đồng đội)
+ └── Document: weekly_coop (totalFlipped: int)
 ```
 
 ### Chi tiết
@@ -245,6 +260,7 @@ Output: % số từ đúng trên tổng số từ. (Được hiển thị trực
   * Độc lập: `/splash`, `/onboarding`, `/login`.
   * `ShellRoute` (có BottomNav): `/home`, `/library`, `/social`, `/settings`.
   * Full-screen: `/deck-detail`, `/add-vocab`, `/study`, `/study-summary`, `/pronunciation`, `/chatbot`, `/ocr`.
+  * Dynamic: `/social/chat/:roomId` — Điều hướng động vào phòng chat cụ thể (nhận `roomId` từ path, `name` từ query params).
 
 ### 10.4 `core/` — Tầng dùng chung
 * **`constants/app_colors.dart`**: Bảng màu Slate (100→900), accent (gold, bronze, streakOrange), trạng thái (success/warning/error).
@@ -328,16 +344,24 @@ Output: % số từ đúng trên tổng số từ. (Được hiển thị trực
     * `presentation/screens/flashcard_screen.dart`: Hiệu ứng lật 3D, tích hợp nút SRS.
     * `presentation/screens/study_summary_screen.dart`: Kết quả buổi học.
 
-### 10.9 `features/social/` — Gamification (Social)
+### 10.9 `features/social/` — Gamification & Chat (Social)
 * **Data Layer**: 
   * `data/badge_service.dart` kiểm tra điều kiện cấp huy hiệu (First Blood, Streak 7, Streak 30...).
+  * `data/chat_service.dart`: Service quản lý phòng chat đa phòng. Bao gồm tạo phòng (`createGroupRoom` - sinh Join Code 6 ký tự), tham gia phòng (`joinRoomByCode`), rời/xóa phòng (`leaveRoom` - tự dọn phòng trống), lắng nghe danh sách phòng (`getUserRooms` - sort client-side), gửi tin nhắn (`sendMessage` - batch write) và lắng nghe tin nhắn (`getMessages`).
+  * `data/quest_service.dart`: Service quản lý nhiệm vụ cá nhân hàng ngày (Daily Quests) và khởi tạo lại khi qua ngày mới.
+  * `data/models/chat_room.dart`: Model `ChatRoom` (id, name, joinCode, members, lastMessage, lastMessageTime).
+  * `data/models/chat_message.dart`: Model `ChatMessage` (id, text, senderId, senderName, timestamp).
 * **Presentation Layer**:
-  * `presentation/providers/social_providers.dart`: Khai báo leaderboardProvider và badgeServiceProvider.
+  * `presentation/providers/social_providers.dart`: Khai báo leaderboardProvider, badgeServiceProvider và chatServiceProvider.
   * Screens:
-    * `presentation/screens/leaderboard_screen.dart`: Ranking Top 50 người dùng cao điểm nhất.
+    * `presentation/screens/leaderboard_screen.dart`: Ranking Top 50 + Tabs (Ranking, Badges, Chat, Co-op).
     * `presentation/screens/badges_screen.dart`: Màn hình Huy hiệu đã đạt/khóa.
+    * `presentation/screens/chat_room_list_screen.dart`: Danh sách phòng chat đang tham gia, nút FAB tạo/join, thao tác Swipe-to-leave, nút (?) hướng dẫn sử dụng.
+    * `presentation/screens/chat_room_screen.dart`: Giao diện chat trong 1 phòng cụ thể (theo roomId), hỗ trợ validation English-only.
+    * `presentation/screens/coop_quest_screen.dart`: Bảng nhiệm vụ đồng đội tuần (Co-op Quest) với nhiều cột mốc phần thưởng (Milestones/Tiers), thanh tiến trình động đọc từ Firestore.
+    * `presentation/screens/lucky_spin_screen.dart`: Giao diện vòng quay may mắn (Daily Gacha).
   * Widgets:
-    * `presentation/widgets/streak_popup.dart`: Animation popup chúc mừng chuỗi ngày học.
+    * `presentation/widgets/streak_popup.dart`: Animation popup chúc mừng chuỗi ngày học, hiển thị XP thực tế và ngày/thứ chính xác.
 
 ### 10.10 `features/tools/` — AI, OCR & Speech (Tools)
 * **Data Layer**:
@@ -360,8 +384,8 @@ Output: % số từ đúng trên tổng số từ. (Được hiển thị trực
 
 | Metric | Giá trị |
 | --- | --- |
-| Tổng số file Dart | **61 files** (bao gồm file code tay và file auto-generated) |
-| Số lượng màn hình (Screens) | **14 screens** |
-| Số lượng Riverpod Provider | **~15 providers** |
-| Số lượng Service/Repository | **7 service classes** |
-| Số lượng Model | **5 models** (User, Deck, Vocab, SyncQueueItem, LocalVocab) |
+| Tổng số file Dart | **~68 files** (bao gồm file code tay và file auto-generated) |
+| Số lượng màn hình (Screens) | **18 screens** |
+| Số lượng Riverpod Provider | **~18 providers** |
+| Số lượng Service/Repository | **10 service classes** |
+| Số lượng Model | **8 models** (User, Deck, Vocab, SyncQueueItem, LocalVocab, ChatRoom, ChatMessage, CoopTier) |

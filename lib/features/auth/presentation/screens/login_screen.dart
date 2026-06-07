@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../widgets/auth_tab_switcher.dart';
 import 'register_screen.dart';
 import 'package:vitaminc/core/utils/app_exception_handler.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -77,6 +78,84 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         backgroundColor: Colors.redAccent,
         behavior: SnackBarBehavior.floating,
       ),
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final resetEmailController = TextEditingController(text: _emailController.text);
+    bool isSending = false;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: const Text('Quên mật khẩu?', style: TextStyle(fontWeight: FontWeight.bold)),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Nhập email của bạn để nhận link đặt lại mật khẩu.', style: TextStyle(fontSize: 14)),
+                  const SizedBox(height: 16),
+                  CustomTextField(
+                    controller: resetEmailController,
+                    hintText: 'name@example.com',
+                    prefixIcon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isSending ? null : () => Navigator.pop(dialogContext),
+                  child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+                ),
+                ElevatedButton(
+                  onPressed: isSending
+                      ? null
+                      : () async {
+                          final email = resetEmailController.text.trim();
+                          if (email.isEmpty) {
+                            _showError('Vui lòng nhập email');
+                            return;
+                          }
+
+                          setDialogState(() => isSending = true);
+
+                          try {
+                            await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+                            if (mounted) {
+                              Navigator.pop(dialogContext);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Link đặt lại mật khẩu đã được gửi đến email của bạn. Hãy kiểm tra hộp thư (kể cả Spam).'),
+                                  backgroundColor: AppColors.success,
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            _showError(e);
+                          } finally {
+                            if (mounted) {
+                              setDialogState(() => isSending = false);
+                            }
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: isSending
+                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Text('Gửi link', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
@@ -187,9 +266,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
-            onPressed: () {
-              // Logic reset mật khẩu có thể thêm ở đây
-            },
+            onPressed: _showForgotPasswordDialog,
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               minimumSize: const Size(0, 40),
