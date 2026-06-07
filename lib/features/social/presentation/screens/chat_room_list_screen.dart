@@ -7,6 +7,8 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/chat_service.dart';
 import '../providers/social_providers.dart';
+import '../../../../core/shared_widgets/empty_state_widget.dart';
+import '../../../../core/shared_widgets/shimmer_loading.dart';
 
 class ChatRoomListScreen extends ConsumerStatefulWidget {
   const ChatRoomListScreen({super.key});
@@ -127,7 +129,7 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
             return Center(child: Text('Lỗi: ${snapshot.error}'));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const ShimmerLoadingList();
           }
 
           final rooms = snapshot.data ?? [];
@@ -186,19 +188,10 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
               ),
               Expanded(
                 child: rooms.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.forum_rounded, size: 64, color: AppColors.slate300),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Bạn chưa tham gia phòng nào.\nHãy bấm (+) tạo mới hoặc nhập mã!',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lexend(color: AppColors.slate500, fontSize: 16),
-                            ),
-                          ],
-                        ),
+                    ? const EmptyStateWidget(
+                        title: 'Chưa tham gia phòng nào',
+                        message: 'Hãy bấm dấu (+) để tạo phòng mới\nhoặc dùng mũi tên để nhập mã phòng nhé!',
+                        icon: Icons.forum_outlined,
                       )
                     : ListView.builder(
                         padding: const EdgeInsets.all(16),

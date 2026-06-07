@@ -4,7 +4,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vitaminc/core/services/local_db_service.dart';
+import 'package:vitaminc/routing/app_router.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -57,6 +59,12 @@ class NotificationService {
       settings: initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         debugPrint('Notification clicked with payload: ${response.payload}');
+        if (response.payload != null) {
+          final context = rootNavigatorKey.currentContext;
+          if (context != null) {
+            context.go(response.payload!);
+          }
+        }
       },
     );
 
@@ -141,6 +149,7 @@ class NotificationService {
       id: 0,
       title: 'VitaminC - Đừng bỏ lỡ mục tiêu!',
       body: 'Streak của bạn đang gặp nguy hiểm! Học ngay 5 thẻ nhé!',
+      payload: '/library',
       scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -192,6 +201,7 @@ class NotificationService {
       id: 1, // ID = 1 (khác ID = 0 của Streak reminder)
       title: title,
       body: body,
+      payload: '/home',
       scheduledDate: scheduledDate,
       notificationDetails: const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -222,5 +232,29 @@ class NotificationService {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
     return scheduledDate;
+  }
+
+  /// Lên lịch thông báo test sau 15 giây để test chức năng Deep Link
+  Future<void> scheduleTestNotification() async {
+    final scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 15));
+    
+    await _localNotifications.zonedSchedule(
+      id: 99,
+      title: 'VitaminC - Test Deep Link',
+      body: 'Bấm vào đây để xem app có tự động mở và nhảy sang màn Thư viện (Library) hay không!',
+      payload: '/library',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'test_channel',
+          'Test Notifications',
+          channelDescription: 'Kênh test thông báo',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+    debugPrint('Đã hẹn thông báo test sau 15 giây.');
   }
 }
