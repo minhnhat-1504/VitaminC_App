@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/shared_widgets/custom_label.dart';
 import '../../../../core/shared_widgets/custom_text_field.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/auth_tab_switcher.dart';
@@ -113,7 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 16),
                   CustomTextField(
                     controller: resetEmailController,
-                    hintText: 'name@example.com',
+                    hintText: 'Nhập địa chỉ email',
                     prefixIcon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                   ),
@@ -181,73 +180,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ? const Center(
                 child: CircularProgressIndicator(color: AppColors.primary),
               )
-            : SingleChildScrollView(
+            : CustomScrollView(
                 physics: const ClampingScrollPhysics(),
-                child: Column(
-                  children: [
-                    _buildHeader(),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          AuthTabSwitcher(
-                            isLoginActive: isLogin,
-                            onTabChanged: () =>
-                                setState(() => isLogin = !isLogin),
-                          ),
-                          const SizedBox(height: 32),
-
-                          Stack(
-                            alignment: Alignment.topCenter,
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        _buildHeader(),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Column(
                             children: [
-                              // Giữ khung layout ổn định
-                              Opacity(
-                                opacity: 0,
-                                child: IgnorePointer(child: _buildLoginForm()),
+                              AuthTabSwitcher(
+                                isLoginActive: isLogin,
+                                onTabChanged: () =>
+                                    setState(() => isLogin = !isLogin),
                               ),
-
-                              // FORM LOGIN
-                              AnimatedOpacity(
-                                duration: const Duration(milliseconds: 250),
-                                opacity: isLogin ? 1.0 : 0.0,
-                                child: IgnorePointer(
-                                  ignoring: !isLogin,
-                                  child: _buildLoginForm(),
-                                ),
-                              ),
-
-                              // FORM REGISTER
-                              // FORM REGISTER
-                              AnimatedOpacity(
-                                duration: const Duration(milliseconds: 250),
-                                opacity: isLogin ? 0.0 : 1.0,
-                                child: IgnorePointer(
-                                  ignoring: isLogin,
-                                  child: RegisterForm(
-                                    nameController:
-                                        _nameController, // <--- THÊM DÒNG NÀY
-                                    emailController: _emailController,
-                                    passwordController: _passwordController,
-                                    submitButton: _buildSubmitButton(
-                                      "Sign Up Now\nĐăng ký ngay",
-                                      _handleEmailAuth,
-                                    ),
+                              const SizedBox(height: 16),
+                              AnimatedCrossFade(
+                                duration: const Duration(milliseconds: 300),
+                                crossFadeState: isLogin
+                                    ? CrossFadeState.showFirst
+                                    : CrossFadeState.showSecond,
+                                alignment: Alignment.topCenter,
+                                firstChild: _buildLoginForm(),
+                                secondChild: RegisterForm(
+                                  nameController: _nameController,
+                                  emailController: _emailController,
+                                  passwordController: _passwordController,
+                                  submitButton: _buildSubmitButton(
+                                    "Đăng ký",
+                                    _handleEmailAuth,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 0),
-                          _buildSocialSection(),
-                          const SizedBox(height: 20),
-                          _buildFooter(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
                           const SizedBox(height: 24),
+                          _buildSocialSection(),
+                          const Spacer(),
+                          const SizedBox(height: 16),
+                          _buildFooter(),
+                          const SizedBox(height: 16),
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
       ),
     );
@@ -257,21 +246,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const CustomLabel(
-          english: 'Email Address',
-          vietnamese: 'Địa chỉ Email',
-        ),
+        _buildLabel('Địa chỉ Email'),
         CustomTextField(
           controller: _emailController,
-          hintText: 'name@example.com',
+          hintText: 'Nhập địa chỉ email',
           prefixIcon: Icons.email_outlined,
           keyboardType: TextInputType.emailAddress,
         ),
-        const SizedBox(height: 24),
-        const CustomLabel(english: 'Password', vietnamese: 'Mật khẩu'),
+        const SizedBox(height: 16),
+        _buildLabel('Mật khẩu'),
         CustomTextField(
           controller: _passwordController,
-          hintText: '••••••••',
+          hintText: 'Nhập mật khẩu',
           prefixIcon: Icons.lock_outline,
           isPassword: true,
         ),
@@ -295,7 +281,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
 
         const SizedBox(height: 8),
-        _buildSubmitButton("Login Now\nĐăng nhập ngay", _handleEmailAuth),
+        _buildSubmitButton("Đăng nhập", _handleEmailAuth),
       ],
     );
   }
@@ -304,7 +290,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildSubmitButton(String text, VoidCallback onPressed) {
     return SizedBox(
       width: double.infinity,
-      height: 60,
+      height: 52,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -330,11 +316,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildHeader() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 40),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
           CircleAvatar(
-            radius: 35,
+            radius: 30,
             backgroundColor: const Color(0xFFBAE6FD),
             child: Icon(
               isLogin ? Icons.school : Icons.person_add_alt_1_rounded,
@@ -342,21 +328,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               color: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
-            isLogin ? 'Welcome Back' : 'Create Account',
+            isLogin ? 'Chào mừng trở lại' : 'Tạo tài khoản',
             style: const TextStyle(
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
               color: AppColors.textLight,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             isLogin
-                ? 'Chào mừng bạn quay trở lại'
+                ? 'Đăng nhập để tiếp tục'
                 : 'Bắt đầu hành trình của bạn',
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 15),
+            style: const TextStyle(color: Color(0xFF64748B), fontSize: 14),
           ),
         ],
       ),
@@ -367,7 +353,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       children: [
         const Text(
-          "OR CONTINUE WITH",
+          "HOẶC TIẾP TỤC VỚI",
           style: TextStyle(
             fontSize: 11,
             color: Color(0xFF94A3B8),
@@ -375,7 +361,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         Row(
           children: [
             _buildSocialBtn("Google", Icons.g_mobiledata, () async {
@@ -405,7 +391,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          height: 56,
+          height: 52,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
@@ -439,14 +425,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       children: [
         const Text(
-          "By continuing, you agree to English Master's",
+          "Bằng cách tiếp tục, bạn đồng ý với",
           style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
         ),
         const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Terms of Service",
+              "Điều khoản dịch vụ",
               style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 13,
@@ -454,11 +440,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
             Text(
-              " & ",
+              " và ",
               style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13),
             ),
             Text(
-              "Privacy Policy",
+              "Chính sách bảo mật",
               style: TextStyle(
                 color: AppColors.primary,
                 fontSize: 13,
@@ -467,17 +453,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 8),
-        const Text(
-          "Bằng cách tiếp tục, bạn đồng ý với Điều khoản dịch vụ\nvà Chính sách bảo mật",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Color(0xFFCBD5E1),
-            fontSize: 11,
-            fontStyle: FontStyle.italic,
+      ],
+    );
+  }
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6, left: 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textLight,
+            fontSize: 14,
           ),
         ),
-      ],
+      ),
     );
   }
 }

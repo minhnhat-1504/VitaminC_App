@@ -48,13 +48,11 @@ class AuthTabSwitcher extends StatelessWidget {
           Row(
             children: [
               _buildTabButton(
-                "Login",
                 "Đăng nhập",
                 isLoginActive,
                 onTabChanged,
               ),
               _buildTabButton(
-                "Sign Up",
                 "Đăng ký",
                 !isLoginActive,
                 onTabChanged,
@@ -67,8 +65,7 @@ class AuthTabSwitcher extends StatelessWidget {
   }
 
   Widget _buildTabButton(
-    String en,
-    String vi,
+    String label,
     bool active,
     VoidCallback onTap,
   ) {
@@ -79,24 +76,13 @@ class AuthTabSwitcher extends StatelessWidget {
         child: Container(
           height: 50,
           alignment: Alignment.center,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                en,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: active ? AppColors.primary : const Color(0xFF94A3B8),
-                ),
-              ),
-              Text(
-                vi,
-                style: TextStyle(
-                  fontSize: 10,
-                  color: active ? AppColors.primary : const Color(0xFF94A3B8),
-                ),
-              ),
-            ],
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: active ? AppColors.primary : const Color(0xFF94A3B8),
+            ),
           ),
         ),
       ),
