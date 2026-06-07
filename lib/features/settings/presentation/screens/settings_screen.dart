@@ -7,6 +7,7 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import 'package:vitaminc/features/library/presentation/controllers/library_controller.dart';
 import 'package:vitaminc/features/study/presentation/controllers/study_controller.dart';
 import 'package:vitaminc/core/services/local_db_provider.dart';
+import 'package:vitaminc/core/services/notification_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -251,6 +252,27 @@ class SettingsScreen extends ConsumerWidget {
                         );
                       }
                     }
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.notifications_active, color: Colors.orange),
+                  title: const Text(
+                    'Test Thông báo Deep Link (15s)',
+                    style: TextStyle(color: Colors.orange),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.orange,
+                  ),
+                  onTap: () async {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Đã hẹn giờ! Hãy bấm nút Home thoát app ngay, đợi 15 giây!'),
+                        duration: Duration(seconds: 5),
+                      ),
+                    );
+                    await ref.read(notificationServiceProvider).scheduleTestNotification();
                   },
                 ),
                 ListTile(

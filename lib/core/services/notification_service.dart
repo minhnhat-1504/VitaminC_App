@@ -233,4 +233,28 @@ class NotificationService {
     }
     return scheduledDate;
   }
+
+  /// Lên lịch thông báo test sau 15 giây để test chức năng Deep Link
+  Future<void> scheduleTestNotification() async {
+    final scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 15));
+    
+    await _localNotifications.zonedSchedule(
+      id: 99,
+      title: 'VitaminC - Test Deep Link',
+      body: 'Bấm vào đây để xem app có tự động mở và nhảy sang màn Thư viện (Library) hay không!',
+      payload: '/library',
+      scheduledDate: scheduledDate,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'test_channel',
+          'Test Notifications',
+          channelDescription: 'Kênh test thông báo',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+    );
+    debugPrint('Đã hẹn thông báo test sau 15 giây.');
+  }
 }
