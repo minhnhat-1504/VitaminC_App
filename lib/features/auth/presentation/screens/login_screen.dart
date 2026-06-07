@@ -46,6 +46,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
+    // Ràng buộc mật khẩu (chỉ áp dụng khi Đăng ký)
+    if (!isLogin) {
+      if (password.length < 6) {
+        _showError("Mật khẩu phải có ít nhất 6 ký tự");
+        return;
+      }
+      final passwordRegex = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d).*$');
+      if (!passwordRegex.hasMatch(password)) {
+        _showError("Mật khẩu phải bao gồm cả chữ cái và chữ số");
+        return;
+      }
+    }
+
     setState(() => isLoading = true);
 
     try {
