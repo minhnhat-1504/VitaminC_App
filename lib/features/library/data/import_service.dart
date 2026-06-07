@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
@@ -8,7 +7,6 @@ import 'package:vitaminc/core/utils/firestore_collections.dart';
 import 'package:vitaminc/features/library/data/models/vocab_model.dart';
 import 'package:vitaminc/core/utils/app_exception_handler.dart';
 import 'package:vitaminc/features/library/data/models/deck_model.dart';
-import 'package:path/path.dart' as path;
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ImportService {
@@ -112,7 +110,7 @@ class ImportService {
           }
 
           try {
-            final wordValue = row.length > 0 && row[0]?.value != null
+            final wordValue = row.isNotEmpty && row[0]?.value != null
                 ? row[0]!.value.toString().trim()
                 : '';
             final meaningValue = row.length > 1 && row[1]?.value != null
@@ -157,7 +155,7 @@ class ImportService {
 
       // 5. Lưu hàng loạt vào Firestore
       int totalImported = 0;
-      final int batchSize = 500;
+      const int batchSize = 500;
 
       for (int i = 0; i < vocabsToImport.length; i += batchSize) {
         final batch = _firestore.batch();

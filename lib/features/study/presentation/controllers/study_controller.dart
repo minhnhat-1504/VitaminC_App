@@ -81,8 +81,9 @@ class StudyController extends StateNotifier<StudyState> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
     }
   }
 
@@ -143,6 +144,6 @@ class StudyController extends StateNotifier<StudyState> {
 }
 
 final studyControllerProvider =
-    StateNotifierProvider<StudyController, StudyState>((ref) {
+    StateNotifierProvider.autoDispose<StudyController, StudyState>((ref) {
       return StudyController(ref);
     });

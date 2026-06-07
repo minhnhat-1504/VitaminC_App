@@ -185,7 +185,7 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
         child: isUser
             ? Text(
                 text,
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppColors.white,
                   fontSize: 15,
                   height: 1.4,

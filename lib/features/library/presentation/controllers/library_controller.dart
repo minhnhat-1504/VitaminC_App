@@ -73,8 +73,9 @@ class LibraryController extends StateNotifier<LibraryState> {
         );
       }
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
     }
   }
 
@@ -107,8 +108,9 @@ class LibraryController extends StateNotifier<LibraryState> {
       await loadDecks(); // Tải lại danh sách Deck vì file Excel tự tạo Deck mới
       return newDeck;
     } catch (e) {
-      if (mounted)
+      if (mounted) {
         state = state.copyWith(isLoading: false, errorMessage: e.toString());
+      }
       return null;
     }
   }
@@ -146,6 +148,6 @@ class LibraryController extends StateNotifier<LibraryState> {
 }
 
 final libraryControllerProvider =
-    StateNotifierProvider<LibraryController, LibraryState>((ref) {
+    StateNotifierProvider.autoDispose<LibraryController, LibraryState>((ref) {
       return LibraryController(ref);
     });
