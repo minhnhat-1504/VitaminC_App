@@ -8,6 +8,7 @@ import 'dart:ui';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../../features/auth/presentation/providers/auth_provider.dart';
 
 class StreakPopup extends ConsumerStatefulWidget {
   const StreakPopup({super.key});
@@ -75,15 +76,33 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     }
   }
 
-  static const List<_WeekDay> _weekDays = [
-    _WeekDay('M', _DayState.completed),
-    _WeekDay('T', _DayState.completed),
-    _WeekDay('W', _DayState.completed),
-    _WeekDay('T', _DayState.today),
-    _WeekDay('F', _DayState.future),
-    _WeekDay('S', _DayState.future),
-    _WeekDay('S', _DayState.future),
-  ];
+  List<_WeekDay> _getDynamicWeekDays(int currentStreak) {
+    final now = DateTime.now();
+    final currentDayOfWeek = now.weekday; // 1 (Mon) -> 7 (Sun)
+    
+    final labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+    final List<_WeekDay> result = [];
+    
+    for (int i = 1; i <= 7; i++) {
+      final label = labels[i - 1];
+      
+      if (i > currentDayOfWeek) {
+        result.add(_WeekDay(label, _DayState.future));
+      } else if (i == currentDayOfWeek) {
+        result.add(_WeekDay(label, _DayState.today));
+      } else {
+        // Những ngày trước đó trong tuần
+        // Do hôm nay vừa học xong nên streak đã bao gồm hôm nay.
+        final daysAgo = currentDayOfWeek - i;
+        if (currentStreak > daysAgo) {
+          result.add(_WeekDay(label, _DayState.completed));
+        } else {
+          result.add(_WeekDay(label, _DayState.future)); // Những ngày lỡ học
+        }
+      }
+    }
+    return result;
+  }
 
   @override
   void initState() {
@@ -366,6 +385,9 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
   }
 
   Widget _buildWeekCard() {
+    final streak = ref.watch(streakCountProvider).value ?? 0;
+    final dynamicWeekDays = _getDynamicWeekDays(streak);
+
     return Container(
       padding: const EdgeInsets.all(21),
       decoration: BoxDecoration(
@@ -412,7 +434,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  'Week 24',
+                  'Week ${((DateTime.now().day - 1) ~/ 7) + 1}',
                   style: GoogleFonts.lexend(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -425,7 +447,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: _weekDays
+            children: dynamicWeekDays
                 .map((day) => _buildDayItem(day))
                 .toList(growable: false),
           ),
@@ -516,12 +538,14 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
   }
 
   Widget _buildStatsCards() {
+    final user = ref.watch(currentUserProvider).value;
+    
     return Row(
       children: [
         Expanded(
           child: _statCard(
             title: 'Total XP',
-            value: '1,240 XP',
+            value: '${user?.xp ?? 0} XP',
             icon: Icons.auto_awesome_rounded,
             background: AppColors.streakOrange.withOpacity(0.05),
             border: AppColors.streakOrange.withOpacity(0.1),
@@ -531,9 +555,9 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
         const SizedBox(width: 16),
         Expanded(
           child: _statCard(
-            title: 'Time',
-            value: '25m today',
-            icon: Icons.schedule_rounded,
+            title: 'Daily XP',
+            value: '${user?.dailyXp ?? 0} XP',
+            icon: Icons.local_fire_department_rounded,
             background: AppColors.primary.withOpacity(0.08),
             border: AppColors.primary.withOpacity(0.18),
             iconColor: AppColors.primary,

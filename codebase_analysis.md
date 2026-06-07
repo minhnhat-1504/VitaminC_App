@@ -4,7 +4,7 @@
 
 ### Thông tin cơ bản
 * **Tên dự án**: VitaminC - Ứng dụng học tiếng Anh thông minh
-* **Trạng thái dự án**: Đã hoàn thành 100% Sprint 1, Sprint 2 và Sprint 3 (Sẵn sàng cho Sprint 4: Kiểm thử và Tối ưu).
+* **Trạng thái dự án**: Đã hoàn thành 100% Sprint 1, Sprint 2, Sprint 3 và Sprint 4. Đang trong giai đoạn triển khai **Sprint 4 Nâng cao** (Social, Gamification nâng cấp & Hệ thống nhiệm vụ).
 
 ### Chức năng chính
 * **Danh sách chức năng cốt lõi**:
@@ -18,7 +18,7 @@
   * Kiểm tra phát âm qua Micro (Speech-to-Text & Levenshtein).
   * Gamification (Theo dõi chuỗi ngày học - Streak, Bảng xếp hạng Real-time, Hệ thống Huy hiệu).
   * Quét từ vựng qua Camera/Ảnh (OCR).
-* **Chức năng tương lai**: Tối ưu UI/UX, thêm Shimmer loading, xử lý Empty State và triển khai Integration Test (Sprint 4).
+* **Chức năng tương lai (Sprint 4 Nâng cao & Sprint 5)**: Nâng cấp hệ thống Chat đa phòng (Tạo phòng, Join bằng Code), tối ưu hóa trải nghiệm Chat độc lập. Hoàn thiện các cơ chế đồng bộ RAM và bộ nhớ cuối cùng.
 
 ---
 

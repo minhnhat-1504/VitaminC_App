@@ -65,9 +65,10 @@ class HomeScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Stack(
+        Expanded(
+          child: Row(
+            children: [
+              Stack(
               alignment: Alignment.bottomRight,
               children: [
                 Container(
@@ -132,22 +133,26 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Chào mừng trở lại",
-                  style: TextStyle(color: AppColors.slate500, fontSize: 12),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      "${user?.displayName ?? 'Người dùng'}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Chào mừng trở lại",
+                    style: TextStyle(color: AppColors.slate500, fontSize: 12),
+                  ),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          "${user?.displayName ?? 'Người dùng'}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -171,9 +176,11 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ],
-        ),
-        Row(
+          ),
+        ],
+      ),
+    ),
+    Row(
           children: [
             // [DEV ONLY] Nút ép thẻ đến hạn để test vòng quay
             IconButton(

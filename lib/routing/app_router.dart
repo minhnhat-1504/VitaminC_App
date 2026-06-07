@@ -7,6 +7,7 @@ import 'package:vitaminc/features/auth/presentation/screens/onboarding_screen.da
 import 'package:vitaminc/features/auth/presentation/screens/splash_screen.dart';
 import 'package:vitaminc/features/dashboard/presentation/screens/home_screen.dart';
 import '../features/social/presentation/screens/leaderboard_screen.dart';
+import '../features/social/presentation/screens/chat_room_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
 import '../core/shared_widgets/bottom_nav_bar.dart';
 
@@ -160,6 +161,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/ocr',
         builder: (context, state) => const OcrScannerScreen(),
+      ),
+      GoRoute(
+        path: '/social/chat/:roomId',
+        builder: (context, state) {
+          final roomId = state.pathParameters['roomId']!;
+          final roomName = state.uri.queryParameters['name'] ?? 'Chat Room';
+          return ChatRoomScreen(roomId: roomId, roomName: roomName);
+        },
       ),
     ],
   );
