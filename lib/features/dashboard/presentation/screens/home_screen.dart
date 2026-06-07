@@ -172,9 +172,28 @@ class HomeScreen extends ConsumerWidget {
             ),
           ],
         ),
-        IconButton(
-          icon: const Icon(Icons.notifications_none_rounded, size: 28),
-          onPressed: () {},
+        Row(
+          children: [
+            // [DEV ONLY] Nút ép thẻ đến hạn để test vòng quay
+            IconButton(
+              icon: const Icon(Icons.bug_report, color: Colors.red),
+              tooltip: 'Mock: Ép tất cả thẻ đến hạn',
+              onPressed: () async {
+                await ref.read(localDbServiceProvider).mockAllCardsDue();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Đã ép tất cả thẻ đến hạn ôn tập!'),
+                    ),
+                  );
+                }
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications_none_rounded, size: 28),
+              onPressed: () {},
+            ),
+          ],
         ),
       ],
     );

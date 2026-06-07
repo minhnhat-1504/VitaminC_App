@@ -36,7 +36,8 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
   Future<void> _updateStatsAndXP() async {
     final studyState = ref.read(studyControllerProvider);
 
-    int wordsReviewed = 0;
+    int totalWordsReviewed = 0;
+    int validWordsReviewed = 0;
     int xp = 0;
 
     // Cơ chế chống spam điểm XP vô tận: không cộng điểm trong chế độ học ép (forceStudy)
@@ -44,7 +45,8 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
       for (final card in studyState.dueCards) {
         final quality = studyState.reviewedQualities[card.id];
         if (quality != null) {
-          wordsReviewed++;
+          totalWordsReviewed++;
+          validWordsReviewed++;
 
           // Từ mới (repetition == 0 trước phiên học) -> không được tính điểm XP (0 XP)
           if (card.repetition == 0) {
@@ -64,16 +66,16 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         }
       }
     } else {
-      // Trong chế độ học ép, vẫn đếm số từ đã học nhưng không cộng XP
+      // Trong chế độ học ép, vẫn đếm số từ đã học nhưng không cộng XP và không tính vào tiến trình nhiệm vụ
       for (final card in studyState.dueCards) {
         if (studyState.reviewedQualities[card.id] != null) {
-          wordsReviewed++;
+          totalWordsReviewed++;
         }
       }
     }
 
     setState(() {
-      _wordsReviewed = wordsReviewed;
+      _wordsReviewed = totalWordsReviewed;
       _xpEarned = xp;
     });
 
@@ -123,11 +125,9 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
             .read(dashboardServiceProvider)
             .getLearnedVocabCount(user.uid);
 
-        // Cập nhật nhiệm vụ ngày: Học 20 từ (tăng theo số từ vừa học)
-        if (wordsReviewed > 0) {
-          await ref
-              .read(questServiceProvider)
-              .updateQuestProgress(user.uid, 'daily_study_20', wordsReviewed);
+        // Cập nhật nhiệm vụ ngày: Học 20 từ (tăng theo số từ vừa học hợp lệ)
+        if (validWordsReviewed > 0) {
+          await ref.read(questServiceProvider).updateQuestProgress(user.uid, 'daily_study_20', validWordsReviewed);
         }
 
         // 4. Kiểm tra và trao huy hiệu tự động
@@ -143,7 +143,7 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         ref.invalidate(currentUserProvider);
 
         // 6. Kích hoạt vòng quay may mắn (Daily Gacha) nếu đủ điều kiện
-        if (wordsReviewed >= 5) {
+        if (validWordsReviewed >= 5) {
           final lastSpinDateStr = prefs.getString('last_spin_date_${user.uid}');
 
           if (lastSpinDateStr != todayStr) {
