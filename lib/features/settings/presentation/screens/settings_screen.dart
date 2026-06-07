@@ -272,7 +272,7 @@ class SettingsScreen extends ConsumerWidget {
                         duration: Duration(seconds: 5),
                       ),
                     );
-                    await ref.read(notificationServiceProvider).scheduleTestNotification();
+                    await NotificationService().scheduleTestNotification();
                   },
                 ),
                 ListTile(
