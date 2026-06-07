@@ -48,13 +48,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // Ràng buộc mật khẩu (chỉ áp dụng khi Đăng ký)
     if (!isLogin) {
-      if (password.length < 6) {
-        _showError("Mật khẩu phải có ít nhất 6 ký tự");
+      if (password.length < 8) {
+        _showError("Mật khẩu phải có ít nhất 8 ký tự");
         return;
       }
-      final passwordRegex = RegExp(r'^(?=.*[a-zA-Z])(?=.*\d).*$');
+      final passwordRegex = RegExp(r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).*$');
       if (!passwordRegex.hasMatch(password)) {
-        _showError("Mật khẩu phải bao gồm cả chữ cái và chữ số");
+        _showError("Mật khẩu phải gồm chữ hoa, chữ thường, số và ký tự đặc biệt");
         return;
       }
     }
