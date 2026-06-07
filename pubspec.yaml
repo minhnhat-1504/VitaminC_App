@@ -87,6 +87,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   
   # Bộ quy tắc viết code chuẩn (Linting), giúp 4 người trong nhóm code cùng một style
   flutter_lints: ^3.0.0
