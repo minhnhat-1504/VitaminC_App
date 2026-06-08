@@ -152,7 +152,7 @@ class DeckListScreen extends ConsumerWidget {
           title: const Text(
             'Thư viện',
             style: TextStyle(
-              color: AppColors.textLight,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -300,7 +300,9 @@ class DeckListScreen extends ConsumerWidget {
                                       fontWeight: FontWeight.w800,
                                       color: isEmpty
                                           ? Colors.grey.shade700
-                                          : AppColors.slate900,
+                                          : (isDark
+                                                ? Colors.white
+                                                : AppColors.slate900),
                                       letterSpacing: 0.5,
                                     ),
                                     textAlign: TextAlign.center,
@@ -526,13 +528,21 @@ class DeckListScreen extends ConsumerWidget {
                   ),
                   title: Text(
                     deck.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   subtitle: deck.description.isNotEmpty
-                      ? Text(deck.description)
+                      ? Text(
+                          deck.description,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color,
+                          ),
+                        )
                       : null,
                   trailing: IconButton(
                     icon: const Icon(Icons.download, color: AppColors.primary),

@@ -187,8 +187,9 @@ class DeckDetailScreen extends ConsumerWidget {
     final deck = libraryState.decks.firstWhere(
       (d) => d.id == deckId,
       // Nếu không tìm thấy, tạo một model rỗng để tránh lỗi null
-      orElse: () => throw Exception('Không tìm thấy bộ thẻ'),
     );
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -219,9 +220,13 @@ class DeckDetailScreen extends ConsumerWidget {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Hãy nhấn dấu + để thêm từ vựng nhé',
-                    style: TextStyle(color: AppColors.textLight),
+                    style: TextStyle(
+                      color:
+                          Theme.of(context).textTheme.bodyMedium?.color ??
+                          AppColors.textLight,
+                    ),
                   ),
                 ],
               ),
@@ -239,9 +244,11 @@ class DeckDetailScreen extends ConsumerWidget {
                 final vocab = state.vocabs[index];
                 return Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? AppColors.slate800 : Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(
+                      color: isDark ? AppColors.slate700 : Colors.grey.shade200,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.02),
@@ -253,9 +260,10 @@ class DeckDetailScreen extends ConsumerWidget {
                   child: ListTile(
                     title: Text(
                       vocab.word,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
                       ),
                     ),
                     subtitle: Column(
@@ -265,7 +273,9 @@ class DeckDetailScreen extends ConsumerWidget {
                         Text(
                           vocab.meaning,
                           style: TextStyle(
-                            color: Colors.grey.shade700,
+                            color: isDark
+                                ? Colors.grey.shade400
+                                : Colors.grey.shade700,
                             fontSize: 15,
                           ),
                         ),
