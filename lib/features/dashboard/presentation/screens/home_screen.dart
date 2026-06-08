@@ -421,7 +421,7 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    deck.title,
+                    "Bộ: ${deck.title}",
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -470,6 +470,7 @@ class HomeScreen extends ConsumerWidget {
 
     final deckId = nearest['deckId'] as String;
     final nextReview = nearest['nextReview'] as DateTime;
+    final updatedAt = nearest['updatedAt'] as DateTime;
     final deck = libraryState.decks.firstWhere(
       (d) => d.id == deckId,
       orElse: () => DeckModel(
@@ -490,6 +491,15 @@ class HomeScreen extends ConsumerWidget {
       timeStr = 'sau ${diff.inMinutes} phút';
     else
       timeStr = 'trong ít phút nữa';
+
+    final totalDuration = nextReview.difference(updatedAt).inMilliseconds;
+    final elapsedDuration = DateTime.now().difference(updatedAt).inMilliseconds;
+    double progress = 0.0;
+    if (totalDuration > 0) {
+      progress = (elapsedDuration / totalDuration).clamp(0.0, 1.0);
+    } else {
+      progress = 1.0;
+    }
 
     return _cardWrapper(
       child: Row(
@@ -512,7 +522,7 @@ class HomeScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  deck.title,
+                  "Bộ: ${deck.title}",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -527,6 +537,15 @@ class HomeScreen extends ConsumerWidget {
                     color: AppColors.slate500,
                     fontSize: 13,
                   ),
+                ),
+                const SizedBox(height: 8),
+                LinearPercentIndicator(
+                  lineHeight: 6.0,
+                  percent: progress,
+                  padding: EdgeInsets.zero,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  progressColor: AppColors.primary,
+                  barRadius: const Radius.circular(4),
                 ),
               ],
             ),

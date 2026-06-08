@@ -124,6 +124,7 @@ class LocalDbService {
       return {
         'deckId': nearestVocab.deckId,
         'nextReview': nearestVocab.nextReview,
+        'updatedAt': nearestVocab.updatedAt,
       };
     }
     return null;
