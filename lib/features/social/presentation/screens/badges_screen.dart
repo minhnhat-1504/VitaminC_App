@@ -16,7 +16,7 @@ class BadgesScreen extends ConsumerWidget {
   static const List<Map<String, dynamic>> badges = [
     {
       'id': 'streak_7',
-      'name': 'On Fire',
+      'name': 'Phong độ',
       'icon': 0xe518,
       'gradient1': 0xFF38BDF8,
       'gradient2': 0xFF2563EB,
@@ -24,7 +24,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'words_100',
-      'name': 'Scholar',
+      'name': 'Học giả',
       'icon': 0xe3c7,
       'gradient1': 0xFF34D399,
       'gradient2': 0xFF16A34A,
@@ -32,7 +32,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'first_blood',
-      'name': 'Speedster',
+      'name': 'Tốc độ',
       'icon': 0xe0e7,
       'gradient1': 0xFFFBBF24,
       'gradient2': 0xFFEA580C,
@@ -40,7 +40,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'streak_30',
-      'name': 'Elite',
+      'name': 'Tinh anh',
       'icon': 0xe1f5,
       'gradient1': 0xFFEC4899,
       'gradient2': 0xFFBE185D,
@@ -48,7 +48,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'orator',
-      'name': 'Orator',
+      'name': 'Hùng biện',
       'icon': 0xf518,
       'gradient1': 0xFFA855F7,
       'gradient2': 0xFF4F46E5,
@@ -56,7 +56,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'master',
-      'name': 'Master',
+      'name': 'Bậc thầy',
       'icon': 0xe559,
       'gradient1': 0xFF0D9488,
       'gradient2': 0xFF0891B2,
@@ -64,7 +64,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'polyglot',
-      'name': 'Polyglot',
+      'name': 'Đa ngôn ngữ',
       'icon': 0xe8e2,
       'gradient1': 0xFF8B5CF6,
       'gradient2': 0xFF6D28D9,
@@ -72,7 +72,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'night_owl',
-      'name': 'Night Owl',
+      'name': 'Cú đêm',
       'icon': 0xef67,
       'gradient1': 0xFF1E293B,
       'gradient2': 0xFF0F172A,
@@ -80,7 +80,7 @@ class BadgesScreen extends ConsumerWidget {
     },
     {
       'id': 'pioneer',
-      'name': 'Pioneer',
+      'name': 'Tiên phong',
       'icon': 0xe55f,
       'gradient1': 0xFFF97316,
       'gradient2': 0xFFDC2626,
@@ -248,7 +248,7 @@ class BadgesScreen extends ConsumerWidget {
   }
 
   Widget _earnedBadgeCard(Map<String, dynamic> badge) {
-    final rotations = {'On Fire': 0.05, 'Scholar': -0.035, 'Speedster': 0.018};
+    final rotations = {'Phong độ': 0.05, 'Học giả': -0.035, 'Tốc độ': 0.018};
     final int grad1 = badge['gradient1'] as int? ?? 0xFF94A3B8;
     final int grad2 = badge['gradient2'] as int? ?? 0xFF64748B;
     final int shadow = badge['shadowColor'] as int? ?? 0xFF475569;

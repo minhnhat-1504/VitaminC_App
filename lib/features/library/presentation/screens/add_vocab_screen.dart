@@ -94,7 +94,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: const CustomAppBar(
-        title: 'Add new vocabulary',
+        title: 'Thêm từ vựng mới',
         showBackButton: true,
       ),
       body: SingleChildScrollView(
@@ -109,19 +109,19 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
           children: [
             CustomTextField(
               controller: _wordController,
-              hintText: 'Vocabulary (English)...',
+              hintText: 'Từ vựng (tiếng Anh)...',
               prefixIcon: Icons.abc,
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _meaningController,
-              hintText: 'Meaning (Vietnamese)...',
+              hintText: 'Nghĩa (tiếng Việt)...',
               prefixIcon: Icons.g_translate,
             ),
             const SizedBox(height: 16),
             CustomTextField(
               controller: _exampleController,
-              hintText: 'Example sentence...',
+              hintText: 'Câu ví dụ (tùy chọn)...',
               prefixIcon: Icons.notes,
             ),
             const SizedBox(height: 24),
@@ -134,7 +134,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
                   onPressed: () {},
                   icon: const Icon(Icons.camera_alt, color: AppColors.primary),
                   label: const Text(
-                    'Add Image',
+                    'Thêm ảnh',
                     style: TextStyle(color: AppColors.primary),
                   ),
                 ),
@@ -142,7 +142,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
                   onPressed: () {},
                   icon: const Icon(Icons.mic, color: AppColors.primary),
                   label: const Text(
-                    'Record Audio',
+                    'Ghi âm',
                     style: TextStyle(color: AppColors.primary),
                   ),
                 ),
@@ -153,11 +153,11 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
             // Nút gạt chia sẻ
             SwitchListTile(
               title: const Text(
-                'Share publicly',
+                'Chia sẻ công khai',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: const Text(
-                'Allow others to find this word',
+                'Cho phép người khác tìm thấy từ này',
                 style: TextStyle(color: AppColors.textLight),
               ),
               activeThumbColor: AppColors.primary,
@@ -170,7 +170,7 @@ class _AddVocabScreenState extends ConsumerState<AddVocabScreen> {
             _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : CustomPrimaryButton(
-                    text: 'SAVE VOCABULARY',
+                    text: 'Lưu từ vựng',
                     onPressed: _saveVocab,
                   ),
           ],

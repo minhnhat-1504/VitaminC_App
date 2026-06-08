@@ -253,7 +253,7 @@ class _CoopQuestScreenState extends ConsumerState<CoopQuestScreen>
 
                 // Trạng thái / Phần thưởng (Danh sách các Tiers)
                 Text(
-                  'Milestones / Các Cột Mốc',
+                  'Các cột mốc',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -378,7 +378,7 @@ class _CoopQuestScreenState extends ConsumerState<CoopQuestScreen>
 
                 // Luật chơi
                 Text(
-                  'How it works / Hướng dẫn đồng đội',
+                  'Hướng dẫn đồng đội',
                   style: GoogleFonts.lexend(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

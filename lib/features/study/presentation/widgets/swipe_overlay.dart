@@ -61,19 +61,19 @@ class SwipeOverlay extends StatelessWidget {
     switch (swipeType) {
       case _SwipeType.easy:
         overlayColor = AppColors.success;
-        label = 'EASY';
+        label = 'DỄ';
         rotationAngle = -0.3;
         labelAlignment = Alignment.topLeft;
         break;
       case _SwipeType.hard:
         overlayColor = AppColors.error;
-        label = 'HARD';
+        label = 'KHÓ';
         rotationAngle = 0.3;
         labelAlignment = Alignment.topRight;
         break;
       case _SwipeType.good:
         overlayColor = AppColors.primary;
-        label = 'GOOD';
+        label = 'TỐT';
         rotationAngle = 0.0;
         labelAlignment = Alignment.topCenter;
         break;
