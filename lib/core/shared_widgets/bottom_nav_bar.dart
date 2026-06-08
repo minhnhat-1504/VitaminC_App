@@ -46,21 +46,49 @@ class MainBottomNavBar extends ConsumerWidget {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColors.primary,
       unselectedItemColor: const Color(0xFF94A3B8),
-      items: const [
+      items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home_rounded),
+          icon: const Icon(Icons.home_outlined),
+          activeIcon: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.5, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            child: const Icon(Icons.home_rounded),
+          ),
           label: 'Trang chủ',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.grid_view_rounded),
+          icon: const Icon(Icons.grid_view_outlined),
+          activeIcon: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.5, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            child: const Icon(Icons.grid_view_rounded),
+          ),
           label: 'Thư viện',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.groups_rounded),
+          icon: const Icon(Icons.groups_outlined),
+          activeIcon: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.5, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            child: const Icon(Icons.groups_rounded),
+          ),
           label: 'Cộng đồng',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person_rounded),
+          icon: const Icon(Icons.person_outline_rounded),
+          activeIcon: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.5, end: 1.0),
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            child: const Icon(Icons.person_rounded),
+          ),
           label: 'Cá nhân',
         ),
       ],

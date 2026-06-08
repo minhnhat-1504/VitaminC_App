@@ -224,32 +224,46 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
               const SizedBox(height: 40),
 
               // Hộp thống kê
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeOutBack,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: child,
                     ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem(
-                      'Words Reviewed',
-                      '$_wordsReviewed',
-                      AppColors.primary,
-                    ),
-                    _buildStatItem(
-                      'XP Earned',
-                      _isUpdating ? '...' : '+$_xpEarned',
-                      AppColors.success,
-                    ),
-                  ],
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildStatItem(
+                        'Words Reviewed',
+                        _wordsReviewed,
+                        AppColors.primary,
+                      ),
+                      _buildStatItem(
+                        'XP Earned',
+                        _isUpdating ? 0 : _xpEarned,
+                        AppColors.success,
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -269,16 +283,24 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
     );
   }
 
-  Widget _buildStatItem(String label, String value, Color color) {
+  Widget _buildStatItem(String label, int value, Color color) {
     return Column(
       children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
+        TweenAnimationBuilder<int>(
+          tween: IntTween(begin: 0, end: value),
+          duration: const Duration(milliseconds: 1500),
+          curve: Curves.easeOutQuart,
+          builder: (context, val, child) {
+            final displayValue = label == 'XP Earned' ? '+$val' : '$val';
+            return Text(
+              _isUpdating && label == 'XP Earned' ? '...' : displayValue,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            );
+          },
         ),
         const SizedBox(height: 4),
         Text(

@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -161,7 +162,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
       );
     }
 
-    final progress = (state.currentIndex + 1) / state.dueCards.length;
+    final progress = state.currentIndex / state.dueCards.length;
 
     return Scaffold(
       appBar: const CustomAppBar(
@@ -173,12 +174,19 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
           // ========== Thanh tiến độ ==========
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.textLight.withValues(alpha: 0.2),
-              color: AppColors.primary,
-              minHeight: 8,
-              borderRadius: BorderRadius.circular(8),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: progress),
+              duration: const Duration(milliseconds: 600),
+              curve: Curves.easeOutCubic,
+              builder: (context, value, child) {
+                return LinearProgressIndicator(
+                  value: value,
+                  backgroundColor: AppColors.textLight.withOpacity(0.2),
+                  color: AppColors.primary,
+                  minHeight: 8,
+                  borderRadius: BorderRadius.circular(8),
+                );
+              },
             ),
           ),
 
@@ -198,7 +206,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 cardsCount: state.dueCards.length,
                 numberOfCardsDisplayed: min(3, state.dueCards.length),
                 isLoop: false,
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 500),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 8,
@@ -251,6 +259,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     }
 
     // ========== Map hướng vuốt → ReviewQuality ==========
+    HapticFeedback.lightImpact(); // Phản hồi rung nhẹ khi vuốt thành công
     switch (direction) {
       case CardSwiperDirection.left:
         _reviewCard(ReviewQuality.hard);
@@ -310,6 +319,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     final isFlipped = _flippedIndices.contains(index);
 
     return GestureDetector(
+      key: ValueKey(card.id),
       onTap: isTopCard
           ? () {
               setState(() {
@@ -326,7 +336,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
         children: [
           // ===== Card Content (Flip animation) =====
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
+            duration: const Duration(milliseconds: 500),
+            switchInCurve: Curves.easeInOutCubic,
+            switchOutCurve: Curves.easeInOutCubic,
             transitionBuilder: (Widget child, Animation<double> animation) {
               final rotateAnim = Tween(begin: pi, end: 0.0).animate(animation);
               return AnimatedBuilder(
@@ -334,15 +346,28 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                 child: child,
                 builder: (context, widget) {
                   final isUnder = (ValueKey(isFlipped) != widget!.key);
-                  var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.003;
+                  var tilt = ((animation.value - 0.5).abs() - 0.5) * 0.006;
                   tilt *= isUnder ? -1.0 : 1.0;
                   final value = isUnder
                       ? min(rotateAnim.value, pi / 2)
                       : rotateAnim.value;
+                  // Dynamic shadow khi card đang giữa chừng flip
+                  final flipProgress = (animation.value - 0.5).abs();
                   return Transform(
                     transform: Matrix4.rotationY(value)..setEntry(3, 0, tilt),
                     alignment: Alignment.center,
-                    child: widget,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.06 + (1 - flipProgress) * 0.12),
+                            blurRadius: 20 + (1 - flipProgress) * 16,
+                            offset: Offset(0, 10 + (1 - flipProgress) * 8),
+                          ),
+                        ],
+                      ),
+                      child: widget,
+                    ),
                   );
                 },
               );
@@ -372,36 +397,48 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
               percentThresholdY: percentThresholdY,
             ),
 
-          // ===== Indicator nhắc nhở lật thẻ (chỉ hiện khi chưa lật lần nào) =====
+          // ===== Indicator nhắc nhở lật thẻ — pulse animation =====
           if (isTopCard && !_hasFlippedOnce)
             Positioned(
               bottom: 24,
               left: 0,
               right: 0,
               child: Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.slate900.withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.touch_app, color: Colors.white, size: 16),
-                      SizedBox(width: 6),
-                      Text(
-                        'Chạm để lật thẻ',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.6, end: 1.0),
+                  duration: const Duration(milliseconds: 1200),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return Opacity(
+                      opacity: value,
+                      child: child,
+                    );
+                  },
+                  // onEnd restarts the animation by toggling
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.slate900.withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.touch_app, color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Text(
+                          'Chạm để lật thẻ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

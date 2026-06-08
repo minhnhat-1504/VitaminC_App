@@ -23,21 +23,23 @@ class AuthTabSwitcher extends StatelessWidget {
         children: [
           AnimatedAlign(
             duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
+            curve: Curves.easeOutQuart,
             alignment: isLoginActive
                 ? Alignment.centerLeft
                 : Alignment.centerRight,
             child: FractionallySizedBox(
               widthFactor: 0.5,
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutQuart,
                 height: 50,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
                   ],

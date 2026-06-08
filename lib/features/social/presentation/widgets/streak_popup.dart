@@ -18,7 +18,7 @@ class StreakPopup extends ConsumerStatefulWidget {
 }
 
 class _StreakPopupState extends ConsumerState<StreakPopup>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   static const double _heroSize = 192;
   static const double _bottomBarHeight = 160;
 
@@ -105,20 +105,36 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     return result;
   }
 
+  // Controller for entrance animation
+  late final AnimationController _entranceController;
+  late final Animation<double> _entranceScale;
+
   @override
   void initState() {
     super.initState();
+
+    // Entrance animation: fire icon scale 0 → 1 (one-shot)
+    _entranceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _entranceScale = CurvedAnimation(
+      parent: _entranceController,
+      curve: Curves.elasticOut,
+    );
+    _entranceController.forward();
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     )..repeat(reverse: true);
     _scale = Tween<double>(
-      begin: 0.98,
-      end: 1.04,
+      begin: 0.96,
+      end: 1.06,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _rotation = Tween<double>(
-      begin: -0.02,
-      end: 0.02,
+      begin: -0.03,
+      end: 0.03,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
     _glow = Tween<double>(
       begin: 0.25,
@@ -128,6 +144,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
 
   @override
   void dispose() {
+    _entranceController.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -253,10 +270,12 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
   }
 
   Widget _buildHero() {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        return Transform.scale(
+    return ScaleTransition(
+      scale: _entranceScale,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
           scale: _scale.value,
           child: Transform.rotate(
             angle: _rotation.value,
@@ -339,7 +358,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildMotivation() {
@@ -448,9 +467,23 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: dynamicWeekDays
-                .map((day) => _buildDayItem(day))
-                .toList(growable: false),
+            children: List.generate(dynamicWeekDays.length, (index) {
+              return TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: Duration(milliseconds: 300 + (index * 80)),
+                curve: Curves.easeOutBack,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: child,
+                    ),
+                  );
+                },
+                child: _buildDayItem(dynamicWeekDays[index]),
+              );
+            }),
           ),
         ],
       ),
@@ -544,24 +577,52 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     return Row(
       children: [
         Expanded(
-          child: _statCard(
-            title: 'Tổng XP',
-            value: '${user?.xp ?? 0} XP',
-            icon: Icons.auto_awesome_rounded,
-            background: AppColors.streakOrange.withOpacity(0.05),
-            border: AppColors.streakOrange.withOpacity(0.1),
-            iconColor: AppColors.streakOrange,
+          child: TweenAnimationBuilder<Offset>(
+            tween: Tween(begin: const Offset(-0.5, 0), end: Offset.zero),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutQuart,
+            builder: (context, offset, child) {
+              return Transform.translate(
+                offset: Offset(offset.dx * MediaQuery.of(context).size.width, 0),
+                child: Opacity(
+                  opacity: (1 - offset.dx.abs() * 2).clamp(0.0, 1.0),
+                  child: child,
+                ),
+              );
+            },
+            child: _statCard(
+              title: 'Tổng XP',
+              value: '${user?.xp ?? 0} XP',
+              icon: Icons.auto_awesome_rounded,
+              background: AppColors.streakOrange.withOpacity(0.05),
+              border: AppColors.streakOrange.withOpacity(0.1),
+              iconColor: AppColors.streakOrange,
+            ),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _statCard(
-            title: 'XP hôm nay',
-            value: '${user?.dailyXp ?? 0} XP',
-            icon: Icons.local_fire_department_rounded,
-            background: AppColors.primary.withOpacity(0.08),
-            border: AppColors.primary.withOpacity(0.18),
-            iconColor: AppColors.primary,
+          child: TweenAnimationBuilder<Offset>(
+            tween: Tween(begin: const Offset(0.5, 0), end: Offset.zero),
+            duration: const Duration(milliseconds: 600),
+            curve: Curves.easeOutQuart,
+            builder: (context, offset, child) {
+              return Transform.translate(
+                offset: Offset(offset.dx * MediaQuery.of(context).size.width, 0),
+                child: Opacity(
+                  opacity: (1 - offset.dx.abs() * 2).clamp(0.0, 1.0),
+                  child: child,
+                ),
+              );
+            },
+            child: _statCard(
+              title: 'XP hôm nay',
+              value: '${user?.dailyXp ?? 0} XP',
+              icon: Icons.local_fire_department_rounded,
+              background: AppColors.primary.withOpacity(0.08),
+              border: AppColors.primary.withOpacity(0.18),
+              iconColor: AppColors.primary,
+            ),
           ),
         ),
       ],

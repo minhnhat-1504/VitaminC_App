@@ -50,6 +50,7 @@ class StudyState {
 
 class StudyController extends StateNotifier<StudyState> {
   final Ref _ref;
+  int _internalIndex = 0;
 
   StudyController(this._ref) : super(StudyState());
 
@@ -71,6 +72,7 @@ class StudyController extends StateNotifier<StudyState> {
         forceStudy: forceStudy,
       );
       if (mounted) {
+        _internalIndex = 0;
         state = state.copyWith(
           isLoading: false,
           dueCards: cards,
@@ -88,9 +90,11 @@ class StudyController extends StateNotifier<StudyState> {
   }
 
   Future<void> processReview(ReviewQuality quality) async {
-    if (state.isFinished || state.currentIndex >= state.dueCards.length) return;
+    if (state.isFinished || _internalIndex >= state.dueCards.length) return;
 
-    final currentCard = state.dueCards[state.currentIndex];
+    final currentCard = state.dueCards[_internalIndex];
+    _internalIndex++; // Tăng đồng bộ để xử lý vuốt nhanh an toàn
+
     final srsEngine = _ref.read(srsEngineProvider);
     final studyService = _ref.read(studyServiceProvider);
 
@@ -98,45 +102,43 @@ class StudyController extends StateNotifier<StudyState> {
       // 1. Tính toán thẻ mới dựa trên đánh giá Hard/Good/Easy
       final updatedCard = srsEngine.processReview(currentCard, quality);
 
-      // 2. Lưu lên Firestore (Chờ lưu xong để Library cập nhật chuẩn xác)
-      await studyService.updateCardAfterReview(updatedCard);
+      // 2. Lưu lên Firestore (Chạy ngầm, không await để tránh lag UI)
+      studyService.updateCardAfterReview(updatedCard).catchError((e) {
+        debugPrint('Error updating card: $e');
+      });
 
-      // 2b. Tăng tiến độ nhiệm vụ đồng đội (Co-op Quest)
-      try {
-        final docRef = FirebaseFirestore.instance
-            .collection('quests')
-            .doc('weekly_coop');
-        final doc = await docRef.get();
-        if (!doc.exists) {
-          await docRef.set({'totalFlipped': 1});
-        } else {
-          await docRef.update({'totalFlipped': FieldValue.increment(1)});
+      // 2b. Tăng tiến độ nhiệm vụ đồng đội (Co-op Quest) chạy ngầm
+      FirebaseFirestore.instance
+          .collection('quests')
+          .doc('weekly_coop')
+          .update({'totalFlipped': FieldValue.increment(1)})
+          .catchError((e) {
+         debugPrint('Error updating coop quest: $e');
+      });
+
+      // 3. Delay cập nhật state để UI thẻ lướt đi xong mới tăng progress
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (!mounted) return;
+
+        final nextIndex = state.currentIndex + 1;
+        final finished = nextIndex >= state.dueCards.length;
+
+        // Cập nhật Map chất lượng đã đánh giá
+        final newReviewedQualities = Map<String, ReviewQuality>.from(
+          state.reviewedQualities,
+        )..[currentCard.id] = quality;
+
+        state = state.copyWith(
+          currentIndex: nextIndex,
+          isFinished: finished,
+          reviewedQualities: newReviewedQualities,
+        );
+
+        // Nếu đã học xong thẻ cuối, báo cho Library tải lại
+        if (finished) {
+          _ref.read(libraryControllerProvider.notifier).loadDecks();
         }
-      } catch (e) {
-        debugPrint('Error updating coop quest: $e');
-      }
-
-      if (!mounted) return;
-
-      // 3. Chuyển sang thẻ tiếp theo
-      final nextIndex = state.currentIndex + 1;
-      final finished = nextIndex >= state.dueCards.length;
-
-      // Cập nhật Map chất lượng đã đánh giá
-      final newReviewedQualities = Map<String, ReviewQuality>.from(
-        state.reviewedQualities,
-      )..[currentCard.id] = quality;
-
-      state = state.copyWith(
-        currentIndex: nextIndex,
-        isFinished: finished,
-        reviewedQualities: newReviewedQualities,
-      );
-
-      // 4. Nếu đã học xong thẻ cuối, báo cho Library tải lại danh sách để hiện trạng thái "Đã học xong"
-      if (finished) {
-        _ref.read(libraryControllerProvider.notifier).loadDecks();
-      }
+      });
     } catch (e) {
       if (mounted) state = state.copyWith(errorMessage: e.toString());
     }

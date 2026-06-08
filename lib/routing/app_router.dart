@@ -25,6 +25,88 @@ import '../features/tools/presentation/screens/ocr_scanner_screen.dart';
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
 
+// ─── CUSTOM PAGE TRANSITIONS ───
+
+/// Fade transition — dùng cho auth flow và shell tabs
+CustomTransitionPage<void> _fadePage({
+  required GoRouterState state,
+  required Widget child,
+  Duration duration = const Duration(milliseconds: 300),
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: duration,
+    reverseTransitionDuration: duration,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
+        child: child,
+      );
+    },
+  );
+}
+
+/// Slide + Fade transition — dùng cho push screens
+CustomTransitionPage<void> _slideFadePage({
+  required GoRouterState state,
+  required Widget child,
+  Duration duration = const Duration(milliseconds: 300),
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: duration,
+    reverseTransitionDuration: duration,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0.08, 0),
+          end: Offset.zero,
+        ).animate(curved),
+        child: FadeTransition(
+          opacity: curved,
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
+/// Slide-up + Fade transition — dùng cho fullscreen dialogs
+CustomTransitionPage<void> _slideUpFadePage({
+  required GoRouterState state,
+  required Widget child,
+  Duration duration = const Duration(milliseconds: 350),
+}) {
+  return CustomTransitionPage<void>(
+    key: state.pageKey,
+    child: child,
+    transitionDuration: duration,
+    reverseTransitionDuration: duration,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutQuart,
+      );
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.06),
+          end: Offset.zero,
+        ).animate(curved),
+        child: FadeTransition(
+          opacity: curved,
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
 // Notifier để lắng nghe các thay đổi trạng thái và thông báo cho GoRouter
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -93,105 +175,130 @@ final routerProvider = Provider<GoRouter>((ref) {
       FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
     ],
     routes: [
-      // Các màn hình độc lập
+      // ─── Auth screens (Fade transition) ───
       GoRoute(
         path: '/splash',
-        builder: (context, state) => const SplashScreen(),
+        pageBuilder: (context, state) =>
+            _fadePage(state: state, child: const SplashScreen(), duration: const Duration(milliseconds: 400)),
       ),
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        pageBuilder: (context, state) =>
+            _fadePage(state: state, child: const OnboardingScreen(), duration: const Duration(milliseconds: 400)),
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) =>
+            _fadePage(state: state, child: const LoginScreen(), duration: const Duration(milliseconds: 400)),
+      ),
       GoRoute(
         path: '/verify-email',
-        builder: (context, state) => const VerifyEmailScreen(),
+        pageBuilder: (context, state) =>
+            _fadePage(state: state, child: const VerifyEmailScreen(), duration: const Duration(milliseconds: 400)),
       ),
 
-      // Cấu hình ShellRoute cho các màn hình có BottomNavigationBar
+      // ─── Shell Route — Bottom Nav tabs (Fade giữa các tab) ───
       ShellRoute(
         navigatorKey: _shellNavigatorKey,
         builder: (context, state, child) {
           return Scaffold(
-            body: child,
+            body: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: child,
+            ),
             bottomNavigationBar: const MainBottomNavBar(),
           );
         },
         routes: [
           GoRoute(
             path: '/home',
-            builder: (context, state) => const HomeScreen(),
+            pageBuilder: (context, state) =>
+                _fadePage(state: state, child: const HomeScreen(), duration: const Duration(milliseconds: 200)),
           ),
           GoRoute(
             path: '/library',
-            builder: (context, state) => const DeckListScreen(),
+            pageBuilder: (context, state) =>
+                _fadePage(state: state, child: const DeckListScreen(), duration: const Duration(milliseconds: 200)),
           ),
           GoRoute(
             path: '/social',
-            builder: (context, state) => const LeaderboardScreen(),
+            pageBuilder: (context, state) =>
+                _fadePage(state: state, child: const LeaderboardScreen(), duration: const Duration(milliseconds: 200)),
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const SettingsScreen(),
+            pageBuilder: (context, state) =>
+                _fadePage(state: state, child: const SettingsScreen(), duration: const Duration(milliseconds: 200)),
           ),
         ],
       ),
 
-      // Các màn hình chức năng sâu (Full screen)
+      // ─── Push screens (Slide + Fade) ───
       GoRoute(
         path: '/deck-detail',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final deckId = state.extra as String;
-          return DeckDetailScreen(deckId: deckId);
+          return _slideFadePage(state: state, child: DeckDetailScreen(deckId: deckId));
         },
       ),
       GoRoute(
         path: '/add-vocab',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           // Hỗ trợ cả 2 kiểu: String (tương thích ngược) và Map (từ OCR)
           if (state.extra is Map<String, String>) {
             final data = state.extra as Map<String, String>;
-            return AddVocabScreen(
-              deckId: data['deckId']!,
-              initialWord: data['word'],
+            return _slideFadePage(
+              state: state,
+              child: AddVocabScreen(deckId: data['deckId']!, initialWord: data['word']),
             );
           }
           final deckId = state.extra as String;
-          return AddVocabScreen(deckId: deckId);
+          return _slideFadePage(state: state, child: AddVocabScreen(deckId: deckId));
         },
       ),
       GoRoute(
         path: '/study',
-        builder: (context, state) {
-          // Ép kiểu extra thành String để lấy deckId
+        pageBuilder: (context, state) {
           final deckId = state.extra as String?;
-          return FlashcardScreen(deckId: deckId);
+          return _slideFadePage(state: state, child: FlashcardScreen(deckId: deckId));
         },
-      ),
-      GoRoute(
-        path: '/study-summary',
-        builder: (context, state) => const StudySummaryScreen(),
       ),
       GoRoute(
         path: '/pronunciation',
-        builder: (context, state) => const PronunciationScreen(),
+        pageBuilder: (context, state) =>
+            _slideFadePage(state: state, child: const PronunciationScreen()),
       ),
       GoRoute(
         path: '/chatbot',
-        builder: (context, state) => const ChatbotScreen(),
+        pageBuilder: (context, state) =>
+            _slideFadePage(state: state, child: const ChatbotScreen()),
       ),
       GoRoute(
         path: '/ocr',
-        builder: (context, state) => const OcrScannerScreen(),
+        pageBuilder: (context, state) =>
+            _slideFadePage(state: state, child: const OcrScannerScreen()),
       ),
       GoRoute(
         path: '/social/chat/:roomId',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final roomId = state.pathParameters['roomId']!;
           final roomName = state.uri.queryParameters['name'] ?? 'Chat Room';
-          return ChatRoomScreen(roomId: roomId, roomName: roomName);
+          return _slideFadePage(
+            state: state,
+            child: ChatRoomScreen(roomId: roomId, roomName: roomName),
+          );
         },
+      ),
+
+      // ─── Fullscreen dialog (Slide up + Fade) ───
+      GoRoute(
+        path: '/study-summary',
+        pageBuilder: (context, state) =>
+            _slideUpFadePage(state: state, child: const StudySummaryScreen()),
       ),
     ],
   );
 });
+
