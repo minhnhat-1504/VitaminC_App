@@ -19,6 +19,7 @@ import '../features/library/presentation/screens/add_vocab_screen.dart';
 import '../features/study/presentation/screens/flashcard_screen.dart';
 import '../features/study/presentation/screens/study_summary_screen.dart';
 import '../features/tools/presentation/screens/pronunciation_screen.dart';
+import '../features/tools/presentation/screens/pronunciation_topic_screen.dart';
 import '../features/tools/presentation/screens/chatbot_screen.dart';
 import '../features/tools/presentation/screens/ocr_scanner_screen.dart';
 
@@ -68,10 +69,7 @@ CustomTransitionPage<void> _slideFadePage({
           begin: const Offset(0.08, 0),
           end: Offset.zero,
         ).animate(curved),
-        child: FadeTransition(
-          opacity: curved,
-          child: child,
-        ),
+        child: FadeTransition(opacity: curved, child: child),
       );
     },
   );
@@ -98,10 +96,7 @@ CustomTransitionPage<void> _slideUpFadePage({
           begin: const Offset(0, 0.06),
           end: Offset.zero,
         ).animate(curved),
-        child: FadeTransition(
-          opacity: curved,
-          child: child,
-        ),
+        child: FadeTransition(opacity: curved, child: child),
       );
     },
   );
@@ -178,23 +173,35 @@ final routerProvider = Provider<GoRouter>((ref) {
       // ─── Auth screens (Fade transition) ───
       GoRoute(
         path: '/splash',
-        pageBuilder: (context, state) =>
-            _fadePage(state: state, child: const SplashScreen(), duration: const Duration(milliseconds: 400)),
+        pageBuilder: (context, state) => _fadePage(
+          state: state,
+          child: const SplashScreen(),
+          duration: const Duration(milliseconds: 400),
+        ),
       ),
       GoRoute(
         path: '/onboarding',
-        pageBuilder: (context, state) =>
-            _fadePage(state: state, child: const OnboardingScreen(), duration: const Duration(milliseconds: 400)),
+        pageBuilder: (context, state) => _fadePage(
+          state: state,
+          child: const OnboardingScreen(),
+          duration: const Duration(milliseconds: 400),
+        ),
       ),
       GoRoute(
         path: '/login',
-        pageBuilder: (context, state) =>
-            _fadePage(state: state, child: const LoginScreen(), duration: const Duration(milliseconds: 400)),
+        pageBuilder: (context, state) => _fadePage(
+          state: state,
+          child: const LoginScreen(),
+          duration: const Duration(milliseconds: 400),
+        ),
       ),
       GoRoute(
         path: '/verify-email',
-        pageBuilder: (context, state) =>
-            _fadePage(state: state, child: const VerifyEmailScreen(), duration: const Duration(milliseconds: 400)),
+        pageBuilder: (context, state) => _fadePage(
+          state: state,
+          child: const VerifyEmailScreen(),
+          duration: const Duration(milliseconds: 400),
+        ),
       ),
 
       // ─── Shell Route — Bottom Nav tabs (Fade giữa các tab) ───
@@ -214,23 +221,35 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/home',
-            pageBuilder: (context, state) =>
-                _fadePage(state: state, child: const HomeScreen(), duration: const Duration(milliseconds: 200)),
+            pageBuilder: (context, state) => _fadePage(
+              state: state,
+              child: const HomeScreen(),
+              duration: const Duration(milliseconds: 200),
+            ),
           ),
           GoRoute(
             path: '/library',
-            pageBuilder: (context, state) =>
-                _fadePage(state: state, child: const DeckListScreen(), duration: const Duration(milliseconds: 200)),
+            pageBuilder: (context, state) => _fadePage(
+              state: state,
+              child: const DeckListScreen(),
+              duration: const Duration(milliseconds: 200),
+            ),
           ),
           GoRoute(
             path: '/social',
-            pageBuilder: (context, state) =>
-                _fadePage(state: state, child: const LeaderboardScreen(), duration: const Duration(milliseconds: 200)),
+            pageBuilder: (context, state) => _fadePage(
+              state: state,
+              child: const LeaderboardScreen(),
+              duration: const Duration(milliseconds: 200),
+            ),
           ),
           GoRoute(
             path: '/settings',
-            pageBuilder: (context, state) =>
-                _fadePage(state: state, child: const SettingsScreen(), duration: const Duration(milliseconds: 200)),
+            pageBuilder: (context, state) => _fadePage(
+              state: state,
+              child: const SettingsScreen(),
+              duration: const Duration(milliseconds: 200),
+            ),
           ),
         ],
       ),
@@ -240,7 +259,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/deck-detail',
         pageBuilder: (context, state) {
           final deckId = state.extra as String;
-          return _slideFadePage(state: state, child: DeckDetailScreen(deckId: deckId));
+          return _slideFadePage(
+            state: state,
+            child: DeckDetailScreen(deckId: deckId),
+          );
         },
       ),
       GoRoute(
@@ -251,24 +273,45 @@ final routerProvider = Provider<GoRouter>((ref) {
             final data = state.extra as Map<String, String>;
             return _slideFadePage(
               state: state,
-              child: AddVocabScreen(deckId: data['deckId']!, initialWord: data['word']),
+              child: AddVocabScreen(
+                deckId: data['deckId']!,
+                initialWord: data['word'],
+              ),
             );
           }
           final deckId = state.extra as String;
-          return _slideFadePage(state: state, child: AddVocabScreen(deckId: deckId));
+          return _slideFadePage(
+            state: state,
+            child: AddVocabScreen(deckId: deckId),
+          );
         },
       ),
       GoRoute(
         path: '/study',
         pageBuilder: (context, state) {
           final deckId = state.extra as String?;
-          return _slideFadePage(state: state, child: FlashcardScreen(deckId: deckId));
+          return _slideFadePage(
+            state: state,
+            child: FlashcardScreen(deckId: deckId),
+          );
         },
       ),
       GoRoute(
         path: '/pronunciation',
-        pageBuilder: (context, state) =>
-            _slideFadePage(state: state, child: const PronunciationScreen()),
+        pageBuilder: (context, state) => _slideFadePage(
+          state: state,
+          child: const PronunciationTopicScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/pronunciation/practice/:topicId',
+        pageBuilder: (context, state) {
+          final topicId = state.pathParameters['topicId']!;
+          return _slideFadePage(
+            state: state,
+            child: PronunciationScreen(topicId: topicId),
+          );
+        },
       ),
       GoRoute(
         path: '/chatbot',
@@ -301,4 +344,3 @@ final routerProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-

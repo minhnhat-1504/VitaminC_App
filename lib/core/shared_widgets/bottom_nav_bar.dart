@@ -53,7 +53,8 @@ class MainBottomNavBar extends ConsumerWidget {
             tween: Tween(begin: 0.5, end: 1.0),
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            builder: (context, value, child) =>
+                Transform.scale(scale: value, child: child),
             child: const Icon(Icons.home_rounded),
           ),
           label: 'Trang chủ',
@@ -64,7 +65,8 @@ class MainBottomNavBar extends ConsumerWidget {
             tween: Tween(begin: 0.5, end: 1.0),
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            builder: (context, value, child) =>
+                Transform.scale(scale: value, child: child),
             child: const Icon(Icons.grid_view_rounded),
           ),
           label: 'Thư viện',
@@ -75,7 +77,8 @@ class MainBottomNavBar extends ConsumerWidget {
             tween: Tween(begin: 0.5, end: 1.0),
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            builder: (context, value, child) =>
+                Transform.scale(scale: value, child: child),
             child: const Icon(Icons.groups_rounded),
           ),
           label: 'Cộng đồng',
@@ -86,7 +89,8 @@ class MainBottomNavBar extends ConsumerWidget {
             tween: Tween(begin: 0.5, end: 1.0),
             duration: const Duration(milliseconds: 500),
             curve: Curves.elasticOut,
-            builder: (context, value, child) => Transform.scale(scale: value, child: child),
+            builder: (context, value, child) =>
+                Transform.scale(scale: value, child: child),
             child: const Icon(Icons.person_rounded),
           ),
           label: 'Cá nhân',

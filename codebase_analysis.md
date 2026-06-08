@@ -126,6 +126,14 @@ Vai trò: Phân tách rõ ràng giữa Core (Tái sử dụng) và Features (Đ�
 * **Phụ thuộc**: `connectivity_plus`, `cloud_firestore`.
 * **File liên quan**: `local_db_service.dart`, `vocab_local.dart`, `sync_queue_item.dart`.
 
+### 5.3. Module Luyện Phát Âm (Pronunciation)
+* **Mục tiêu**: Hỗ trợ người dùng luyện phát âm theo từng chủ đề thực tế.
+* **Chức năng**: Chọn chủ đề (Giao tiếp, Du lịch...), xem danh sách các câu hỏi, thực hành đọc và nhận phản hồi chấm điểm.
+* **Đầu vào**: `topicId` từ màn hình danh sách chủ đề.
+* **Đầu ra**: Phản hồi đúng/sai và điểm số từng câu qua `SpeechToText`.
+* **Phụ thuộc**: `speech_to_text`, `flutter_tts`, `Riverpod` (quản lý state chủ đề).
+* **File liên quan**: `pronunciation_topic_screen.dart`, `pronunciation_screen.dart`, `mock_pronunciation_data.dart`.
+
 ---
 
 ## 6. Luồng

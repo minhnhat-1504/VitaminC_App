@@ -113,8 +113,8 @@ class StudyController extends StateNotifier<StudyState> {
           .doc('weekly_coop')
           .update({'totalFlipped': FieldValue.increment(1)})
           .catchError((e) {
-         debugPrint('Error updating coop quest: $e');
-      });
+            debugPrint('Error updating coop quest: $e');
+          });
 
       // 3. Delay cập nhật state để UI thẻ lướt đi xong mới tăng progress
       Future.delayed(const Duration(milliseconds: 400), () {

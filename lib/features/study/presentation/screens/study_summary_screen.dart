@@ -168,8 +168,8 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
                         (context, animation, secondaryAnimation, child) {
                           final curvedAnimation = CurvedAnimation(
                             parent: animation,
-                            curve: Curves
-                                .easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
+                            curve:
+                                Curves.easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
                           );
                           return ScaleTransition(
                             scale: curvedAnimation,
