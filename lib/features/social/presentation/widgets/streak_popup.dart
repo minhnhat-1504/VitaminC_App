@@ -59,8 +59,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text:
-              'Tôi vừa đạt cột mốc Streak ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
+          text: 'Tôi vừa đạt cột mốc Chuỗi học ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
         ),
       );
     } catch (e) {
@@ -346,7 +345,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
               ),
               const SizedBox(height: 4),
               Text(
-                'DAYS / NGÀY',
+                'NGÀY LIÊN TIẾP',
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -365,7 +364,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     return Column(
       children: [
         Text(
-          'You are on fire!',
+          'Tuyệt vời!',
           style: GoogleFonts.lexend(
             fontSize: 30,
             fontWeight: FontWeight.w800,

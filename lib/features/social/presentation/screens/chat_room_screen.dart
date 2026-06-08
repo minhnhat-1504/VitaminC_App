@@ -186,7 +186,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'English-Only Zone',
+                        'Khu vực chỉ dùng tiếng Anh',
                         style: GoogleFonts.lexend(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -304,7 +304,7 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
                         color: AppColors.slate900,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Type a message in English...',
+                        hintText: 'Nhập tin nhắn bằng tiếng Anh...',
                         hintStyle: GoogleFonts.lexend(
                           fontSize: 14,
                           color: AppColors.slate400,

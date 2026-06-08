@@ -74,7 +74,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     if (state.dueCards.isEmpty) {
       return Scaffold(
         appBar: const CustomAppBar(
-          title: 'Review Complete',
+          title: 'Hoàn thành ôn tập',
           showBackButton: true,
         ),
         body: Center(
@@ -102,7 +102,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                   backgroundColor: AppColors.primary,
                 ),
                 child: const Text(
-                  'Học lại toàn bộ (Cram mode)',
+                  'Học lại toàn bộ',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
@@ -123,7 +123,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
     if (state.isFinished) {
       return Scaffold(
         appBar: const CustomAppBar(
-          title: 'Review Complete',
+          title: 'Hoàn thành ôn tập',
           showBackButton: true,
         ),
         body: Center(
@@ -166,7 +166,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
 
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Now Learning: IELTS Vocab',
+        title: 'Đang học từ vựng',
         showBackButton: true,
       ),
       body: Column(
@@ -564,19 +564,19 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                   // Hướng dẫn vuốt trái
                   _buildGuideItem(
                     icon: Icons.arrow_back_rounded,
-                    label: 'HARD',
+                    label: 'Khó',
                     color: AppColors.error,
                   ),
                   // Hướng dẫn vuốt lên
                   _buildGuideItem(
                     icon: Icons.arrow_upward_rounded,
-                    label: 'GOOD',
+                    label: 'Tốt',
                     color: AppColors.primary,
                   ),
                   // Hướng dẫn vuốt phải
                   _buildGuideItem(
                     icon: Icons.arrow_forward_rounded,
-                    label: 'EASY',
+                    label: 'Dễ',
                     color: AppColors.success,
                   ),
                 ],

@@ -160,7 +160,7 @@ class DeckListScreen extends ConsumerWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.file_upload, color: AppColors.primary),
-              tooltip: 'Import Excel',
+              tooltip: 'Nhập từ Excel',
               onPressed: () async {
                 final newDeck = await controller.importExcel();
                 if (context.mounted) {
@@ -223,7 +223,7 @@ class DeckListScreen extends ConsumerWidget {
           ? EmptyStateWidget(
               title: 'Thư viện rỗng',
               message:
-                  'Bạn chưa có Bộ thẻ nào.\nBấm dấu + hoặc Import Excel nhé!',
+                  'Bạn chưa có bộ thẻ nào.\nBấm dấu + hoặc Nhập từ Excel nhé!',
               icon: Icons.style_outlined,
               buttonText: 'Tạo bộ thẻ ngay',
               onButtonPressed: () => _showAddDeckDialog(context, ref),

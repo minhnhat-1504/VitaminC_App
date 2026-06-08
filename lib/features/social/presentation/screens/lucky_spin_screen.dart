@@ -25,9 +25,9 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
     '+10 XP',
     '+50 XP',
     '+100 XP',
-    'Lucky Badge',
+    'Huy hiệu',
     '+20 XP',
-    'Try Again',
+    'Thử lại nhé',
   ];
 
   final List<Color> _colors = [
@@ -44,9 +44,9 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
     40, // +10 XP (40%)
     10, // +50 XP (10%)
     4, // +100 XP (4%)
-    1, // Lucky Badge (1%)
+    1, // Huy hiệu May mắn (1%)
     20, // +20 XP (20%)
-    25, // Try Again (25%)
+    25, // Thử lại nhé (25%)
   ];
 
   @override
@@ -132,11 +132,11 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              reward == 'Try Again'
+              reward == 'Thử lại nhé'
                   ? 'Chúc bạn may mắn lần sau!'
                   : 'Chúc mừng! Bạn nhận được $reward',
             ),
-            backgroundColor: reward == 'Try Again'
+            backgroundColor: reward == 'Thử lại nhé'
                 ? AppColors.slate600
                 : AppColors.gold,
           ),
@@ -175,7 +175,7 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
             ),
             const SizedBox(height: 32),
             SizedBox(
-              height: 250,
+              height: 300,
               child: FortuneWheel(
                 selected: _selected.stream,
                 animateFirst: false,
@@ -187,6 +187,7 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
                         style: const TextStyle(
                           color: AppColors.white,
                           fontWeight: FontWeight.bold,
+                          fontSize: 11,
                         ),
                       ),
                       style: FortuneItemStyle(
@@ -202,8 +203,8 @@ class _LuckySpinScreenState extends ConsumerState<LuckySpinScreen> {
             const SizedBox(height: 32),
             CustomPrimaryButton(
               text: _hasSpun
-                  ? 'ĐÓNG'
-                  : (_isSpinning ? 'ĐANG QUAY...' : 'QUAY NGAY'),
+                  ? 'Đóng'
+                  : (_isSpinning ? 'Đang quay...' : 'Quay ngay'),
               onPressed: () {
                 if (_hasSpun) {
                   Navigator.of(context).pop();

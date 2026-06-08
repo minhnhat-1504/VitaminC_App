@@ -25,8 +25,8 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   int _selectedTab = 0;
 
   // Hạng giải đấu tĩnh (Local constants)
-  static const String leagueName = 'RUBY LEAGUE';
-  static const String leagueTimeLeft = '2d 14h';
+  static const String leagueName = 'GIẢI ĐẤU RUBY';
+  static const String leagueTimeLeft = '2 ngày 14 giờ';
 
   void _openStreakPopup() {
     showGeneralDialog(
@@ -63,7 +63,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
-      appBar: const CustomAppBar(title: 'Xếp hạng', showBackButton: false),
+      appBar: const CustomAppBar(title: 'Cộng đồng', showBackButton: false),
       body: SafeArea(
         top: false,
         child: Column(
@@ -278,7 +278,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       const SizedBox(height: 20),
       _buildRestOfLeague(users),
       const SizedBox(height: 40),
-      _buildAchievementsPreview(currentUser),
     ];
   }
 
@@ -598,7 +597,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 8, bottom: 12),
           child: Text(
-            'YOUR POSITION',
+            'HẠNG CỦA BẠN',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -704,7 +703,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                                       style: TextStyle(fontSize: 10),
                                     ),
                                     Text(
-                                      '$currentStreak day streak',
+                                      '$currentStreak chuỗi ngày học',
                                       style: GoogleFonts.lexend(
                                         fontSize: 12,
                                         color: AppColors.slate500,
@@ -748,7 +747,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 8, bottom: 12, top: 8),
           child: Text(
-            'REST OF THE LEAGUE',
+            'PHẦN CÒN LẠI',
             style: GoogleFonts.lexend(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -767,7 +766,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   Widget _leagueItem(UserModel user, int rank) {
-    final name = user.displayName.isNotEmpty ? user.displayName : 'Learner';
+    final name = user.displayName.isNotEmpty ? user.displayName : 'Học viên';
     final initials = name.length >= 2
         ? name.substring(0, 2).toUpperCase()
         : (name.isNotEmpty ? name[0].toUpperCase() : 'L');
@@ -867,7 +866,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Achievements',
+                'Thành tựu',
                 style: GoogleFonts.lexend(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -913,7 +912,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
   }
 
   Widget _achievedBadge(Map<String, dynamic> badge) {
-    final rotations = {'On Fire': 0.05, 'Scholar': -0.035, 'Speedster': 0.018};
+    final rotations = {'Phong độ': 0.05, 'Học giả': -0.035, 'Tốc độ': 0.018};
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [

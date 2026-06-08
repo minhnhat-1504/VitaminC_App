@@ -148,46 +148,41 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
         // 5. Làm mới thông tin người dùng hiện tại để đồng bộ UI
         ref.invalidate(currentUserProvider);
 
-        // 6. Kích hoạt vòng quay may mắn (Daily Gacha) nếu đủ điều kiện
+        // 6. Kích hoạt vòng quay may mắn (Daily Gacha) nếu đủ điều kiện (Đã tắt check giới hạn 1 lần/ngày để test)
         if (validWordsReviewed >= 5) {
-          final lastSpinDateStr = prefs.getString('last_spin_date_${user.uid}');
-
-          if (lastSpinDateStr != todayStr) {
-            await prefs.setString('last_spin_date_${user.uid}', todayStr);
-            if (mounted) {
-              // Delay vòng quay một chút nếu Streak popup cũng được hiện, để tránh đè chéo đột ngột
-              Future.delayed(
-                Duration(milliseconds: willShowStreakPopup ? 800 : 100),
-                () {
-                  if (mounted) {
-                    showGeneralDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      barrierColor: Colors.black.withOpacity(0.5),
-                      transitionDuration: const Duration(milliseconds: 400),
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return const LuckySpinScreen();
-                      },
-                      transitionBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                            final curvedAnimation = CurvedAnimation(
-                              parent: animation,
-                              curve: Curves
-                                  .easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
-                            );
-                            return ScaleTransition(
-                              scale: curvedAnimation,
-                              child: FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              ),
-                            );
-                          },
-                    );
-                  }
-                },
-              );
-            }
+          if (mounted) {
+            // Delay vòng quay một chút nếu Streak popup cũng được hiện, để tránh đè chéo đột ngột
+            Future.delayed(
+              Duration(milliseconds: willShowStreakPopup ? 800 : 100),
+              () {
+                if (mounted) {
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    barrierColor: Colors.black.withOpacity(0.5),
+                    transitionDuration: const Duration(milliseconds: 400),
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return const LuckySpinScreen();
+                    },
+                    transitionBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                          final curvedAnimation = CurvedAnimation(
+                            parent: animation,
+                            curve: Curves
+                                .easeOutBack, // Hiệu ứng nảy nhẹ rất mượt
+                          );
+                          return ScaleTransition(
+                            scale: curvedAnimation,
+                            child: FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            ),
+                          );
+                        },
+                  );
+                }
+              },
+            );
           }
         }
       } catch (e) {
@@ -213,12 +208,12 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
               const Icon(Icons.stars, size: 100, color: AppColors.secondary),
               const SizedBox(height: 24),
               const Text(
-                'Amazing job!',
+                'Tuyệt vời!',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'You have completed your study session.',
+                'Bạn đã hoàn thành phiên học.',
                 style: TextStyle(fontSize: 16, color: AppColors.textLight),
               ),
               const SizedBox(height: 40),
@@ -253,12 +248,12 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _buildStatItem(
-                        'Words Reviewed',
+                        'Từ đã ôn tập',
                         _wordsReviewed,
                         AppColors.primary,
                       ),
                       _buildStatItem(
-                        'XP Earned',
+                        'XP nhận được',
                         _isUpdating ? 0 : _xpEarned,
                         AppColors.success,
                       ),
@@ -270,7 +265,7 @@ class _StudySummaryScreenState extends ConsumerState<StudySummaryScreen> {
               const SizedBox(height: 60),
 
               CustomPrimaryButton(
-                text: 'BACK TO HOME',
+                text: 'Quay về trang chủ',
                 onPressed: () {
                   // Chuyển hướng về tab Home
                   context.go('/home');
