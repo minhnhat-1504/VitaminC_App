@@ -17,8 +17,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -216,11 +217,11 @@ class HomeScreen extends ConsumerWidget {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: isDark ? AppColors.slate800 : AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.black.withOpacity(0.03),
+                  color: AppColors.black.withOpacity(isDark ? 0.2 : 0.03),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
@@ -276,6 +277,7 @@ class HomeScreen extends ConsumerWidget {
       children: [
         Expanded(
           child: _cardWrapper(
+            context,
             child: streakCountAsync.when(
               data: (streakCount) => Column(
                 children: [
@@ -323,6 +325,7 @@ class HomeScreen extends ConsumerWidget {
         const SizedBox(width: 15),
         Expanded(
           child: _cardWrapper(
+            context,
             child: vocabCountAsync.when(
               data: (vocabCount) => Column(
                 children: [
@@ -401,6 +404,7 @@ class HomeScreen extends ConsumerWidget {
       final dueCount = dueDecks.first.value;
 
       return _cardWrapper(
+        context,
         child: Row(
           children: [
             Container(
@@ -502,6 +506,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return _cardWrapper(
+      context,
       child: Row(
         children: [
           Container(
@@ -567,6 +572,7 @@ class HomeScreen extends ConsumerWidget {
     final int percentInt = (percent * 100).toInt();
 
     return _cardWrapper(
+      context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -651,6 +657,7 @@ class HomeScreen extends ConsumerWidget {
           data: (quests) {
             if (quests.isEmpty) {
               return _cardWrapper(
+                context,
                 child: const Center(
                   child: Text(
                     "Hôm nay chưa có nhiệm vụ nào.",
@@ -668,6 +675,7 @@ class HomeScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: _cardWrapper(
+                    context,
                     padding: const EdgeInsets.all(15),
                     child: Row(
                       children: [
@@ -846,6 +854,7 @@ class HomeScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: _cardWrapper(
+        context,
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -875,19 +884,21 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _cardWrapper({
+  Widget _cardWrapper(
+    BuildContext context, {
     required Widget child,
     EdgeInsets padding = const EdgeInsets.all(20),
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isDark ? AppColors.slate800 : AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.03),
+            color: AppColors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),

@@ -8,6 +8,7 @@ import 'package:vitaminc/features/library/presentation/controllers/library_contr
 import 'package:vitaminc/features/study/presentation/controllers/study_controller.dart';
 import 'package:vitaminc/core/services/local_db_provider.dart';
 import 'package:vitaminc/core/services/notification_service.dart';
+import 'package:vitaminc/core/providers/theme_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -184,7 +185,12 @@ class SettingsScreen extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.dark_mode),
                   title: const Text("Chế độ tối"),
-                  trailing: Switch(value: false, onChanged: (val) {}),
+                  trailing: Switch(
+                    value: ref.watch(themeProvider) == ThemeMode.dark,
+                    onChanged: (val) {
+                      ref.read(themeProvider.notifier).toggleTheme(val);
+                    },
+                  ),
                 ),
                 const ListTile(
                   leading: Icon(Icons.notifications),
