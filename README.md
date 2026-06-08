@@ -661,3 +661,26 @@ Vì nhóm chỉ tập trung build cho Android, hãy kiểm tra lại file `andro
 
 ---
 
+### Nhật ký Hoàn thiện Sprint 5 & Bản vá lỗi (Recent Updates)
+
+Trong 2 ngày vừa qua, nhóm đã hợp nhất (merge) thành công nhiều nhánh tính năng quan trọng nhằm hoàn thiện Sprint 5 và tinh chỉnh giao diện người dùng:
+
+#### 👨‍💻 Thành viên 1: Bảo mật & Kiểm thử
+- **Xác thực và Bảo mật (`feature/sprint5-error-handling-security`):** Bổ sung màn hình xác minh Email bắt buộc. Nâng cấp ràng buộc mật khẩu (yêu cầu tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt).
+- **Quản trị hệ thống:** Hoàn thiện luồng Quên mật khẩu, trạm xử lý lỗi trung tâm và tích hợp Integration Test (Automation Testing).
+
+#### 👨‍💻 Thành viên 2: Trải nghiệm UI/UX
+- **Tối ưu hiển thị (`feature/sprint5-ui-ux-deeplink`, `bugfix/polish-ui-effects`):** Đồng nhất ngôn ngữ hiển thị form Đăng nhập/Đăng ký. Đổi tên AI Teacher thành Gemini. Bổ sung icon Xem/Ẩn mật khẩu.
+- **Trạng thái & Điều hướng:** Hoàn thiện các trạng thái rỗng (Empty State), hiệu ứng tải (Shimmer). Xử lý chống vỡ giao diện khi bàn phím ảo bật lên. Tích hợp test Deep link thông báo FCM trong phần Cài đặt.
+
+#### 👨‍💻 Thành viên 3: Tối ưu Bộ nhớ & Giao diện
+- **Giải phóng RAM (`feature/sprint5-animation-polish`):** Sửa lỗi crash do rò rỉ `AnimationController`, áp dụng `autoDispose` cho các Provider nhằm tối ưu hóa bộ nhớ thiết bị.
+- **Nhận diện thương hiệu (`feature/sprint5-performance-appicon`):** Cập nhật App Icon sang màu xanh thương hiệu (`#0DA2E7`) và logo chính thức để nổi bật trên màn hình chính.
+
+#### 👨‍💻 Thành viên 4: Đo lường & Vá lỗi Logic
+- **Đo lường hệ thống (`feature/sprint5-e2e-testing`):** Tích hợp cấu hình `firebase_analytics` và `crashlytics` để theo dõi hành vi người dùng, bắt lỗi app crash.
+- **Sửa lỗi tính năng (Bug fixes):** Giải quyết lỗi điều hướng của tính năng OCR, lỗi tràn tab trên Bảng xếp hạng và chớp nháy (glitch) khi lật Flashcard.
+
+#### 🔧 Hotfix: Đồng bộ Ngôn ngữ (`chore/unify-vietnamese-text`)
+- **Việt hóa toàn diện:** Dịch toàn bộ các đoạn văn bản tiếng Anh còn sót lại ở giao diện Flashcard, Phòng chat, Tổng kết, Huy hiệu sang tiếng Việt.
+- **Vá lỗi logic từ khóa:** Sửa lỗi kẹt Vòng quay may mắn (do thay đổi chuỗi trả thưởng 'Try Again') và lỗi crash màn hình Huy hiệu (do thay đổi key hệ thống).
