@@ -149,7 +149,7 @@ class DeckListScreen extends ConsumerWidget {
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Thư viện',
             style: TextStyle(
               color: Theme.of(context).textTheme.bodyLarge?.color,
