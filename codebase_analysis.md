@@ -134,6 +134,10 @@ Vai trò: Phân tách rõ ràng giữa Core (Tái sử dụng) và Features (Đ�
 * **Phụ thuộc**: `speech_to_text`, `flutter_tts`, `Riverpod` (quản lý state chủ đề).
 * **File liên quan**: `pronunciation_topic_screen.dart`, `pronunciation_screen.dart`, `mock_pronunciation_data.dart`.
 
+### 5.4. Tối ưu Giao diện (UI/UX) & Dashboard
+* **Trang chủ (Home)**: Tích hợp đầy đủ các công cụ (Quét từ vựng, Luyện phát âm, Chat AI, Huy hiệu) để người dùng thao tác nhanh.
+* **Theo dõi tiến độ thẻ**: Thêm chỉ báo trực quan về thời gian cần ôn tập (`nextReview`) cho từng Flashcard trong chi tiết Bộ thẻ, giúp người dùng chủ động học tập.
+
 ---
 
 ## 6. Luồng

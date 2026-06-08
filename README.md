@@ -672,6 +672,7 @@ Trong 2 ngày vừa qua, nhóm đã hợp nhất (merge) thành công nhiều nh
 #### 👨‍💻 Thành viên 2: Trải nghiệm UI/UX
 - **Tối ưu hiển thị (`feature/sprint5-ui-ux-deeplink`, `bugfix/polish-ui-effects`):** Đồng nhất ngôn ngữ hiển thị form Đăng nhập/Đăng ký. Đổi tên AI Teacher thành Gemini. Bổ sung icon Xem/Ẩn mật khẩu.
 - **Trạng thái & Điều hướng:** Hoàn thiện các trạng thái rỗng (Empty State), hiệu ứng tải (Shimmer). Xử lý chống vỡ giao diện khi bàn phím ảo bật lên. Tích hợp test Deep link thông báo FCM trong phần Cài đặt.
+- **Trang chủ & Theo dõi tiến độ (`feature/sprint5-home-and-review-ui`):** Bổ sung các công cụ nhanh (Huy hiệu, Chat AI) vào Trang chủ. Hiển thị trực quan thời gian cần ôn tập cho từng thẻ từ vựng với các nhãn màu (Cần ôn ngay, Ôn sau X giờ).
 
 #### 👨‍💻 Thành viên 3: Tối ưu Bộ nhớ & Giao diện
 - **Giải phóng RAM (`feature/sprint5-animation-polish`):** Sửa lỗi crash do rò rỉ `AnimationController`, áp dụng `autoDispose` cho các Provider nhằm tối ưu hóa bộ nhớ thiết bị.

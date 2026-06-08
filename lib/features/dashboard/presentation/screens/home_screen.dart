@@ -8,6 +8,9 @@ import '../providers/dashboard_providers.dart';
 import 'package:vitaminc/features/auth/presentation/providers/auth_provider.dart';
 import 'package:vitaminc/features/social/presentation/providers/quest_provider.dart';
 import 'package:vitaminc/core/services/local_db_provider.dart';
+import 'package:vitaminc/features/library/presentation/controllers/library_controller.dart';
+import 'package:vitaminc/features/library/data/models/deck_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -27,6 +30,8 @@ class HomeScreen extends ConsumerWidget {
               _buildSearchBar(context),
               const SizedBox(height: 20),
               _buildStatsCards(ref),
+              const SizedBox(height: 25),
+              _buildNextReviewCard(context, ref),
               const SizedBox(height: 25),
               _buildDailyGoal(ref),
               const SizedBox(height: 25),
@@ -366,6 +371,190 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
+  Widget _buildNextReviewCard(BuildContext context, WidgetRef ref) {
+    final libraryState = ref.watch(libraryControllerProvider);
+
+    if (libraryState.isLoading) {
+      return const SizedBox(
+        height: 80,
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Kiểm tra xem có bộ thẻ nào đến hạn không
+    final dueDecks = libraryState.dueCardsCount.entries
+        .where((e) => e.value > 0)
+        .toList();
+
+    if (dueDecks.isNotEmpty) {
+      // Lấy bộ thẻ cần học ngay
+      final deckId = dueDecks.first.key;
+      final deck = libraryState.decks.firstWhere(
+        (d) => d.id == deckId,
+        orElse: () => DeckModel(
+          id: '',
+          title: 'Unknown',
+          createdAt: Timestamp.now(),
+          updatedAt: Timestamp.now(),
+        ),
+      );
+      final dueCount = dueDecks.first.value;
+
+      return _cardWrapper(
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.error,
+                size: 28,
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Bộ: ${deck.title}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Có $dueCount thẻ cần ôn ngay!",
+                    style: const TextStyle(
+                      color: AppColors.error,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => context.push('/study', extra: deckId),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "Học ngay",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Không có thẻ due, hiển thị nearest
+    final nearest = libraryState.nearestReviewInfo;
+    if (nearest == null) {
+      return const SizedBox.shrink(); // Không có thẻ nào trong DB
+    }
+
+    final deckId = nearest['deckId'] as String;
+    final nextReview = nearest['nextReview'] as DateTime;
+    final updatedAt = nearest['updatedAt'] as DateTime;
+    final deck = libraryState.decks.firstWhere(
+      (d) => d.id == deckId,
+      orElse: () => DeckModel(
+        id: '',
+        title: 'Unknown',
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      ),
+    );
+
+    final diff = nextReview.difference(DateTime.now());
+    String timeStr = '';
+    if (diff.inDays > 0)
+      timeStr = 'sau ${diff.inDays} ngày';
+    else if (diff.inHours > 0)
+      timeStr = 'sau ${diff.inHours} giờ';
+    else if (diff.inMinutes > 0)
+      timeStr = 'sau ${diff.inMinutes} phút';
+    else
+      timeStr = 'trong ít phút nữa';
+
+    final totalDuration = nextReview.difference(updatedAt).inMilliseconds;
+    final elapsedDuration = DateTime.now().difference(updatedAt).inMilliseconds;
+    double progress = 0.0;
+    if (totalDuration > 0) {
+      progress = (elapsedDuration / totalDuration).clamp(0.0, 1.0);
+    } else {
+      progress = 1.0;
+    }
+
+    return _cardWrapper(
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.access_time_filled_rounded,
+              color: AppColors.primary,
+              size: 28,
+            ),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Bộ: ${deck.title}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  "Ôn tập tiếp theo $timeStr",
+                  style: const TextStyle(
+                    color: AppColors.slate500,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                LinearPercentIndicator(
+                  lineHeight: 6.0,
+                  percent: progress,
+                  padding: EdgeInsets.zero,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  progressColor: AppColors.primary,
+                  barRadius: const Radius.circular(4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildDailyGoal(WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
@@ -597,7 +786,7 @@ class HomeScreen extends ConsumerWidget {
                 subtitle: "OCR AI",
                 icon: Icons.document_scanner_rounded,
                 color: AppColors.primary,
-                route: '/ocr',
+                onTap: () => context.push('/ocr'),
               ),
             ),
             const SizedBox(width: 15),
@@ -608,7 +797,36 @@ class HomeScreen extends ConsumerWidget {
                 subtitle: "AI chấm điểm",
                 icon: Icons.mic_rounded,
                 color: AppColors.secondary,
-                route: '/pronunciation',
+                onTap: () => context.push('/pronunciation'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        Row(
+          children: [
+            Expanded(
+              child: _toolCard(
+                context,
+                title: "Chat với AI",
+                subtitle: "Gemini",
+                icon: Icons.chat_rounded,
+                color: AppColors.success,
+                onTap: () => context.push('/chatbot'),
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: _toolCard(
+                context,
+                title: "Huy hiệu",
+                subtitle: "Thành tích",
+                icon: Icons.military_tech_rounded,
+                color: AppColors.gold,
+                onTap: () {
+                  // Mở tab Cộng đồng (nơi chứa huy hiệu)
+                  context.go('/social');
+                },
               ),
             ),
           ],
@@ -623,10 +841,10 @@ class HomeScreen extends ConsumerWidget {
     required String subtitle,
     required IconData icon,
     required Color color,
-    required String route,
+    required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: () => context.push(route),
+      onTap: onTap,
       child: _cardWrapper(
         padding: const EdgeInsets.all(16),
         child: Column(
