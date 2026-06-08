@@ -163,7 +163,10 @@ class _ChatbotScreenState extends ConsumerState<ChatbotScreen> {
                 final isUser = message['isUser'] as bool;
                 return TweenAnimationBuilder<Offset>(
                   key: ValueKey('${index}_${message['text'].hashCode}'),
-                  tween: Tween(begin: Offset(isUser ? 0.2 : -0.2, 0), end: Offset.zero),
+                  tween: Tween(
+                    begin: Offset(isUser ? 0.2 : -0.2, 0),
+                    end: Offset.zero,
+                  ),
                   duration: const Duration(milliseconds: 400),
                   curve: Curves.easeOutQuart,
                   builder: (context, offset, child) {
@@ -307,13 +310,17 @@ class _TypingIndicator extends StatefulWidget {
   State<_TypingIndicator> createState() => _TypingIndicatorState();
 }
 
-class _TypingIndicatorState extends State<_TypingIndicator> with SingleTickerProviderStateMixin {
+class _TypingIndicatorState extends State<_TypingIndicator>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))..repeat();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
   }
 
   @override
@@ -352,10 +359,7 @@ class _TypingIndicatorState extends State<_TypingIndicator> with SingleTickerPro
               final delay = index * 0.2;
               final t = (_controller.value - delay).clamp(0.0, 1.0);
               final y = math.sin(t * math.pi * 2) * -4;
-              return Transform.translate(
-                offset: Offset(0, y),
-                child: child,
-              );
+              return Transform.translate(offset: Offset(0, y), child: child);
             },
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 2),

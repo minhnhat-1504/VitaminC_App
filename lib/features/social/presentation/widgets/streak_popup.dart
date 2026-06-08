@@ -59,7 +59,8 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(file.path)],
-          text: 'Tôi vừa đạt cột mốc Chuỗi học ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
+          text:
+              'Tôi vừa đạt cột mốc Chuỗi học ${ref.read(streakCountProvider).value ?? 0} ngày trên VitaminC! 🔥 Hãy học tiếng Anh cùng tôi nhé!',
         ),
       );
     } catch (e) {
@@ -275,89 +276,92 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
         animation: _controller,
         builder: (context, child) {
           return Transform.scale(
-          scale: _scale.value,
-          child: Transform.rotate(
-            angle: _rotation.value,
-            child: Stack(
-              alignment: Alignment.center,
+            scale: _scale.value,
+            child: Transform.rotate(
+              angle: _rotation.value,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: _heroSize,
+                    height: _heroSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.streakOrange.withOpacity(
+                            _glow.value,
+                          ),
+                          blurRadius: 32,
+                          spreadRadius: 6,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (child != null) child,
+                ],
+              ),
+            ),
+          );
+        },
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (rect) {
+                return LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.streakOrange.withOpacity(0.7),
+                    AppColors.streakOrange,
+                  ],
+                ).createShader(rect);
+              },
+              child: Transform.scale(
+                scale: 1.12,
+                child: const Icon(
+                  Icons.local_fire_department_rounded,
+                  size: _heroSize,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: _heroSize,
-                  height: _heroSize,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.streakOrange.withOpacity(_glow.value),
-                        blurRadius: 32,
-                        spreadRadius: 6,
+                Text(
+                  '${ref.watch(streakCountProvider).value ?? 0}',
+                  style: GoogleFonts.lexend(
+                    fontSize: 60,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
                 ),
-                if (child != null) child,
+                const SizedBox(height: 4),
+                Text(
+                  'NGÀY LIÊN TIẾP',
+                  style: GoogleFonts.lexend(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white.withOpacity(0.9),
+                    letterSpacing: 1.0,
+                  ),
+                ),
               ],
             ),
-          ),
-        );
-      },
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          ShaderMask(
-            blendMode: BlendMode.srcIn,
-            shaderCallback: (rect) {
-              return LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.streakOrange.withOpacity(0.7),
-                  AppColors.streakOrange,
-                ],
-              ).createShader(rect);
-            },
-            child: Transform.scale(
-              scale: 1.12,
-              child: const Icon(
-                Icons.local_fire_department_rounded,
-                size: _heroSize,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                '${ref.watch(streakCountProvider).value ?? 0}',
-                style: GoogleFonts.lexend(
-                  fontSize: 60,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'NGÀY LIÊN TIẾP',
-                style: GoogleFonts.lexend(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white.withOpacity(0.9),
-                  letterSpacing: 1.0,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildMotivation() {
@@ -582,7 +586,10 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
             curve: Curves.easeOutQuart,
             builder: (context, offset, child) {
               return Transform.translate(
-                offset: Offset(offset.dx * MediaQuery.of(context).size.width, 0),
+                offset: Offset(
+                  offset.dx * MediaQuery.of(context).size.width,
+                  0,
+                ),
                 child: Opacity(
                   opacity: (1 - offset.dx.abs() * 2).clamp(0.0, 1.0),
                   child: child,
@@ -607,7 +614,10 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
             curve: Curves.easeOutQuart,
             builder: (context, offset, child) {
               return Transform.translate(
-                offset: Offset(offset.dx * MediaQuery.of(context).size.width, 0),
+                offset: Offset(
+                  offset.dx * MediaQuery.of(context).size.width,
+                  0,
+                ),
                 child: Opacity(
                   opacity: (1 - offset.dx.abs() * 2).clamp(0.0, 1.0),
                   child: child,

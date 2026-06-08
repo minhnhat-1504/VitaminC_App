@@ -10,8 +10,13 @@ import '../../../../core/shared_widgets/custom_app_bar.dart';
 import '../../data/speech_service.dart';
 import '../../data/tts_service.dart';
 
+import 'package:go_router/go_router.dart';
+import '../providers/pronunciation_provider.dart';
+import '../../domain/models/pronunciation_exercise.dart';
+
 class PronunciationScreen extends ConsumerStatefulWidget {
-  const PronunciationScreen({super.key});
+  final String topicId;
+  const PronunciationScreen({super.key, required this.topicId});
 
   @override
   ConsumerState<PronunciationScreen> createState() =>
@@ -20,28 +25,6 @@ class PronunciationScreen extends ConsumerStatefulWidget {
 
 class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
     with TickerProviderStateMixin {
-  // ─── Dữ liệu mẫu cho các bài luyện tập ───
-  static const List<Map<String, String>> _exercises = [
-    {
-      'phrase': 'Hello, how are you?',
-      'translation': '"Xin chào, bạn có khỏe không?"',
-      'tip': 'Nhấn mạnh âm "h"',
-      'unit': 'BÀI 1 - GIAO TIẾP CƠ BẢN',
-    },
-    {
-      'phrase': 'The check, please',
-      'translation': '"Cho tôi hóa đơn"',
-      'tip': 'Nhấn mạnh âm "ch"',
-      'unit': 'BÀI 3 - ĂN UỐNG',
-    },
-    {
-      'phrase': 'Where is the nearest station?',
-      'translation': '"Ga gần nhất ở đâu?"',
-      'tip': 'Chú ý phát âm từ "nearest"',
-      'unit': 'BÀI 5 - DU LỊCH',
-    },
-  ];
-
   int _currentExercise = 0;
 
   late final AnimationController _waveController;
@@ -77,12 +60,20 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
   double _s(double value, double scale) => value * scale;
 
   // ─── Lấy thông tin bài tập hiện tại ───
-  Map<String, String> get _currentData => _exercises[_currentExercise];
-  String get _unitTitle => _currentData['unit']!;
-  String get _phrase => _currentData['phrase']!;
-  String get _translation => _currentData['translation']!;
-  String get _tipText => _currentData['tip']!;
-  double get _progress => (_currentExercise + 1) / _exercises.length;
+  List<PronunciationExercise> get _exercises =>
+      ref.read(pronunciationExercisesProvider(widget.topicId));
+
+  PronunciationExercise get _currentData => _exercises[_currentExercise];
+  String get _unitTitle {
+    final topic = ref.read(currentPronunciationTopicProvider(widget.topicId));
+    return topic?.title.toUpperCase() ?? 'LUYỆN PHÁT ÂM';
+  }
+
+  String get _phrase => _currentData.phrase;
+  String get _translation => _currentData.translation;
+  String get _tipText => _currentData.tip;
+  double get _progress =>
+      _exercises.isEmpty ? 0 : (_currentExercise + 1) / _exercises.length;
 
   // ──────────────────────────────────────────────
   // LOGIC GHI ÂM & CHẤM ĐIỂM
@@ -214,9 +205,21 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
 
   void _nextExercise() {
     _reset();
-    setState(() {
-      _currentExercise = (_currentExercise + 1) % _exercises.length;
-    });
+    if (_currentExercise + 1 >= _exercises.length) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Chúc mừng bạn đã hoàn thành chủ đề!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        context.pop();
+      }
+    } else {
+      setState(() {
+        _currentExercise++;
+      });
+    }
   }
 
   Color get _scoreColor {
@@ -251,49 +254,51 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
       ),
       body: SafeArea(
         top: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  _s(20, uiScale),
-                  _s(12, uiScale),
-                  _s(20, uiScale),
-                  _s(24, uiScale),
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(height: _s(8, uiScale)),
-                    _buildProgressBar(uiScale),
-                    SizedBox(height: _s(16, uiScale)),
-                    _buildPhraseSection(uiScale),
-                    SizedBox(height: _s(12, uiScale)),
-                    Text(
-                      _translation,
-                      style: GoogleFonts.lexend(
-                        fontSize: _s(16, uiScale),
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF6B7280),
+        child: _exercises.isEmpty
+            ? const Center(child: Text('Không có dữ liệu bài tập.'))
+            : Column(
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(
+                        _s(20, uiScale),
+                        _s(12, uiScale),
+                        _s(20, uiScale),
+                        _s(24, uiScale),
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(height: _s(8, uiScale)),
+                          _buildProgressBar(uiScale),
+                          SizedBox(height: _s(16, uiScale)),
+                          _buildPhraseSection(uiScale),
+                          SizedBox(height: _s(12, uiScale)),
+                          Text(
+                            _translation,
+                            style: GoogleFonts.lexend(
+                              fontSize: _s(16, uiScale),
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                          SizedBox(height: _s(14, uiScale)),
+                          _buildTipPill(uiScale),
+                          SizedBox(height: _s(24, uiScale)),
+                          _buildScoreRing(ringSize, uiScale),
+                          SizedBox(height: _s(10, uiScale)),
+                          // Hiển thị câu user đã đọc (recognized text)
+                          if (_recognizedText.isNotEmpty && !_isRecording)
+                            _buildRecognizedTextBox(uiScale),
+                          SizedBox(height: _s(12, uiScale)),
+                          _buildWaveform(uiScale),
+                          SizedBox(height: _s(18, uiScale)),
+                          _buildBottomCard(uiScale),
+                        ],
                       ),
                     ),
-                    SizedBox(height: _s(14, uiScale)),
-                    _buildTipPill(uiScale),
-                    SizedBox(height: _s(24, uiScale)),
-                    _buildScoreRing(ringSize, uiScale),
-                    SizedBox(height: _s(10, uiScale)),
-                    // Hiển thị câu user đã đọc (recognized text)
-                    if (_recognizedText.isNotEmpty && !_isRecording)
-                      _buildRecognizedTextBox(uiScale),
-                    SizedBox(height: _s(12, uiScale)),
-                    _buildWaveform(uiScale),
-                    SizedBox(height: _s(18, uiScale)),
-                    _buildBottomCard(uiScale),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -503,11 +508,36 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
                   alignment: Alignment.center,
                   children: [
                     if (percent > 0) ...[
-                      _buildSmallStar(-math.pi / 2, value / percent, uiScale, delay: 0.0),
-                      _buildSmallStar(-math.pi / 8, value / percent, uiScale, delay: 0.05),
-                      _buildSmallStar(-7 * math.pi / 8, value / percent, uiScale, delay: 0.1),
-                      _buildSmallStar(math.pi / 5, value / percent, uiScale, delay: 0.15),
-                      _buildSmallStar(4 * math.pi / 5, value / percent, uiScale, delay: 0.2),
+                      _buildSmallStar(
+                        -math.pi / 2,
+                        value / percent,
+                        uiScale,
+                        delay: 0.0,
+                      ),
+                      _buildSmallStar(
+                        -math.pi / 8,
+                        value / percent,
+                        uiScale,
+                        delay: 0.05,
+                      ),
+                      _buildSmallStar(
+                        -7 * math.pi / 8,
+                        value / percent,
+                        uiScale,
+                        delay: 0.1,
+                      ),
+                      _buildSmallStar(
+                        math.pi / 5,
+                        value / percent,
+                        uiScale,
+                        delay: 0.15,
+                      ),
+                      _buildSmallStar(
+                        4 * math.pi / 5,
+                        value / percent,
+                        uiScale,
+                        delay: 0.2,
+                      ),
                     ],
                     Transform.scale(
                       scale: percent > 0
@@ -531,7 +561,12 @@ class _PronunciationScreenState extends ConsumerState<PronunciationScreen>
     );
   }
 
-  Widget _buildSmallStar(double angle, double progress, double uiScale, {double delay = 0.0}) {
+  Widget _buildSmallStar(
+    double angle,
+    double progress,
+    double uiScale, {
+    double delay = 0.0,
+  }) {
     // Thêm stagger delay cho mỗi ngôi sao
     final p = (progress - delay).clamp(0.0, 1.0) / (1.0 - delay);
     if (p <= 0.0) return const SizedBox.shrink();
@@ -763,22 +798,37 @@ class _WaveformPainter extends CustomPainter {
           ? (0.25 + base * 0.75) * (0.4 + (centerBoost * 0.6))
           : 0.16 + (centerBoost * 0.22);
       final targetHeight = size.height * (0.2 + intensity * 0.8);
-      
+
       // Lerp 15% giữa chiều cao cũ và mới để tạo hiệu ứng mượt mà (không bị giật frame)
-      final barHeight = _previousHeights[i] + (targetHeight - _previousHeights[i]) * 0.15;
+      final barHeight =
+          _previousHeights[i] + (targetHeight - _previousHeights[i]) * 0.15;
       _previousHeights[i] = barHeight;
-      
+
       final top = centerY - (barHeight / 2);
 
       final isRight = i > (barCount / 2);
-      
+
       final paint = Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: isRight
-              ? [const Color(0xFFEF4444).withValues(alpha: isRecording ? 0.9 : 0.45), const Color(0xFFFCA5A5).withValues(alpha: isRecording ? 0.9 : 0.45)]
-              : [const Color(0xFF60A5FA).withValues(alpha: isRecording ? 0.9 : 0.45), const Color(0xFF93C5FD).withValues(alpha: isRecording ? 0.9 : 0.45)],
+              ? [
+                  const Color(
+                    0xFFEF4444,
+                  ).withValues(alpha: isRecording ? 0.9 : 0.45),
+                  const Color(
+                    0xFFFCA5A5,
+                  ).withValues(alpha: isRecording ? 0.9 : 0.45),
+                ]
+              : [
+                  const Color(
+                    0xFF60A5FA,
+                  ).withValues(alpha: isRecording ? 0.9 : 0.45),
+                  const Color(
+                    0xFF93C5FD,
+                  ).withValues(alpha: isRecording ? 0.9 : 0.45),
+                ],
         ).createShader(Rect.fromLTWH(x, top, barWidth, barHeight));
 
       final rect = RRect.fromRectAndRadius(
@@ -818,7 +868,7 @@ class _WavyUnderlinePainter extends CustomPainter {
     final amplitude = strokeWidth * 1.6;
     final waveLength = strokeWidth * 4.2;
     final y = size.height - strokeWidth * 2.0;
-    
+
     // Dịch chuyển điểm bắt đầu sang trái một chút theo phase (cuộn mượt)
     final dxOffset = -(phase * waveLength) % waveLength;
 
@@ -842,8 +892,8 @@ class _WavyUnderlinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WavyUnderlinePainter oldDelegate) {
-    return oldDelegate.color != color || 
-           oldDelegate.strokeWidth != strokeWidth ||
-           oldDelegate.phase != phase;
+    return oldDelegate.color != color ||
+        oldDelegate.strokeWidth != strokeWidth ||
+        oldDelegate.phase != phase;
   }
 }

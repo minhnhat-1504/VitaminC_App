@@ -33,13 +33,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
     );
 
-    _slideUp = Tween<Offset>(
-      begin: const Offset(0, 0.08),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: const Interval(0.0, 0.85, curve: Curves.easeOutCubic),
-    ));
+    _slideUp = Tween<Offset>(begin: const Offset(0, 0.08), end: Offset.zero)
+        .animate(
+          CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 0.85, curve: Curves.easeOutCubic),
+          ),
+        );
 
     // Bắt đầu animation sau 1 frame
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -114,4 +114,3 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 }
-

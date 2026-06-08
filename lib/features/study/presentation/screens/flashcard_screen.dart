@@ -360,7 +360,9 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                       decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06 + (1 - flipProgress) * 0.12),
+                            color: Colors.black.withOpacity(
+                              0.06 + (1 - flipProgress) * 0.12,
+                            ),
                             blurRadius: 20 + (1 - flipProgress) * 16,
                             offset: Offset(0, 10 + (1 - flipProgress) * 8),
                           ),
@@ -409,10 +411,7 @@ class _FlashcardScreenState extends ConsumerState<FlashcardScreen> {
                   duration: const Duration(milliseconds: 1200),
                   curve: Curves.easeInOut,
                   builder: (context, value, child) {
-                    return Opacity(
-                      opacity: value,
-                      child: child,
-                    );
+                    return Opacity(opacity: value, child: child);
                   },
                   // onEnd restarts the animation by toggling
                   child: Container(
