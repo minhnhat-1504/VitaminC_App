@@ -5,11 +5,32 @@ import 'package:vitaminc/core/constants/app_colors.dart';
 import 'package:vitaminc/core/shared_widgets/custom_app_bar.dart';
 import 'package:vitaminc/features/library/presentation/controllers/deck_detail_controller.dart';
 import 'package:vitaminc/features/library/presentation/controllers/library_controller.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DeckDetailScreen extends ConsumerWidget {
   final String deckId;
 
   const DeckDetailScreen({super.key, required this.deckId});
+
+  String _getTimeUntilReview(Timestamp nextReview) {
+    final now = DateTime.now();
+    final reviewTime = nextReview.toDate();
+    if (reviewTime.isBefore(now)) return 'Cần ôn ngay';
+
+    final diff = reviewTime.difference(now);
+    if (diff.inDays > 0) return 'Ôn sau ${diff.inDays} ngày';
+    if (diff.inHours > 0) return 'Ôn sau ${diff.inHours} giờ';
+    if (diff.inMinutes > 0) return 'Ôn sau ${diff.inMinutes} phút';
+    return 'Ôn trong ít phút nữa';
+  }
+
+  Color _getReviewColor(Timestamp nextReview) {
+    final now = DateTime.now();
+    final reviewTime = nextReview.toDate();
+    if (reviewTime.isBefore(now)) return AppColors.error;
+    if (reviewTime.difference(now).inHours <= 24) return AppColors.warning;
+    return AppColors.success;
+  }
 
   void _showEditDeckDialog(BuildContext context, WidgetRef ref, dynamic deck) {
     final titleController = TextEditingController(text: deck.title);
@@ -259,6 +280,38 @@ class DeckDetailScreen extends ConsumerWidget {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getReviewColor(
+                              vocab.nextReview,
+                            ).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.access_time_filled_rounded,
+                                size: 14,
+                                color: _getReviewColor(vocab.nextReview),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _getTimeUntilReview(vocab.nextReview),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: _getReviewColor(vocab.nextReview),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                     trailing: Row(

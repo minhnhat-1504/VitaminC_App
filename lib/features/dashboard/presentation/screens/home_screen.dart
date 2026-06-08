@@ -597,7 +597,7 @@ class HomeScreen extends ConsumerWidget {
                 subtitle: "OCR AI",
                 icon: Icons.document_scanner_rounded,
                 color: AppColors.primary,
-                route: '/ocr',
+                onTap: () => context.push('/ocr'),
               ),
             ),
             const SizedBox(width: 15),
@@ -608,7 +608,36 @@ class HomeScreen extends ConsumerWidget {
                 subtitle: "AI chấm điểm",
                 icon: Icons.mic_rounded,
                 color: AppColors.secondary,
-                route: '/pronunciation',
+                onTap: () => context.push('/pronunciation'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        Row(
+          children: [
+            Expanded(
+              child: _toolCard(
+                context,
+                title: "Chat với AI",
+                subtitle: "Gemini",
+                icon: Icons.chat_rounded,
+                color: AppColors.success,
+                onTap: () => context.push('/chatbot'),
+              ),
+            ),
+            const SizedBox(width: 15),
+            Expanded(
+              child: _toolCard(
+                context,
+                title: "Huy hiệu",
+                subtitle: "Thành tích",
+                icon: Icons.military_tech_rounded,
+                color: AppColors.gold,
+                onTap: () {
+                  // Mở tab Cộng đồng (nơi chứa huy hiệu)
+                  context.go('/social');
+                },
               ),
             ),
           ],
@@ -623,10 +652,10 @@ class HomeScreen extends ConsumerWidget {
     required String subtitle,
     required IconData icon,
     required Color color,
-    required String route,
+    required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: () => context.push(route),
+      onTap: onTap,
       child: _cardWrapper(
         padding: const EdgeInsets.all(16),
         child: Column(

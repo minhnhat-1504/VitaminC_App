@@ -91,7 +91,8 @@ class BadgesScreen extends ConsumerWidget {
     {
       'id': 'photographic_memory',
       'name': 'Não Bộ',
-      'description': 'Đánh giá "Dễ" cho 50 thẻ liên tiếp mà không có thẻ nào "Khó".',
+      'description':
+          'Đánh giá "Dễ" cho 50 thẻ liên tiếp mà không có thẻ nào "Khó".',
       'icon': 0xea41, // psychology
       'gradient1': 0xFFF472B6,
       'gradient2': 0xFFBE185D,
@@ -110,7 +111,8 @@ class BadgesScreen extends ConsumerWidget {
     {
       'id': 'golden_voice',
       'name': 'Giọng Vàng',
-      'description': 'Dùng micro luyện phát âm và đạt >90% cho 50 từ khác nhau.',
+      'description':
+          'Dùng micro luyện phát âm và đạt >90% cho 50 từ khác nhau.',
       'icon': 0xe3e0, // mic
       'gradient1': 0xFFFBBF24,
       'gradient2': 0xFFD97706,
@@ -309,7 +311,8 @@ class BadgesScreen extends ConsumerWidget {
                   );
                 },
                 child: GestureDetector(
-                  onTap: () => _showBadgeDetails(context, earnedList[index], true),
+                  onTap: () =>
+                      _showBadgeDetails(context, earnedList[index], true),
                   child: _earnedBadgeCard(earnedList[index]),
                 ),
               );
@@ -355,7 +358,8 @@ class BadgesScreen extends ConsumerWidget {
                   );
                 },
                 child: GestureDetector(
-                  onTap: () => _showBadgeDetails(context, lockedList[index], false),
+                  onTap: () =>
+                      _showBadgeDetails(context, lockedList[index], false),
                   child: _lockedBadgeCard(lockedList[index]),
                 ),
               );
@@ -366,13 +370,19 @@ class BadgesScreen extends ConsumerWidget {
     );
   }
 
-  void _showBadgeDetails(BuildContext context, Map<String, dynamic> badge, bool isEarned) {
+  void _showBadgeDetails(
+    BuildContext context,
+    Map<String, dynamic> badge,
+    bool isEarned,
+  ) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(
             badge['name'] as String,
             style: GoogleFonts.lexend(
@@ -391,7 +401,8 @@ class BadgesScreen extends ConsumerWidget {
               ],
               const SizedBox(height: 24),
               Text(
-                badge['description'] as String? ?? 'Chưa có thông tin điều kiện.',
+                badge['description'] as String? ??
+                    'Chưa có thông tin điều kiện.',
                 style: GoogleFonts.lexend(
                   fontSize: 14,
                   color: _slate500,
@@ -431,8 +442,8 @@ class BadgesScreen extends ConsumerWidget {
 
   Widget _earnedBadgeCard(Map<String, dynamic> badge) {
     final rotations = {
-      'Bền Bỉ': 0.05, 
-      'Siêu Tốc': -0.05, 
+      'Bền Bỉ': 0.05,
+      'Siêu Tốc': -0.05,
       'Khởi Bước': 0.03,
       'Quán Quân': -0.04,
       'Cú Đêm': 0.05,
@@ -492,9 +503,6 @@ class BadgesScreen extends ConsumerWidget {
   }
 
   Widget _lockedBadgeCard(Map<String, dynamic> badge) {
-    return Opacity(
-      opacity: 0.4,
-      child: _earnedBadgeCard(badge),
-    );
+    return Opacity(opacity: 0.4, child: _earnedBadgeCard(badge));
   }
 }
