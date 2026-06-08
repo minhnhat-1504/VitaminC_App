@@ -62,7 +62,6 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     final currentStreak = ref.watch(streakCountProvider).value ?? 0;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: const CustomAppBar(title: 'Cộng đồng', showBackButton: false),
       body: SafeArea(
         top: false,

@@ -154,11 +154,14 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     return Material(
       color: Colors.transparent,
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppColors.backgroundLight, AppColors.backgroundLight],
+            colors: [
+              Theme.of(context).scaffoldBackgroundColor,
+              Theme.of(context).scaffoldBackgroundColor,
+            ],
           ),
         ),
         child: SafeArea(
@@ -196,7 +199,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
                       child: RepaintBoundary(
                         key: _boundaryKey,
                         child: Container(
-                          color: AppColors.backgroundLight,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -683,7 +686,7 @@ class _StreakPopupState extends ConsumerState<StreakPopup>
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
       decoration: BoxDecoration(
-        color: AppColors.backgroundLight.withOpacity(0.95),
+        color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.95),
         border: const Border(top: BorderSide(color: AppColors.slate200)),
         boxShadow: [
           BoxShadow(

@@ -106,7 +106,6 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
     final currentUser = ref.watch(currentUserProvider).value;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
