@@ -108,6 +108,27 @@ class LocalDbService {
     return dueCards;
   }
 
+  /// Tìm bộ thẻ có thời gian ôn tập gần nhất (nếu không có thẻ nào due)
+  Map<String, dynamic>? getNearestReviewDeck() {
+    VocabLocal? nearestVocab;
+    for (var vocab in _vocabsBox.values) {
+      if (nearestVocab == null) {
+        nearestVocab = vocab;
+      } else {
+        if (vocab.nextReview.isBefore(nearestVocab.nextReview)) {
+          nearestVocab = vocab;
+        }
+      }
+    }
+    if (nearestVocab != null) {
+      return {
+        'deckId': nearestVocab.deckId,
+        'nextReview': nearestVocab.nextReview,
+      };
+    }
+    return null;
+  }
+
   /// Cập nhật từ vựng trong Local DB và thêm vào hàng đợi (khi User ôn tập)
   Future<void> updateLocalVocab(VocabModel updatedVocab) async {
     final vocabLocal = VocabLocal.fromVocabModel(updatedVocab);

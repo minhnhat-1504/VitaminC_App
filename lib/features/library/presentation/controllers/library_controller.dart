@@ -10,6 +10,8 @@ class LibraryState {
   final List<DeckModel> decks;
   final Map<String, int> dueCardsCount;
   final Map<String, int> totalCardsCount;
+  final Map<String, dynamic>?
+  nearestReviewInfo; // { 'deckId': String, 'nextReview': DateTime }
   final String? errorMessage;
 
   LibraryState({
@@ -17,6 +19,7 @@ class LibraryState {
     this.decks = const [],
     this.dueCardsCount = const {},
     this.totalCardsCount = const {},
+    this.nearestReviewInfo,
     this.errorMessage,
   });
 
@@ -25,6 +28,7 @@ class LibraryState {
     List<DeckModel>? decks,
     Map<String, int>? dueCardsCount,
     Map<String, int>? totalCardsCount,
+    Map<String, dynamic>? nearestReviewInfo,
     String? errorMessage,
   }) {
     return LibraryState(
@@ -32,6 +36,7 @@ class LibraryState {
       decks: decks ?? this.decks,
       dueCardsCount: dueCardsCount ?? this.dueCardsCount,
       totalCardsCount: totalCardsCount ?? this.totalCardsCount,
+      nearestReviewInfo: nearestReviewInfo ?? this.nearestReviewInfo,
       errorMessage: errorMessage,
     );
   }
@@ -64,12 +69,17 @@ class LibraryController extends StateNotifier<LibraryState> {
         totalCounts[deck.id] = await libraryService.getTotalCount(deck.id);
       }
 
+      final nearestReview = _ref
+          .read(localDbServiceProvider)
+          .getNearestReviewDeck();
+
       if (mounted) {
         state = state.copyWith(
           isLoading: false,
           decks: decks,
           dueCardsCount: dueCounts,
           totalCardsCount: totalCounts,
+          nearestReviewInfo: nearestReview,
         );
       }
     } catch (e) {
