@@ -93,10 +93,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             duration: const Duration(milliseconds: 600),
             curve: Curves.elasticOut,
             builder: (context, value, child) {
-              return Transform.scale(
-                scale: value,
-                child: child,
-              );
+              return Transform.scale(scale: value, child: child);
             },
             child: Icon(icon, size: 100, color: AppColors.primary),
           ),

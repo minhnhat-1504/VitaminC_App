@@ -24,10 +24,7 @@ class ShimmerLoadingList extends StatelessWidget {
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(0, 20 * (1 - value)),
-              child: Opacity(
-                opacity: value,
-                child: child,
-              ),
+              child: Opacity(opacity: value, child: child),
             );
           },
           child: Padding(
@@ -72,10 +69,7 @@ class ShimmerGrid extends StatelessWidget {
           builder: (context, value, child) {
             return Transform.translate(
               offset: Offset(0, 20 * (1 - value)),
-              child: Opacity(
-                opacity: value,
-                child: child,
-              ),
+              child: Opacity(opacity: value, child: child),
             );
           },
           child: Shimmer.fromColors(

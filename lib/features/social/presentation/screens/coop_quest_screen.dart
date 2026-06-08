@@ -213,7 +213,9 @@ class _CoopQuestScreenState extends ConsumerState<CoopQuestScreen>
                                 LayoutBuilder(
                                   builder: (context, constraints) {
                                     return AnimatedContainer(
-                                      duration: const Duration(milliseconds: 500),
+                                      duration: const Duration(
+                                        milliseconds: 500,
+                                      ),
                                       width: constraints.maxWidth * percentage,
                                       height: 16,
                                       decoration: BoxDecoration(
@@ -274,104 +276,101 @@ class _CoopQuestScreenState extends ConsumerState<CoopQuestScreen>
                     builder: (context, value, child) {
                       return Transform.translate(
                         offset: Offset(0, 20 * (1 - value)),
-                        child: Opacity(
-                          opacity: value,
-                          child: child,
-                        ),
+                        child: Opacity(opacity: value, child: child),
                       );
                     },
                     child: Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isTierCompleted
-                          ? AppColors.success.withValues(alpha: 0.08)
-                          : Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
                         color: isTierCompleted
-                            ? AppColors.success.withValues(alpha: 0.3)
-                            : AppColors.slate200,
+                            ? AppColors.success.withValues(alpha: 0.08)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isTierCompleted
+                              ? AppColors.success.withValues(alpha: 0.3)
+                              : AppColors.slate200,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isTierCompleted
+                                  ? AppColors.success.withValues(alpha: 0.12)
+                                  : AppColors.slate100,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isTierCompleted
+                                  ? Icons.emoji_events_rounded
+                                  : Icons.lock_outline_rounded,
+                              color: isTierCompleted
+                                  ? AppColors.success
+                                  : AppColors.slate400,
+                              size: 24,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        tier.title,
+                                        style: GoogleFonts.lexend(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: isTierCompleted
+                                              ? AppColors.success
+                                              : AppColors.slate800,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withValues(
+                                          alpha: 0.1,
+                                        ),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        '+${tier.xpReward} XP',
+                                        style: GoogleFonts.lexend(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Mục tiêu: ${tier.target} thẻ',
+                                  style: GoogleFonts.lexend(
+                                    fontSize: 12,
+                                    color: AppColors.slate500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: isTierCompleted
-                                ? AppColors.success.withValues(alpha: 0.12)
-                                : AppColors.slate100,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            isTierCompleted
-                                ? Icons.emoji_events_rounded
-                                : Icons.lock_outline_rounded,
-                            color: isTierCompleted
-                                ? AppColors.success
-                                : AppColors.slate400,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      tier.title,
-                                      style: GoogleFonts.lexend(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: isTierCompleted
-                                            ? AppColors.success
-                                            : AppColors.slate800,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 4,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Text(
-                                      '+${tier.xpReward} XP',
-                                      style: GoogleFonts.lexend(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Mục tiêu: ${tier.target} thẻ',
-                                style: GoogleFonts.lexend(
-                                  fontSize: 12,
-                                  color: AppColors.slate500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                   );
                 }),
                 const SizedBox(height: 24),
