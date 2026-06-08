@@ -30,13 +30,13 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 25),
               _buildSearchBar(context),
               const SizedBox(height: 20),
-              _buildStatsCards(ref),
+              _buildStatsCards(context, ref),
               const SizedBox(height: 25),
               _buildNextReviewCard(context, ref),
               const SizedBox(height: 25),
-              _buildDailyGoal(ref),
+              _buildDailyGoal(context, ref),
               const SizedBox(height: 25),
-              _buildDailyQuests(ref),
+              _buildDailyQuests(context, ref),
               const SizedBox(height: 25),
               _buildTools(context),
             ],
@@ -212,6 +212,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildSearchBar(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
@@ -268,7 +269,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsCards(WidgetRef ref) {
+  Widget _buildStatsCards(BuildContext context, WidgetRef ref) {
     // Theo dõi giá trị số từ vựng đã học và Streak
     final vocabCountAsync = ref.watch(learnedVocabCountProvider);
     final streakCountAsync = ref.watch(streakCountProvider);
@@ -560,7 +561,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDailyGoal(WidgetRef ref) {
+  Widget _buildDailyGoal(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
 
@@ -642,7 +643,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDailyQuests(WidgetRef ref) {
+  Widget _buildDailyQuests(BuildContext context, WidgetRef ref) {
     final questsAsync = ref.watch(dailyQuestsProvider);
 
     return Column(
