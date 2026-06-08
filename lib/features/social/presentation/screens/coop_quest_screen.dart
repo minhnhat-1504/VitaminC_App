@@ -53,7 +53,6 @@ class _CoopQuestScreenState extends ConsumerState<CoopQuestScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance
             .collection('quests')

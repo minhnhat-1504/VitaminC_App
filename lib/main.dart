@@ -13,6 +13,8 @@ import 'core/models/sync_queue_item.dart';
 import 'core/services/local_db_service.dart';
 
 import 'core/constants/app_colors.dart';
+import 'core/constants/app_theme.dart';
+import 'core/providers/theme_provider.dart';
 import 'core/services/notification_service.dart';
 import 'core/utils/app_exception_handler.dart';
 import 'routing/app_router.dart';
@@ -28,6 +30,7 @@ void main() async {
 
     // Khởi tạo Local DB (Hive CE)
     await Hive.initFlutter();
+    await Hive.openBox('settingsBox');
     Hive.registerAdapter(VocabLocalAdapter());
     Hive.registerAdapter(SyncQueueItemAdapter());
 
@@ -78,34 +81,15 @@ class VitaminCApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeProvider);
 
     return MaterialApp.router(
       scaffoldMessengerKey: AppExceptionHandler.rootScaffoldMessengerKey,
       title: 'VitaminC',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.backgroundLight,
-        textTheme: GoogleFonts.lexendTextTheme(),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: AppColors.primary,
-          primary: AppColors.primary,
-          surface: AppColors.backgroundLight,
-        ),
-        appBarTheme: AppBarTheme(
-          backgroundColor: AppColors.backgroundLight,
-          elevation: 0,
-          centerTitle: true,
-          titleTextStyle: GoogleFonts.lexend(
-            color: AppColors.textLight,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          iconTheme: const IconThemeData(color: AppColors.textLight),
-        ),
-      ),
-      // Kết nối config mới từ Provider
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

@@ -17,8 +17,9 @@ class HomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -29,13 +30,13 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 25),
               _buildSearchBar(context),
               const SizedBox(height: 20),
-              _buildStatsCards(ref),
+              _buildStatsCards(context, ref),
               const SizedBox(height: 25),
               _buildNextReviewCard(context, ref),
               const SizedBox(height: 25),
-              _buildDailyGoal(ref),
+              _buildDailyGoal(context, ref),
               const SizedBox(height: 25),
-              _buildDailyQuests(ref),
+              _buildDailyQuests(context, ref),
               const SizedBox(height: 25),
               _buildTools(context),
             ],
@@ -211,16 +212,17 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildSearchBar(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: isDark ? AppColors.slate800 : AppColors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.black.withOpacity(0.03),
+                  color: AppColors.black.withOpacity(isDark ? 0.2 : 0.03),
                   blurRadius: 10,
                   offset: const Offset(0, 5),
                 ),
@@ -267,7 +269,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatsCards(WidgetRef ref) {
+  Widget _buildStatsCards(BuildContext context, WidgetRef ref) {
     // Theo dõi giá trị số từ vựng đã học và Streak
     final vocabCountAsync = ref.watch(learnedVocabCountProvider);
     final streakCountAsync = ref.watch(streakCountProvider);
@@ -276,6 +278,7 @@ class HomeScreen extends ConsumerWidget {
       children: [
         Expanded(
           child: _cardWrapper(
+            context,
             child: streakCountAsync.when(
               data: (streakCount) => Column(
                 children: [
@@ -323,6 +326,7 @@ class HomeScreen extends ConsumerWidget {
         const SizedBox(width: 15),
         Expanded(
           child: _cardWrapper(
+            context,
             child: vocabCountAsync.when(
               data: (vocabCount) => Column(
                 children: [
@@ -401,6 +405,7 @@ class HomeScreen extends ConsumerWidget {
       final dueCount = dueDecks.first.value;
 
       return _cardWrapper(
+        context,
         child: Row(
           children: [
             Container(
@@ -502,6 +507,7 @@ class HomeScreen extends ConsumerWidget {
     }
 
     return _cardWrapper(
+      context,
       child: Row(
         children: [
           Container(
@@ -555,7 +561,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDailyGoal(WidgetRef ref) {
+  Widget _buildDailyGoal(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
 
@@ -567,6 +573,7 @@ class HomeScreen extends ConsumerWidget {
     final int percentInt = (percent * 100).toInt();
 
     return _cardWrapper(
+      context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -636,7 +643,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDailyQuests(WidgetRef ref) {
+  Widget _buildDailyQuests(BuildContext context, WidgetRef ref) {
     final questsAsync = ref.watch(dailyQuestsProvider);
 
     return Column(
@@ -651,6 +658,7 @@ class HomeScreen extends ConsumerWidget {
           data: (quests) {
             if (quests.isEmpty) {
               return _cardWrapper(
+                context,
                 child: const Center(
                   child: Text(
                     "Hôm nay chưa có nhiệm vụ nào.",
@@ -668,6 +676,7 @@ class HomeScreen extends ConsumerWidget {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: _cardWrapper(
+                    context,
                     padding: const EdgeInsets.all(15),
                     child: Row(
                       children: [
@@ -846,6 +855,7 @@ class HomeScreen extends ConsumerWidget {
     return GestureDetector(
       onTap: onTap,
       child: _cardWrapper(
+        context,
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
@@ -875,19 +885,21 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _cardWrapper({
+  Widget _cardWrapper(
+    BuildContext context, {
     required Widget child,
     EdgeInsets padding = const EdgeInsets.all(20),
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       padding: padding,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: isDark ? AppColors.slate800 : AppColors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.03),
+            color: AppColors.black.withOpacity(isDark ? 0.2 : 0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),

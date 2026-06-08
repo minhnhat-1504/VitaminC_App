@@ -147,12 +147,12 @@ class DeckListScreen extends ConsumerWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: AppColors.backgroundLight,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Thư viện',
             style: TextStyle(
-              color: AppColors.textLight,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -215,6 +215,7 @@ class DeckListScreen extends ConsumerWidget {
     LibraryController controller,
     bool isAdmin,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return RefreshIndicator(
       onRefresh: () => controller.loadDecks(),
       child: state.isLoading && state.decks.isEmpty
@@ -253,7 +254,7 @@ class DeckListScreen extends ConsumerWidget {
                     child: Container(
                       decoration: BoxDecoration(
                         color: isFinished
-                            ? Colors.white
+                            ? (isDark ? AppColors.slate800 : Colors.white)
                             : AppColors.primary.withOpacity(0.05),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
@@ -299,7 +300,9 @@ class DeckListScreen extends ConsumerWidget {
                                       fontWeight: FontWeight.w800,
                                       color: isEmpty
                                           ? Colors.grey.shade700
-                                          : AppColors.slate900,
+                                          : (isDark
+                                                ? Colors.white
+                                                : AppColors.slate900),
                                       letterSpacing: 0.5,
                                     ),
                                     textAlign: TextAlign.center,
@@ -519,19 +522,27 @@ class DeckListScreen extends ConsumerWidget {
                     horizontal: 16,
                     vertical: 8,
                   ),
-                  leading: const CircleAvatar(
-                    backgroundColor: AppColors.backgroundLight,
-                    child: Icon(Icons.public, color: AppColors.primary),
+                  leading: CircleAvatar(
+                    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                    child: const Icon(Icons.public, color: AppColors.primary),
                   ),
                   title: Text(
                     deck.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
                   subtitle: deck.description.isNotEmpty
-                      ? Text(deck.description)
+                      ? Text(
+                          deck.description,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color,
+                          ),
+                        )
                       : null,
                   trailing: IconButton(
                     icon: const Icon(Icons.download, color: AppColors.primary),

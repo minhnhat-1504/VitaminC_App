@@ -137,7 +137,6 @@ class _ChatRoomListScreenState extends ConsumerState<ChatRoomListScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
       body: StreamBuilder<List<ChatRoom>>(
         stream: ref.read(chatServiceProvider).getUserRooms(currentUser.uid),
         builder: (context, snapshot) {
