@@ -1,90 +1,90 @@
-# VitaminC - Ung dung hoc tieng Anh thong minh
+# VitaminC - Ứng dụng học tiếng Anh thông minh tích hợp thuật toán SRS và AI Chatbot
 
-VitaminC la ung dung hoc tieng anh tich hop he thong lap ngat quang (SRS) giup nguoi dung ghi nho tu vung lau dai, ket hop cung tro ly ao AI ho tro luyen phan xa giao tiep. Du an duoc phat trien tren nen tang Flutter cho thiet bi Android.
+VitaminC là ứng dụng hỗ trợ học tiếng Anh hiệu quả dành cho thiết bị Android, được thiết kế giúp người dùng ghi nhớ từ vựng lâu dài thông qua phương pháp lặp ngắt quãng và cải thiện phản xạ giao tiếp bằng chatbot trí tuệ nhân tạo.
 
-## 1. Cac tinh nang chinh
+## 1. Các tính năng chính
 
-### Hoc tap thong minh qua the ghi nho (Flashcard)
-- Ung dung thuat toan lap ngat quang SM-2 de toi uu hoa thoi gian on tap tu vung cua tung ca nhan.
-- Che do hoc va on tap tu vung linh hoat theo cac muc do nho khac nhau (Kho, Tot, De).
-- Ho tro hieu ung lat the flashcard 3D muot ma de tang trai nghiem hoc tap.
+### Hệ thống học tập qua thẻ ghi nhớ (Flashcard)
+- Áp dụng thuật toán lặp ngắt quãng SM-2 để tối ưu hóa tần suất ôn tập từ vựng dựa trên khả năng ghi nhớ của từng người dùng.
+- Hỗ trợ các chế độ học tập và đánh giá mức độ thuộc từ bao gồm Khó, Tốt và Dễ.
+- Hiệu ứng lật thẻ flashcard ba chiều trực quan giúp tăng tính tương tác.
 
-### Tich hop tri tue nhan tao va tien ich thong minh
-- Chatbot giao vien tieng Anh duoc phat trien tren nen tang Google Gemini AI ho tro giai dap thac mac va tao cac vi du thuc te.
-- Cong nghe nhan dien ky tu quang hoc (OCR) cho phep quet va nhan dien tu vung tu hinh anh de them vao kho tu nhanh chong.
-- Tinh nang Text-to-Speech (TTS) giup phat am chuan xac cac tu vung tieng Anh.
-- Tinh nang Speech-to-Text (STT) ho tro nguoi dung luyen phat am va tu dong cham diem do chinh xac theo thang do tu dong.
+### Tiện ích thông minh hỗ trợ học tập
+- Chatbot giáo viên tiếng Anh được tích hợp công nghệ Google Gemini AI hỗ trợ giải đáp thắc mắc, dịch thuật và cung cấp ví dụ thực tế theo ngữ cảnh.
+- Nhận diện ký tự quang học (OCR) cho phép người dùng quét văn bản từ camera hoặc hình ảnh để thêm nhanh từ vựng mới vào kho lưu trữ cá nhân.
+- Tích hợp công nghệ chuyển văn bản thành giọng nói (Text-to-Speech) giúp nghe phát âm chuẩn của từ vựng.
+- Kiểm tra và đánh giá phát âm thông qua công nghệ nhận diện giọng nói (Speech-to-Text) kết hợp thuật toán khoảng cách Levenshtein để đo lường độ chính xác theo tỷ lệ phần trăm.
 
-### Ket noi va thi dua (Gamification)
-- Phong chat nhom da phong hoc (Multi-room Chat) giup nguoi dung trao doi truc tuyen bang tieng Anh. He thong tu dong phat hien va nhac nho khi nguoi dung nhap ky tu tieng Viet de dam bao moi truong tieng Anh hoan toan.
-- Bang xep hang hoc tap thoi gian thuc dua tren diem kinh nghiem (XP) tich luy.
-- He thong nhiem vu hang ngay va nhiem vu dong doi de duy tri dong luc hoc tap.
-- Vong quay may man hang ngay thuong diem kinh nghiem hoac phan qua ngau nhien khi hoan thanh muc tieu hoc.
-- Tinh nang theo doi Streak ghi nhan so ngay hoc lien tuc cua nguoi dung.
+### Tính năng thi đua và kết nối xã hội (Gamification)
+- Phòng chat nhóm hỗ trợ đa phòng học (Multi-room Chat) khuyến khích giao tiếp bằng tiếng Anh. Hệ thống tự động phát hiện và cảnh báo khi người dùng nhập tiếng Việt để giữ môi trường giao tiếp hoàn toàn bằng tiếng Anh.
+- Bảng xếp hạng học tập thời gian thực hiển thị danh sách người dùng có điểm kinh nghiệm (XP) cao nhất.
+- Hệ thống nhiệm vụ cá nhân hằng ngày và nhiệm vụ đồng đội tuần để kích thích tinh thần tự học.
+- Vòng quay may mắn hằng ngày giúp nhận thêm điểm thưởng kinh nghiệm sau khi hoàn thành số lượng thẻ quy định.
+- Theo dõi chuỗi ngày học liên tục (Streak) và tặng huy hiệu thành tích để duy trì thói quen học tập.
 
-### Ho tro che do ngoai tuyen (Offline-First)
-- Toi uu hoa luu tru cuc bo thong qua co so du lieu Isar Database.
-- Cho phap hoc va lam viec voi flashcard ma khong can ket noi mang.
-- Tu dong dong bo hoa du lieu len may chu Firebase khi thiet bi co ket noi Internet tro lai.
-
----
-
-## 2. Cong nghe su dung
-
-- Ngon ngu lap trinh: Dart
-- Framework: Flutter
-- Quan ly trang thai: Flutter Riverpod
-- Dieu huong (Routing): GoRouter
-- Co so du lieu thoi gian thuc va xac thuc: Firebase (Auth, Firestore, Storage, Cloud Messaging)
-- Co so du lieu cuc bo (Offline): Isar Database
-- Trí tue nhan tao: Google Generative AI (Gemini 1.5 Flash)
-- Thu vien OCR va STT: Google ML Kit Text Recognition, Speech-to-Text, Flutter TTS
+### Hoạt động ngoại tuyến và đồng bộ dữ liệu (Offline-First)
+- Lưu trữ dữ liệu cục bộ thông qua Isar Database, cho phép người dùng học tập và ôn thẻ ngay cả khi không có kết nối Internet.
+- Tự động đẩy dữ liệu và đồng bộ hóa tiến độ lên Firebase Cloud Firestore ngay khi thiết bị kết nối mạng trở lại.
 
 ---
 
-## 3. Huong dan cai dat va cau hinh
+## 2. Công nghệ sử dụng
 
-### Yeu cau he thong
-- Flutter SDK phien ban tu 3.10 tro len.
-- Java Development Kit (JDK) phien ban 17.
-- Thiet bi Android hoac trinh gia lap chay Android API 21 tro len (yeu cau Android API 23 cho mot so tinh nang AI).
-
-### Buoc 1: Tai ma nguon ve may cuc bo
-```bash
-git clone https://github.com/minhnhat-1504/VitaminC_App.git
-cd vitaminc
-```
-
-### Buoc 2: Cai dat cac thu vien phu thuoc (Dependencies)
-Chay lenh sau tai thu muc goc cua du an de tai ve tat ca cac thu vien can thiet:
-```bash
-flutter pub get
-```
-
-### Buoc 3: Cau hinh Firebase cho Android
-1. Truy cap Firebase Console va tao mot du an moi dat ten la VitaminC.
-2. Them ung dung Android vao du an voi ten goi Package Name trung khop voi cau hinh trong file `android/app/build.gradle` (vi du: `com.minhnhat.vitaminc`).
-3. Lay thong tin chung thu SHA-1 cua thiet bi phat trien va nhap vao cau hinh Firebase de cho phep dang nhap bang Google.
-4. Tai xuong file `google-services.json` va luu vao thu muc `android/app/`.
-5. Mo file `android/app/build.gradle` de dam bao tuy chon `multiDexEnabled true` da duoc thiet lap.
-
-### Buoc 4: Thiet lap API Key cho Gemini
-Dang ky mot API Key tai Google AI Studio va cau hinh vao file moi truong (`.env`) tai thu muc goc cua ung dung voi noi dung sau:
-```text
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-```
+- Ngôn ngữ lập trình: Dart
+- Framework phát triển: Flutter
+- Quản lý trạng thái ứng dụng: Riverpod
+- Quản lý điều hướng màn hình: GoRouter
+- Cơ sở dữ liệu và xác thực người dùng: Firebase (Authentication, Cloud Firestore, Cloud Storage, Cloud Messaging)
+- Cơ sở dữ liệu cục bộ: Isar Database
+- Trí tuệ nhân tạo: Google Generative AI (Gemini 1.5 Flash)
+- Thư viện xử lý hình ảnh và giọng nói: Google ML Kit Text Recognition, Speech-to-Text, Flutter TTS
 
 ---
 
-## 4. Huong dan chay ung dung
+## 3. Hướng dẫn cài đặt và cấu hình
 
-Sau khi hoan thanh cac buoc cai dat va cau hinh tren, ket noi thiet bi Android hoac bat trinh gia lap len, sau do chay lenh sau trong terminal:
+### Yêu cầu hệ thống
+- Flutter SDK từ phiên bản 3.10 trở lên.
+- Java Development Kit (JDK) phiên bản 17.
+- Thiết bị chạy hệ điều hành Android phiên bản 5.0 (API 21) trở lên.
 
+### Các bước cài đặt
+
+1. Tải mã nguồn dự án về máy:
+   ```bash
+   git clone https://github.com/minhnhat-1504/VitaminC_App.git
+   cd vitaminc
+   ```
+
+2. Cài đặt các gói thư viện phụ thuộc:
+   ```bash
+   flutter pub get
+   ```
+
+3. Cấu hình Firebase cho Android:
+   - Truy cập vào trang quản trị Firebase Console và tạo dự án mới.
+   - Thêm ứng dụng Android vào dự án với mã gói (Package Name) trùng khớp với mã khai báo trong file `android/app/build.gradle`.
+   - Cung cấp mã SHA-1 của thiết bị chạy thử nghiệm để hỗ trợ tính năng đăng nhập Google Sign-In.
+   - Tải file cấu hình `google-services.json` từ Firebase và sao chép vào thư mục `android/app/`.
+   - Bật tính năng Multidex trong file cấu hình gradle của ứng dụng bằng cách thêm dòng `multiDexEnabled true` vào mục `defaultConfig`.
+
+4. Cấu hình khóa API cho Gemini AI:
+   - Đăng ký và nhận API Key từ Google AI Studio.
+   - Tạo file `.env` tại thư mục gốc của dự án và khai báo biến môi trường:
+     ```text
+     GEMINI_API_KEY=khóa_api_của_bạn
+     ```
+
+---
+
+## 4. Hướng dẫn chạy dự án
+
+Kết nối thiết bị thử nghiệm Android hoặc khởi chạy trình giả lập, sau đó thực hiện lệnh:
 ```bash
 flutter run
 ```
 
-De kiem tra va dinh dang lai ma nguon theo dung tieu chuan, ban co the chay lenh:
+Để định dạng và chuẩn hóa mã nguồn trước khi commit, chạy lệnh:
 ```bash
 dart format .
 ```
